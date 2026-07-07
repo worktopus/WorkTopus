@@ -31,7 +31,7 @@ public class SecurityConfig {
             .formLogin(form->form
                     .loginPage("/login")
                     .loginProcessingUrl("/login")  // 생략가능
-                    .defaultSuccessUrl("/visitorMain", true)
+                    .defaultSuccessUrl("/members/me", true)
                     .permitAll() // 로그인 페이지는 누구나 접근가능하다
                     // 로그인화면, 로그인처리 url, 로그인 실패 url 은 실패없이 접근가능 해야함
             )
