@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<th:block th:fragment="header">
+    <header class="header">
+
+    <!-- 왼쪽 -->
+        <div class="header__left">
+
+            <button class="header__project-switcher">
+
+                <div class="header__project-bg" >
+                    <img th:src="@{/img/folder-open.svg}" class="header__project-icon">
+                </div>
+
+                <div class="header__project-info">
+<!--
+            <span class="header__project-label">
+                현재 프로젝트
+            </span>
+-->
+                    <span class="header__project-name">
+                Worktopus
+            </span>
+
+                </div>
+
+                <img th:src="@{/img/caret-down.svg}"
+                     class="header__project-arrow"
+                     alt="">
+
+            </button>
+
+        </div>
+
+
+    <!-- 오른쪽 -->
+    <div class="header__right">
+
+        <!-- 알림 -->
+        <button class="header__icon">
+
+            <img th:src="@{/img/bell.svg}">
+
+            <span class="header__badge">
+                3
+            </span>
+
+        </button>
+
+        <!-- 채팅 -->
+        <button class="header__icon">
+
+            <img th:src="@{/img/message-square-text.svg}">
+
+        </button>
+
+        <!-- 채팅 -->
+        <button class="header__icon">
+
+            <img th:src="@{/img/sticky-note.svg}">
+
+        </button>
+
+        <!-- 프로필 -->
+        <div class="header__profile">
+
+            <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
+
+            <div class="header__info">
+
+                <p class="header__name">
+                    김여린
+                </p>
+
+                <span class="header__role">
+            Backend Developer
+        </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+</th:block>
+
+</body>
+</html>

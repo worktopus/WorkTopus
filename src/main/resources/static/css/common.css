@@ -1,0 +1,68 @@
+/* ===========================
+   Worktopus Common
+=========================== */
+
+:root {
+  --primary: #4F8EF7;
+  --primary-dark: #2F6FEA;
+  --primary-light: #DCEAFF;
+  --primary-soft: #F2F7FF;
+
+  --secondary: #72D2FF;
+
+  --bg: #F5F8FC;
+  --card: #FFFFFF;
+  --border: #E4ECF7;
+
+  --text-main: #25324B;
+  --text-sub: #6B7280;
+  --text-right: #FFFFFF;
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  --shadow: 0 10px 30px rgba(79, 142, 247, .08);
+
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 82px;
+
+  --transition: .25s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text-main);
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}

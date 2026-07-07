@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Worktopus</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div th:replace="~{fragments/layout/sidebar :: sidebar}"></div>
+
+    <div class="layout_content">
+
+        <div th:replace="~{fragments/layout/header :: header}"></div>
+
+        <main class="main">
+            <!-- 각 페이지가 들어갈 영역 -->
+        </main>
+
+    </div>
+
+</div>
+
+</body>
+</html>
