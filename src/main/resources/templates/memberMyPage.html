@@ -13,35 +13,33 @@
     </style>
 </head>
 <body>
-    <div class="box">
-        <h2>내 정보</h2>
-        <p class="msg" th:if="${msg}" th:text="${msg}"></p>
-        <p>아이디: <strong th:text="${member.username}"></strong></p>
-        <p>권한: <strong th:text="${member.role}"></strong></p>
+<div class="box">
+    <h2>내 정보</h2>
+    <p class="msg" th:if="${msg}" th:text="${msg}"></p>
+    <p>아이디: <strong th:text="${member.username}"></strong></p>
+    <p>권한: <strong th:text="${member.role}"></strong></p>
 
-        <form th:action="@{/members/me}" method="post" th:object="${memberForm}">
-            <div class="error" th:if="${#fields.hasGlobalErrors()}"
-                 th:each="err: ${#fields.globalErrors()}"
-                 th:text="${err}"></div>
+    <form th:action="@{/members/me}" method="post" th:object="${memberForm}">
+        <div class="error" th:if="${#fields.hasGlobalErrors()}"
+             th:each="err: ${#fields.globalErrors()}"
+             th:text="${err}"></div>
 
-            <label>이름
-                <input type="text" th:field="*{name}" placeholder="최대 30자" required>
-                <span class="error" th:errors="*{name}"></span>
-            </label>
-            <label>이메일
-                <input type="email" th:field="*{email}" placeholder="최대 320자" required>
-                <span class="error" th:errors="*{email}"></span>
-            </label>
-            <label>새 비밀번호
-                <input type="password" th:field="*{password}" placeholder="변경하지 않으려면 비워 주세요">
-                <span class="error" th:errors="*{password}"></span>
-            </label>
+        <label>이름
+            <input type="text" th:field="*{name}" placeholder="최대 30자" required>
+            <span class="error" th:errors="*{name}"></span>
+        </label>
+        <label>이메일
+            <input type="email" th:field="*{email}" placeholder="최대 320자" required>
+            <span class="error" th:errors="*{email}"></span>
+        </label>
+        <label>새 비밀번호
+            <input type="password" th:field="*{password}" placeholder="변경하지 않으려면 비워 주세요">
+            <span class="error" th:errors="*{password}"></span>
+        </label>
 
-            <button type="submit">내 정보 수정</button>
-            <a th:href="@{/visitorMain}"><button type="button">방명록으로</button></a>
-            <a th:if="${isAdmin}" th:href="@{/admin/members}"><button type="button">회원관리</button></a>
+        <button type="submit">내 정보 수정</button>
 
-        </form>
-    </div>
+    </form>
+</div>
 </body>
 </html>

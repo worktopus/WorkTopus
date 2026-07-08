@@ -25,7 +25,7 @@ public class MemberController {
     @GetMapping("/members/register")
     public String registerForm(Model model) {
         model.addAttribute("memberForm", new MemberCreateForm());
-        return "memberRegister";  // memberReigster.html
+        return "register";  // memberReigster.html
     }
 
     // 회원가입
@@ -37,7 +37,7 @@ public class MemberController {
 
         // 입력에 오류가 있다면 다시 입력화면으로 돌아가기
         if(bindingResult.hasErrors()) {
-            return "memberRegister";  // memberReigster.html
+            return "register";  // memberReigster.html
         }
 
         // 회원가입 : DB에 저장
@@ -47,7 +47,7 @@ public class MemberController {
             redirectAttributes.addFlashAttribute("msg",
                     "회원가입이 실패했습니다." + e.getMessage() );
             bindingResult.reject("가입실패", e.getMessage());
-            return "memberRegister";
+            return "register";
         }
 
         redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인하세요");
