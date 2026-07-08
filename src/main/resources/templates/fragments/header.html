@@ -13,7 +13,8 @@
             <button class="header__project-switcher">
 
                 <div class="header__project-bg" >
-                    <img th:src="@{/img/folder-open.svg}" class="header__project-icon">
+                    <span class="header__project-icon" th:block th:insert="~{fragments/icons :: prjopen}" >
+                    </span>
                 </div>
 
                 <div class="header__project-info">
@@ -41,9 +42,10 @@
     <div class="header__right">
 
         <!-- 알림 -->
-        <button class="header__icon">
+        <button class="header__icon" type="button" aria-label="알림">
 
-            <img th:src="@{/img/bell.svg}">
+            <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}">
+            </span>
 
             <span class="header__badge">
                 3
@@ -52,16 +54,16 @@
         </button>
 
         <!-- 채팅 -->
-        <button class="header__icon">
+        <button class="header__icon"
+                th:insert="~{fragments/icons :: chat}">
 
-            <img th:src="@{/img/message-square-text.svg}">
 
         </button>
 
-        <!-- 채팅 -->
-        <button class="header__icon">
+        <!-- 메모 -->
+        <button class="header__icon"
+                th:insert="~{fragments/icons :: memo}">
 
-            <img th:src="@{/img/sticky-note.svg}">
 
         </button>
 

@@ -31,4 +31,9 @@ public class ProjectBoardController {
     public String boardDetail1() {
         return "project/board-detail1";
     }
+
+    @RequestMapping("/board-write")
+    public String boardWrite() {
+        return "project/board-write";
+    }
 }

@@ -75,8 +75,8 @@
 .header__icon {
     position: relative;
 
-    width: 46px;
-    height: 46px;
+    width: 50px;
+    height: 50px;
 
     display: flex;
     justify-content: center;
@@ -86,6 +86,8 @@
     border-radius: var(--radius-sm);
 
     background: var(--card);
+
+    color: var(--primary-dark);
 
     box-shadow: var(--shadow);
 
@@ -239,6 +241,7 @@
     align-items: center;
 
     background: var(--primary-soft);
+    color: var(--text-sub);
 
     font-size: 22px;
 
