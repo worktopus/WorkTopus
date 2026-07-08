@@ -28,7 +28,7 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // oracle
-    runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 
     // 지갑
     runtimeOnly 'com.oracle.database.security:oraclepki'
