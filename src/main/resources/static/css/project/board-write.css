@@ -1,5 +1,7 @@
 /* ==========================================================
-   Board Write
+   Board Write Page
+   - 게시글 작성 페이지의 레이아웃/폼/첨부파일/버튼만 담당
+   - 에디터 내부 UI는 board-editor.css에서 관리
 ========================================================== */
 
 .board_write {
@@ -51,7 +53,7 @@
 }
 
 /* ==========================================================
-   Form
+   Form / Card
 ========================================================== */
 
 .board_write_form {
@@ -59,10 +61,6 @@
     flex-direction: column;
     gap: 26px;
 }
-
-/* ==========================================================
-   Card
-========================================================== */
 
 .board_write_card {
     width: 100%;
@@ -135,187 +133,6 @@
 
     font-size: 22px;
     font-weight: 700;
-}
-
-/* ==========================================================
-   WorkTopus Editor
-========================================================== */
-
-.wt_editor {
-    position: relative;
-    width: 100%;
-}
-
-.wt_editor_content {
-    width: 100%;
-    min-height: 380px;
-
-    padding: 22px 24px;
-
-    box-sizing: border-box;
-
-    border: 1px solid var(--border);
-    border-radius: 16px;
-
-    background: #f8fafc;
-    color: var(--text-main);
-
-    font-size: 15px;
-    line-height: 1.8;
-
-    white-space: pre-wrap;
-    word-break: break-word;
-
-    outline: none;
-
-    transition: .2s;
-}
-
-.wt_editor_content:focus {
-    border-color: var(--primary);
-    background: #fff;
-}
-
-.wt_editor_content:empty::before {
-    content: "내용을 입력하세요. '/' 를 입력하면 블록 명령어를 사용할 수 있습니다.";
-
-    color: #a0aec0;
-
-    pointer-events: none;
-}
-
-.wt_editor_hint {
-    margin: 10px 0 0;
-
-    font-size: 13px;
-    color: var(--text-sub);
-}
-
-/* ==========================================================
-   Inline Toolbar
-========================================================== */
-
-.wt_editor_inline {
-    position: absolute;
-    z-index: 100;
-
-    display: none;
-    align-items: center;
-    gap: 4px;
-
-    padding: 6px;
-
-    border: 1px solid var(--border);
-    border-radius: 999px;
-
-    background: #fff;
-
-    box-shadow: 0 10px 30px rgba(15, 23, 42, .15);
-
-    transform: translateX(-50%);
-}
-
-.wt_editor_inline.is_active {
-    display: flex;
-}
-
-.wt_editor_inline_btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 34px;
-    height: 34px;
-
-    border: none;
-    border-radius: 999px;
-
-    background: transparent;
-    color: var(--text-main);
-
-    font-size: 14px;
-    font-weight: 700;
-
-    cursor: pointer;
-
-    transition: .15s;
-}
-
-.wt_editor_inline_btn:hover {
-    background: var(--primary-soft);
-    color: var(--primary);
-}
-
-.wt_editor_inline_btn_italic {
-    font-style: italic;
-}
-
-/* ==========================================================
-   Slash Command
-========================================================== */
-
-.wt_editor_command {
-    position: absolute;
-    z-index: 90;
-
-    display: none;
-    flex-direction: column;
-
-    width: 240px;
-
-    padding: 8px;
-
-    border: 1px solid var(--border);
-    border-radius: 14px;
-
-    background: #fff;
-
-    box-shadow: 0 14px 36px rgba(15, 23, 42, .14);
-}
-
-.wt_editor_command.is_active {
-    display: flex;
-}
-
-.wt_editor_command_item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-
-    width: 100%;
-
-    padding: 10px 12px;
-
-    border: 0;
-    border-radius: 10px;
-
-    background: transparent;
-    color: var(--text-main);
-
-    font-size: 14px;
-    font-weight: 600;
-    text-align: left;
-
-    cursor: pointer;
-
-    transition: .15s;
-}
-
-.wt_editor_command_item span {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 24px;
-    height: 24px;
-
-    color: var(--text-sub);
-}
-
-.wt_editor_command_item:hover,
-.wt_editor_command_item.is_selected {
-    background: var(--primary-soft);
-    color: var(--primary);
 }
 
 /* ==========================================================

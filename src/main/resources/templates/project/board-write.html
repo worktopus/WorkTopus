@@ -9,7 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/project/board-write.css}">
-    <link rel="stylesheet" th:href="@{/css/project/board-editor.css}">
+    <link rel="stylesheet" th:href="@{/css/project/write-editor.css}">
 
 
 </head>
@@ -108,9 +108,78 @@
                                name="content">
 
                         <div class="wt_editor_inline" data-inline-toolbar>
-                            <button type="button" class="wt_editor_inline_btn" data-inline="bold">B</button>
-                            <button type="button" class="wt_editor_inline_btn wt_editor_inline_btn_italic" data-inline="italic">I</button>
-                            <button type="button" class="wt_editor_inline_btn" data-inline="link">🔗</button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="bold"
+                                    aria-label="굵게">
+                                <th:block th:replace="~{fragments/icons :: bold}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="italic"
+                                    aria-label="기울기">
+                                <th:block th:replace="~{fragments/icons :: italic}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="strike"
+                                    aria-label="취소선">
+                                <th:block th:replace="~{fragments/icons :: strike}"></th:block>
+                            </button>
+
+                            <div class="wt_editor_divider"></div>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="color"
+                                    aria-label="글자색">
+                                <th:block th:replace="~{fragments/icons :: textcolor}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="highlight"
+                                    aria-label="형광펜">
+                                <th:block th:replace="~{fragments/icons :: highlight}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="link"
+                                    aria-label="링크">
+                                <th:block th:replace="~{fragments/icons :: link}"></th:block>
+                            </button>
+
+                        </div>
+
+                        <div class="wt_editor_color_palette"
+                             data-color-palette>
+
+                            <button data-color="#ef4444"></button>
+
+                            <button data-color="#f97316"></button>
+
+                            <button data-color="#eab308"></button>
+
+                            <button data-color="#22c55e"></button>
+
+                            <button data-color="#3b82f6"></button>
+
+                            <button data-color="#8b5cf6"></button>
+
+                        </div>
+
+                        <div class="wt_editor_highlight_palette"
+                             data-highlight-palette>
+
+                            <button data-highlight="#fef08a"></button>
+                            <button data-highlight="#bbf7d0"></button>
+                            <button data-highlight="#bfdbfe"></button>
+                            <button data-highlight="#ddd6fe"></button>
+
                         </div>
 
                         <div class="wt_editor_command" data-command-menu>
@@ -160,6 +229,7 @@
                         Tip. 내용을 쓰다가 <strong>/</strong> 를 입력하면 블록 명령어가 열립니다.
                     </p>
                 </div>
+            </div>
 
 
 
@@ -212,6 +282,7 @@
 </div>
 
 
+<script th:src="@{/js/project/write-editor.js}"></script>
 <script th:src="@{/js/project/board-write.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
 </body>
