@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Worktopus | Calendar</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/calendar.css}">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="layout__content">
+
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <main class="main">
+
+            <section class="calendar">
+
+                <section class="calendar__header">
+
+                    <div>
+                        <p class="calendar__label">PROJECT CALENDAR</p>
+
+                        <h1 class="calendar__title">
+                            일정 캘린더
+                        </h1>
+
+                        <p class="calendar__desc">
+                            프로젝트 일정과 업무 마감일을 월간 달력으로 확인하세요.
+                        </p>
+                    </div>
+
+                    <button type="button"
+                            class="calendar__add-button">
+                        + 일정 추가
+                    </button>
+
+                </section>
+
+                <section class="calendar__panel">
+
+                    <div class="calendar__toolbar">
+
+                        <button type="button"
+                                class="calendar__nav-button"
+                                id="prevMonth">
+                            ‹
+                        </button>
+
+                        <div class="calendar__current">
+                            <strong id="calendarTitle">2026년 7월</strong>
+                            <button type="button"
+                                    class="calendar__today-button"
+                                    id="todayButton">
+                                Today
+                            </button>
+                        </div>
+
+                        <button type="button"
+                                class="calendar__nav-button"
+                                id="nextMonth">
+                            ›
+                        </button>
+
+                    </div>
+
+                    <div class="calendar__weekdays">
+                        <div>일</div>
+                        <div>월</div>
+                        <div>화</div>
+                        <div>수</div>
+                        <div>목</div>
+                        <div>금</div>
+                        <div>토</div>
+                    </div>
+
+                    <div class="calendar__grid"
+                         id="calendarGrid">
+                        <!-- JS에서 날짜 생성 -->
+                    </div>
+
+                </section>
+
+            </section>
+            <div class="calendar-modal" id="calendarModal">
+
+                <div class="calendar-modal__overlay"></div>
+
+                <div class="calendar-modal__content">
+
+                    <div class="calendar-modal__header">
+                        <h2>일정 추가</h2>
+
+                        <button type="button"
+                                class="calendar-modal__close"
+                                id="calendarModalClose">
+                            ✕
+                        </button>
+                    </div>
+
+                    <form id="calendarForm">
+
+                        <div class="calendar-modal__group">
+                            <label>일정 제목</label>
+                            <input type="text" id="scheduleTitle" required>
+                        </div>
+
+                        <div class="calendar-modal__group">
+                            <label>날짜</label>
+                            <input type="date" id="scheduleDate" required>
+                        </div>
+
+                        <div class="calendar-modal__group">
+                            <label>유형</label>
+                            <select id="scheduleType">
+                                <option value="meeting">회의</option>
+                                <option value="deadline">마감</option>
+                                <option value="release">배포</option>
+                            </select>
+                        </div>
+
+                        <div class="calendar-modal__group">
+                            <label>설명</label>
+                            <textarea id="scheduleContent" rows="4"></textarea>
+                        </div>
+
+                        <button type="button"
+                                class="calendar-modal__delete"
+                                id="scheduleDelete">
+                            삭제
+                        </button>
+
+                        <button type="submit"
+                                class="calendar-modal__submit">
+                            저장
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/projects/calendar.js}"></script>
+
+</body>
+</html>

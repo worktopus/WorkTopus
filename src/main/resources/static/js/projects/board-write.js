@@ -7,6 +7,9 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // 수정 화면에서 기존 내용을 hidden input에도 맞춰둠
+    contentInput.value = content.innerHTML;
+
     form.addEventListener("submit", function (event) {
         const plainText = content.innerText.trim();
 
@@ -17,7 +20,6 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        // contenteditable의 HTML 값을 hidden input에 담아 서버로 전송
         contentInput.value = content.innerHTML;
     });
 });

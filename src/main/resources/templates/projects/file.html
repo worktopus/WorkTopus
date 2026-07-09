@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Worktopus | Files</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/file.css}">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="layout__content">
+
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <main class="main">
+
+            <section class="file">
+
+                <section class="file__header">
+                    <div>
+                        <p class="file__label">PROJECT FILES</p>
+                        <h1 class="file__title">첨부파일 모아보기</h1>
+                        <p class="file__desc">
+                            프로젝트 게시판에 업로드된 첨부파일을 한곳에서 확인하세요.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="file__toolbar">
+                    <div class="file__search">
+                        <input type="text"
+                               id="fileSearch"
+                               placeholder="파일명, 게시글 제목, 작성자로 검색">
+                    </div>
+
+                    <select id="fileTypeFilter" class="file__filter">
+                        <option value="all">전체 파일</option>
+                        <option value="pdf">PDF</option>
+                        <option value="doc">문서</option>
+                        <option value="image">이미지</option>
+                        <option value="zip">압축파일</option>
+                    </select>
+                </section>
+
+                <section class="file__panel">
+
+                    <div class="file__table-head">
+                        <div>파일명</div>
+                        <div>게시글</div>
+                        <div>크기</div>
+                        <div>업로드일</div>
+                        <div>작성자</div>
+                        <div>관리</div>
+                    </div>
+
+                    <div class="file__list" id="fileList">
+                        <!-- JS 렌더링 -->
+                    </div>
+
+                </section>
+
+            </section>
+
+        </main>
+
+    </div>
+
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/projects/file.js}"></script>
+
+</body>
+</html>

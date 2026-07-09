@@ -3,19 +3,20 @@
 =========================== */
 
 :root {
-  --primary: #4F8EF7;
-  --primary-dark: #2F6FEA;
-  --primary-light: #DCEAFF;
-  --primary-soft: #F2F7FF;
+  --primary: #7287F4;
+  --primary-hover: #5D73EA;
+  --primary-dark: #5F72D9;
+  --primary-light: #EEF1FF;
+  --primary-soft: #F5F7FF;
 
   --secondary: #72D2FF;
 
-  --bg: #F5F8FC;
+  --bg: #FFFFFF;
   --card: #FFFFFF;
   --border: #E4ECF7;
 
-  --text-main: #25324B;
-  --text-sub: #6B7280;
+  --text-main: #222;
+  --text-sub: #666;
   --text-right: #FFFFFF;
 
   --success: #22C55E;
@@ -37,6 +38,7 @@
 * {
   margin: 0;
   padding: 0;
+
   box-sizing: border-box;
 }
 

@@ -8,8 +8,8 @@
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
-    <link rel="stylesheet" th:href="@{/css/project/board-write.css}">
-    <link rel="stylesheet" th:href="@{/css/project/write-editor.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/board-write.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/write-editor.css}">
 
 
 </head>
@@ -39,9 +39,11 @@
 
         <!-- 작성 폼 -->
         <form class="board_write_form"
-              th:action="@{/project/board/write}"
+              th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
               method="post"
               enctype="multipart/form-data">
+            <input type="hidden" name="projectId" th:value="${projectId}">
+            <input type="hidden" name="notice" value="false">
 
             <!-- 기본 정보 -->
             <div class="board_write_card">
@@ -263,7 +265,7 @@
 
             <!-- 버튼 -->
             <div class="board_write_actions">
-                <a th:href="@{/project/board}" class="board_write_btn board_write_btn_cancel">
+                <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}" class="board_write_btn board_write_btn_cancel">
                     취소
                 </a>
 
@@ -282,8 +284,8 @@
 </div>
 
 
-<script th:src="@{/js/project/write-editor.js}"></script>
-<script th:src="@{/js/project/board-write.js}"></script>
+<script th:src="@{/js/projects/write-editor.js}"></script>
+<script th:src="@{/js/projects/board-write.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
 </body>
 </html>

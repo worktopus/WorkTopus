@@ -1,4 +1,4 @@
-package com.example.worktopus;
+package com.example.worktopus.projects;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

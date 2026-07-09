@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
           나중에 실제 DB 연결하면 이런 식으로 변경 가능
 
           location.href =
-              "/project/board?keyword=" + encodeURIComponent(keyword)
+              "/projects/board?keyword=" + encodeURIComponent(keyword)
               + "&category=" + encodeURIComponent(category)
               + "&sort=" + encodeURIComponent(sort);
         */

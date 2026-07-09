@@ -353,15 +353,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const inlineActions = {
             bold() {
-                wrapSelection("strong");
+                toggleInline("strong");
             },
 
             italic() {
-                wrapSelection("em");
+                toggleInline("em");
             },
 
             strike() {
-                wrapSelection("s");
+                toggleInline("s");
             },
 
             link() {
@@ -431,6 +431,68 @@ document.addEventListener("DOMContentLoaded", function () {
        Text Wrapper
     ========================================================== */
 
+    /**
+     * 인라인 스타일(굵게, 기울기, 취소선) 토글
+     * - 이미 같은 태그 안이면 스타일 제거
+     * - 없으면 새로 적용
+     */
+    function toggleInline(tagName) {
+        restoreSelection();
+
+        const selection = window.getSelection();
+
+        if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+            return;
+        }
+
+        const range = selection.getRangeAt(0);
+
+        // 1. 선택 시작 지점 기준으로 부모 태그 검사
+        const startTag = findParentTag(range.startContainer, tagName);
+
+        if (startTag) {
+            unwrap(startTag);
+            return;
+        }
+
+        // 2. 선택 영역 안에 태그가 통째로 들어있는 경우 검사
+        const selectedContent = range.cloneContents();
+        const targetTag = selectedContent.querySelector(tagName);
+
+        if (targetTag) {
+            const realTag = content.querySelector(tagName);
+
+            if (realTag) {
+                unwrap(realTag);
+                return;
+            }
+        }
+
+        // 3. 없으면 새로 적용
+        wrapSelection(tagName);
+    }
+
+    function findParentTag(node, tagName) {
+        let current = node;
+
+        if (current.nodeType === Node.TEXT_NODE) {
+            current = current.parentNode;
+        }
+
+        while (current && current !== content) {
+            if (
+                current.nodeType === Node.ELEMENT_NODE &&
+                current.tagName.toLowerCase() === tagName
+            ) {
+                return current;
+            }
+
+            current = current.parentNode;
+        }
+
+        return null;
+    }
+
     function wrapSelection(tagName, attributes = {}) {
         const selection = window.getSelection();
 
@@ -455,6 +517,32 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         moveCursorAfter(wrapper);
+    }
+
+    function unwrap(element) {
+        const parent = element.parentNode;
+        const next = element.nextSibling;
+
+        while (element.firstChild) {
+            parent.insertBefore(element.firstChild, element);
+        }
+
+        parent.removeChild(element);
+
+        const range = document.createRange();
+        const selection = window.getSelection();
+
+        if (next) {
+            range.setStartBefore(next);
+        } else {
+            range.selectNodeContents(parent);
+            range.collapse(false);
+        }
+
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        savedRange = range.cloneRange();
     }
 
     function applyStyleToSelection(styleName, value) {

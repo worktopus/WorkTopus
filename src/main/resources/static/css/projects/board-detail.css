@@ -212,7 +212,7 @@
 
 .board-detail_btn-sub:hover{
 
-    background:var(--primary);
+    background:var(--primary-hover);
 
     color:white;
 
@@ -331,7 +331,7 @@
 
 .board-detail_file-btn:hover {
 
-    background: var(--primary-dark);
+    background: var(--primary-hover);
 
 }
 
@@ -415,7 +415,7 @@
 
 .board-detail_comment-form button:hover {
 
-    background: var(--primary-dark);
+    background: var(--primary-hover);
 
 }
 
@@ -517,7 +517,7 @@
 
 .board-detail_back:hover {
 
-    background: var(--primary-dark);
+    background: var(--primary-hover);
 
 }
 
