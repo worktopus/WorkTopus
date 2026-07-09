@@ -5,10 +5,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.example.springedu2.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 
 // SpringSecurity
+@RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
+
+    private final CustomOAuth2UserService customOAuth2UserService;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -34,6 +39,21 @@ public class SecurityConfig {
                                 .failureUrl("/login?error")
                                 .permitAll() // 로그인 페이지는 누구나 접근가능하다
                         // 로그인화면, 로그인처리 url, 로그인 실패 url 은 실패없이 접근가능 해야함
+                )
+                .oauth2Login(oauth -> oauth
+                        .loginPage("/login")
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler((request, response, authentication) -> {
+                            System.out.println("OAuth2 로그인 성공 = " + authentication.getName());
+                            response.sendRedirect("/projects");
+                        })
+                        .failureHandler((request, response, exception) -> {
+                            System.out.println("OAuth2 로그인 실패");
+                            exception.printStackTrace();
+                            response.sendRedirect("/login?error");
+                        })
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")

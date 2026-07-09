@@ -3,44 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <title>회원가입</title>
-    <link rel="stylesheet" href="/css/visitor.css">
-    <style>
-        .box { width: 420px; margin: 40px auto; padding: 24px; border: 1px solid #ddd; border-radius: 12px; background: #fff; }
-        label { display: block; margin: 12px 0; }
-        input { width: 100%; padding: 10px; box-sizing: border-box; }
-        button { padding: 10px 16px; margin-top: 10px; }
-        .error { color: #dc2626; }
-    </style>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/register.css">
 </head>
 <body>
-<div class="box">
-    <h2>회원가입</h2>
-    <form th:action="@{/members/register}" method="post" th:object="${memberForm}">
-        <div class="error" th:if="${#fields.hasGlobalErrors()}"
-             th:each="err : ${#fields.globalErrors()}"
-             th:text="${err}"></div>
+<div class="register-page">
+    <div class="register-card">
+        <a href="/index.html" class="register-logo">
+            <img src="/images/logo.png" alt="WorkTopus logo" class="register-logo-img">
+            <span class="register-logo-text">WorkTopus</span>
+        </a>
 
-        <label>아이디
-            <input type="text" th:field="*{username}" placeholder="4자 이상" required>
-            <span class="error" th:errors="*{username}"></span>
-        </label>
-        <label>비밀번호
-            <input type="password" th:field="*{password}" placeholder="4자 이상" required>
-            <span class="error" th:errors="*{password}"></span>
-        </label>
-        <label>이름
-            <input type="text" th:field="*{name}" placeholder="최대 30자" required>
-            <span class="error" th:errors="*{name}"></span>
-        </label>
-        <label>이메일
-            <input type="email" th:field="*{email}" placeholder="최대 320자" required>
-            <span class="error" th:errors="*{email}"></span>
-        </label>
+        <h1 class="register-title">회원가입</h1>
+        <p class="register-desc">WorkTopus에서 팀 프로젝트를 시작하세요.</p>
 
-        <button type="submit">가입</button>
-        <a th:href="@{/login}"><button type="button">로그인으로</button></a>
+        <form th:action="@{/members/register}" method="post" th:object="${memberForm}" class="register-form">
+            <div class="register-error" th:if="${#fields.hasGlobalErrors()}"
+                 th:each="err : ${#fields.globalErrors()}"
+                 th:text="${err}"></div>
 
-    </form>
+            <label class="register-label" for="username">아이디</label>
+            <input class="register-input" type="text" th:field="*{username}" id="username" placeholder="4자 이상" required>
+            <span class="register-error-text" th:errors="*{username}"></span>
+
+            <label class="register-label" for="password">비밀번호</label>
+            <input class="register-input" type="password" th:field="*{password}" id="password" placeholder="4자 이상" required>
+            <span class="register-error-text" th:errors="*{password}"></span>
+
+            <label class="register-label" for="name">이름</label>
+            <input class="register-input" type="text" th:field="*{name}" id="name" placeholder="최대 30자" required>
+            <span class="register-error-text" th:errors="*{name}"></span>
+
+            <label class="register-label" for="email">이메일</label>
+            <input class="register-input" type="email" th:field="*{email}" id="email" placeholder="example@email.com" required>
+            <span class="register-error-text" th:errors="*{email}"></span>
+
+            <button class="register-submit" type="submit">가입하기</button>
+        </form>
+
+        <div class="register-links">
+            <a href="/login" class="register-link">로그인으로</a>
+            <span class="register-link-bar">|</span>
+            <a href="/index.html" class="register-link">홈으로</a>
+        </div>
+    </div>
 </div>
 </body>
 </html>

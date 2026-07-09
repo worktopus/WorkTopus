@@ -30,7 +30,7 @@ public class Member { // 회원
     @Column(nullable = false, length = 50)
     private String name;             // 사용자 이름
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;            // 이메일
 
     @Enumerated(EnumType.STRING)
@@ -39,6 +39,17 @@ public class Member { // 회원
 
     @Column(nullable = false)
     private boolean enabled = true;  // 계정 사용 가능
+
+    // ===== 소셜 로그인 =====
+    @Column(nullable = false, length = 20)
+    private String provider = "local";   // local, google, kakao
+
+    @Column(length = 100)
+    private String providerId;           // 구글/카카오 고유 ID
+
+    @Column(length = 500)
+    private String picture;              // 프로필 사진 URL
+
 
     @CreationTimestamp                // 자동
     @Column(nullable = false, updatable = false)
