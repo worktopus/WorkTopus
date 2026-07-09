@@ -1,9 +1,18 @@
 server:
   port: 8080
 
+
 spring:
   application:
     name: WorkTopus
+  thymeleaf:
+    cache: false
+  devtools:
+    restart:
+      enabled: true
+    livereload:
+      enabled: true
+
 
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver

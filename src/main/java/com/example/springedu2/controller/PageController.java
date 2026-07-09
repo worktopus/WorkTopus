@@ -20,4 +20,10 @@ public class PageController {
     public String accessDenied() {
         return "access-denied";
     }
+
+    // 프로젝트 새로 만들기
+    @GetMapping("/projects/new")
+    public String projectCreate() {
+        return "project-create";
+    }
 }

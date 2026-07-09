@@ -1,10 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>projects</title>
+    <title>프로젝트</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/projects.css">
 </head>
 <body>
+<div class="projects-page">
+    <header class="projects-header">
+        <a href="/index.html" class="projects-logo">
+            <img src="/images/logo.png" alt="WorkTopus logo" class="projects-logo-img">
+            <span class="projects-logo-text">WorkTopus</span>
+        </a>
 
+        <a href="/logout" class="projects-logout">로그아웃</a>
+    </header>
+
+    <main class="projects-main">
+        <section class="projects-hero">
+            <p class="projects-label">Workspace</p>
+            <div class="projects-hero-row">
+                <div class="projects-hero-text">
+                    <h1 class="projects-title">내 프로젝트</h1>
+                    <p class="projects-desc">참여 중인 프로젝트를 선택하거나 새 프로젝트를 시작하세요.</p>
+                </div>
+
+                <div class="projects-toolbar">
+                    <a href="/projects/new" class="projects-create-btn">+ 프로젝트 생성</a>
+                    <button type="button" class="projects-join-btn">코드로 참여</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 프로젝트 있을 때 -->
+        <section class="projects-content">
+            <div class="projects-summary">
+                <p class="projects-count">3개의 프로젝트에 참여 중입니다.</p>
+            </div>
+
+            <div class="project-list">
+                <a href="/projects/1" class="project-card">
+                    <div class="project-card-top">
+                        <h2 class="project-card-title">WorkTopus</h2>
+                        <span class="project-card-badge">진행중</span>
+                    </div>
+                    <p class="project-card-desc">팀 협업과 업무 관리를 위한 프로젝트입니다.</p>
+                    <div class="project-card-meta">
+                        <span class="project-card-meta-item">멤버 5명</span>
+                        <span class="project-card-meta-item">업무 18개</span>
+                    </div>
+                </a>
+
+                <a href="/projects/2" class="project-card">
+                    <div class="project-card-top">
+                        <h2 class="project-card-title">AFPK 스터디</h2>
+                        <span class="project-card-badge">진행중</span>
+                    </div>
+                    <p class="project-card-desc">자격증 준비 일정과 과제를 관리하는 공간입니다.</p>
+                    <div class="project-card-meta">
+                        <span class="project-card-meta-item">멤버 3명</span>
+                        <span class="project-card-meta-item">업무 12개</span>
+                    </div>
+                </a>
+
+                <a href="/projects/3" class="project-card">
+                    <div class="project-card-top">
+                        <h2 class="project-card-title">은행 취업 준비</h2>
+                        <span class="project-card-badge">진행중</span>
+                    </div>
+                    <p class="project-card-desc">필기, 자소서, 면접 준비를 함께 정리합니다.</p>
+                    <div class="project-card-meta">
+                        <span class="project-card-meta-item">멤버 2명</span>
+                        <span class="project-card-meta-item">업무 9개</span>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <!-- 프로젝트 없을 때: 나중에 th:if로 전환 -->
+        <section class="projects-empty">
+            <div class="empty-card">
+                <div class="empty-icon">＋</div>
+                <h2 class="empty-title">프로젝트 생성</h2>
+                <p class="empty-desc">새 프로젝트를 만들고 팀원들과 업무를 관리하세요.</p>
+                <a href="/projects/new" class="empty-btn">프로젝트 생성</a>
+            </div>
+
+            <div class="empty-card">
+                <div class="empty-icon">#</div>
+                <h2 class="empty-title">코드로 참여</h2>
+                <p class="empty-desc">초대 코드를 입력해 기존 프로젝트에 참여하세요.</p>
+                <form action="/projects/join" method="post" class="join-form">
+                    <input type="text" name="inviteCode" class="join-input" placeholder="초대 코드 입력">
+                    <button type="submit" class="join-submit">입장</button>
+                </form>
+            </div>
+        </section>
+    </main>
+</div>
 </body>
 </html>
