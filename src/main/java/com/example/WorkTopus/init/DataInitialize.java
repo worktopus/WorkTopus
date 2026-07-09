@@ -26,13 +26,13 @@ public class DataInitialize implements ApplicationRunner {
     private void createIfNotExists(String user_id, String password,
                                    String name, String email, Role role) {
         // 계정이 존재한다면 return
-        if(userRepository.existsByUsername(user_id)) {
+        if(userRepository.existsByUserId(user_id)) {
             return;
         }
 
         // 계정이 없다면 저장
         Users member = new Users();
-        member.setUser_id(user_id);
+        member.setUserId(user_id);
         member.setPassword(passwordEncoder.encode(password));
         member.setName(name);
         member.setEmail(email);

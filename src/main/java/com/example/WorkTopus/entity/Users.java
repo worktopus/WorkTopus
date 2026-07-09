@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,39 +16,39 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class Users {
 
-    @Id                                                  // primarykey
-    @GeneratedValue(strategy = GenerationType.IDENTITY)  // 시퀀스
-    private Long user_num;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_num")
+    private Long userNum;      // user_num -> userNum 변경
 
-    @Column(nullable = false, updatable = true, length = 30)  // notnull, unique, varchar(30)
-    private String user_id;
+    @Column(name = "user_id", nullable = false, length = 30)
+    private String userId;     // user_id -> userId 변경
 
-    @Column(nullable = false)        // 암호화된 비번은 길어서 length 지정 X
+    @Column(nullable = false)
     private String password;
 
     @Column(nullable = false, length = 50)
-    private String name;              // 사용자 이름
+    private String name;
 
     @Column(nullable = false)
-    private String email;             // 이메일
+    private String email;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private Role role = Role.USER;    // 권한
+    private Role role = Role.USER;
 
     @Column(nullable = false)
-    private boolean enabled = true;   // 계정 사용 가능
-
-    @CreationTimestamp                // 자동
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;  // 계정 생성일
+    private boolean enabled = true;
 
     @CreationTimestamp
-    @Column(nullable = false)         // 자동
-    private LocalDateTime updatedAt;  // 계정 수정일
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     @CreationTimestamp
-    @Column(nullable = false)
-    private LocalDateTime deleteAt;   // 계정 삭제일
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
 
+    @CreationTimestamp
+    @Column(name = "delete_at", nullable = false)
+    private LocalDateTime deleteAt;
 }

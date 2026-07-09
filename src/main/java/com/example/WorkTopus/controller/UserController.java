@@ -1,5 +1,6 @@
 package com.example.WorkTopus.controller;
 
+import com.example.WorkTopus.dto.UserUpdateForm;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
@@ -22,11 +23,10 @@ public class UserController {
     // 내 정보
     @GetMapping("/user/me")
     public String myPage(Authentication authentication, Model model) {
-        System.out.println(("Authentication:" + authentication));
 
         Users user = userService.findByUserName(authentication.getName());
         model.addAttribute("user", user);
-        model.addAttribute("userForm", userService.toUpdateFrom(user));
+        model.addAttribute("userForm", userService.toUpdateForm(user));
 
         return "userMyPage";
     }
@@ -47,7 +47,7 @@ public class UserController {
         }
 
         try {
-            userService.update(user.getId(), userForm, false);
+            userService.update(user.getUserNum(), userForm, false);
         } catch (IllegalArgumentException e) {
             bindingResult.reject("updateFail", e.getMessage());
             model.addAttribute("user", user);
