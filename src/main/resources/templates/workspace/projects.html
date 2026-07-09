@@ -29,7 +29,7 @@
 
                 <div class="projects-toolbar">
                     <a href="/projects/new" class="projects-create-btn">+ 프로젝트 생성</a>
-                    <button type="button" class="projects-join-btn">코드로 참여</button>
+                    <button type="button" class="projects-join-btn" onclick="openJoinModal()">코드로 참여</button>
                 </div>
             </div>
         </section>
@@ -100,5 +100,27 @@
         </section>
     </main>
 </div>
+
+<!--코드 입력칸-->
+<div class="join-modal" id="joinModal">
+    <div class="join-modal-bg" onclick="closeJoinModal()"></div>
+
+    <div class="join-modal-card">
+        <h2 class="join-modal-title">초대 코드로 참여</h2>
+        <p class="join-modal-desc">팀원에게 받은 초대 코드를 입력하세요.</p>
+
+        <form action="/projects/join" method="post" class="join-modal-form">
+            <input type="text" name="inviteCode" class="join-modal-input" placeholder="초대 코드 입력" required>
+
+            <div class="join-modal-buttons">
+                <button type="button" class="join-modal-cancel" onclick="closeJoinModal()">취소</button>
+                <button type="submit" class="join-modal-submit">참여하기</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script src="/js/projects.js"></script>
 </body>
 </html>
