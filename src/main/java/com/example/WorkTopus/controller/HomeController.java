@@ -1,0 +1,29 @@
+package com.example.WorkTopus.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+
+@Controller
+public class HomeController {
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
+
+    @GetMapping("/projects")
+    public String projects() {
+        return "projects";
+    }
+
+    @GetMapping("/access-denied")
+    public String accessDenied() {
+        return "access-denied";
+    }
+
+    // 프로젝트 새로 만들기
+    @GetMapping("/projects/new")
+    public String projectCreate() {
+        return "project-create";
+    }
+}

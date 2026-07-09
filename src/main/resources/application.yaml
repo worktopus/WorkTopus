@@ -15,16 +15,21 @@ spring:
 
 
   datasource:
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
     driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
-    username: ADMIN
-    password: 'WorkTopus1234!'
+    url: jdbc:oracle:thin:@localhost:1521:xe
+    username: test
+    password: 1234
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
 
     hibernate:
       ddl-auto: update
+      #ddl-auto: none
 
     show-sql: true
     properties:
