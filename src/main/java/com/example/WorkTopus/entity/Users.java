@@ -51,4 +51,14 @@ public class Users {
     @CreationTimestamp
     @Column(name = "delete_at", nullable = false)
     private LocalDateTime deleteAt;
+
+    // ===== 소셜 로그인 =====
+    @Column(nullable = false, length = 20)
+    private String provider = "local";   // local, google, kakao
+
+    @Column(length = 100)
+    private String providerId;           // 구글/카카오 고유 ID
+
+    @Column(length = 500)
+    private String picture;              // 프로필 사진 URL
 }
