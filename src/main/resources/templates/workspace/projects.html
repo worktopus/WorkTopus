@@ -22,6 +22,15 @@
     </header>
 
     <main class="projects-main">
+        <p class="projects-message success-message"
+           th:if="${successMessage}"
+           th:text="${successMessage}">
+        </p>
+
+        <p class="projects-message error-message"
+           th:if="${errorMessage}"
+           th:text="${errorMessage}">
+        </p>
         <section class="projects-hero">
             <p class="projects-label">Workspace</p>
 
@@ -97,6 +106,7 @@
         <h2 class="join-modal-title">초대 코드로 참여</h2>
         <p class="join-modal-desc">팀원에게 받은 초대 코드를 입력하세요.</p>
 
+        <!--초대코드 입력 화면-->
         <form action="/projects/join" method="post" class="join-modal-form">
             <input type="text" name="inviteCode" class="join-modal-input" placeholder="초대 코드 입력" required>
 

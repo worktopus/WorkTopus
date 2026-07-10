@@ -30,9 +30,15 @@ public class HomeController {
     }
 
     @GetMapping("/projects")
-    public String projects(Authentication authentication, Model model) {
-        Users loginUser = userService.findByUserId(authentication.getName());
-        List<Projects> projects = projectService.findProjectsByOwner(loginUser);
+    public String projects(
+            Authentication authentication,
+            Model model
+    ) {
+        Users loginUser =
+                userService.findByUserId(authentication.getName());
+
+        List<Projects> projects =
+                projectService.findProjectsByUser(loginUser);
 
         model.addAttribute("projects", projects);
 

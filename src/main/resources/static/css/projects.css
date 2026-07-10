@@ -416,6 +416,24 @@
     background: var(--primary-hover);
 }
 
+.projects-message {
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    font-weight: 400;
+    border-radius: 14px;
+}
+
+.success-message {
+    color: var(--primary-dark);
+    background: var(--primary-light);
+}
+
+.error-message {
+    color: #dc2626;
+    background: #fff1f2;
+}
+
 /* 확인용 */
 
 /*.projects-grid {
