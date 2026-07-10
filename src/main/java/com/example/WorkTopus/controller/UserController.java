@@ -1,9 +1,11 @@
 package com.example.WorkTopus.controller;
 
-import com.example.WorkTopus.dto.UserCreateForm;
+import com.example.WorkTopus.dto.UserUpdateForm;
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication; // 💡 임포트 추가 확인
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -18,31 +20,51 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/user/register")
-    public String registerForm(Model model) {
-        model.addAttribute("userForm", new UserCreateForm());
-        return "user/register";
+    // 내 정보 보기
+    @GetMapping("/user/mypage")
+    public String myPage(Authentication authentication, Model model) {
+
+        Users user = userService.findByUserId(authentication.getName());
+        model.addAttribute("user", user);
+
+        UserUpdateForm userForm = new UserUpdateForm();
+        userForm.setName(user.getName());
+        userForm.setEmail(user.getEmail());
+        model.addAttribute("userForm", userForm);
+
+        return "user/mypage";
     }
 
-    @PostMapping("/user/register")
-    public String registerUser(
-            @Valid @ModelAttribute("userForm") UserCreateForm userForm,
+    // 내 정보 수정 처리
+    @PostMapping("/user/mypage")
+    public String updateMyPage(
+            Authentication authentication,
+            @Valid @ModelAttribute("userForm") UserUpdateForm userForm,
             BindingResult bindingResult,
-            RedirectAttributes redirectAttributes
-    ) throws IllegalAccessException {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
+        String userId = authentication.getName();
+        Users user = userService.findByUserId(userId);
+
+        // 에러 발생 시 원래 유저 정보 조회 후 폼으로 복귀
         if (bindingResult.hasErrors()) {
-            return "user/register";
+            model.addAttribute("user", user);
+            return "user/mypage";
         }
 
         try {
-            userService.register(userForm);
+            userService.updateName(userId, userForm.getName());
         } catch (IllegalArgumentException e) {
-            bindingResult.reject("가입실패", e.getMessage());
-            return "user/register";
+            bindingResult.reject("updateFail", e.getMessage());
+            model.addAttribute("user", user);
+            return "user/mypage";
         }
 
-        redirectAttributes.addFlashAttribute("msg", "회원가입이 완료되었습니다. 로그인하세요");
-        return "redirect:/login";
+        // 리디렉션 시 메시지 전달
+        redirectAttributes.addFlashAttribute("msg",
+                "내 정보가 수정되었습니다");
+
+        return "redirect:/user/mypage";
     }
 }
