@@ -13,7 +13,7 @@ public class UserCreateForm {
 
     @NotBlank(message = "아이디는 필수입니다")  // NULL, "(빈문자열)", "(공백)"
     @Size(min = 4, max = 30, message = "아이디는 4~30자로 입력하세요")
-    private String user_id;
+    private String userId;
 
     @NotBlank(message = "비밀번호는 필수입니다")
     @Size(min = 4, max = 100, message = "비밀번호는 4자이상 입력하세요")

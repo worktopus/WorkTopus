@@ -32,22 +32,23 @@
                 프로젝트 이름과 설명을 입력하여 팀 협업 공간을 만들어보세요.
             </p>
 
-            <form class="project-create-form" action="/projects" method="post">
-                <label class="project-create-label-text" for="projectName">프로젝트 이름</label>
+            <form th:action="@{/projects}" method="post" th:object="${projectCreateForm}" class="project-create-form">
+
+                <label class="project-create-label-text" for="name">프로젝트 이름</label>
                 <input
                         class="project-create-input"
-                        id="projectName"
-                        name="projectName"
+                        id="name"
                         type="text"
+                        th:field="*{name}"
                         placeholder="예) WorkTopus"
                         required
                 >
 
-                <label class="project-create-label-text" for="projectDesc">프로젝트 설명</label>
+                <label class="project-create-label-text" for="description">프로젝트 설명</label>
                 <textarea
                         class="project-create-textarea"
-                        id="projectDesc"
-                        name="projectDesc"
+                        id="description"
+                        th:field="*{description}"
                         placeholder="프로젝트에 대한 간단한 설명을 입력하세요."
                 ></textarea>
 

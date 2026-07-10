@@ -23,7 +23,7 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/","/index.html",
                                 "/css/**", "/images/**", "/js/**",
-                                "/login", "/members/register"
+                                "/login", "/user/register"
                         ).permitAll()       // 로그인 없이 사용가능
                         // .requestMatchers(
                         //        "/admin/**", "/vupdate", "/vdelete"
