@@ -169,4 +169,27 @@ public class UserService implements UserDetailsService {
             );
         }
     }
+
+    @Transactional(readOnly = true)
+    public boolean isUserIdAvailable(String userId) {
+        if (userId == null || userId.isBlank()) {
+            throw new IllegalArgumentException(
+                    "아이디를 입력하세요."
+            );
+        }
+
+        String normalizedUserId = userId.trim();
+
+        if (normalizedUserId.length() < 4 ||
+                normalizedUserId.length() > 30) {
+
+            throw new IllegalArgumentException(
+                    "아이디는 4~30자로 입력하세요."
+            );
+        }
+
+        return !userRepository.existsByUserId(
+                normalizedUserId
+        );
+    }
 }

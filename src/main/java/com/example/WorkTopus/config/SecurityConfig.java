@@ -18,12 +18,13 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                // .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/","/index.html",
                                 "/css/**", "/images/**", "/js/**",
-                                "/login", "/user/register"
+                                "/login", "/home/register", "/home/check-id", "/home/email/send",
+                                "/home/email/verify"
                         ).permitAll()       // 로그인 없이 사용가능
                         // .requestMatchers(
                         //        "/admin/**", "/vupdate", "/vdelete"

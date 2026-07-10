@@ -138,3 +138,63 @@
     font-size: 13px;
     color: #ccc;
 }
+
+/*==================아이디 중복확인=============================*/
+.register-input-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.register-row-input {
+    flex: 1;
+}
+
+.register-check-btn {
+    min-width: 112px;
+    height: 48px;
+    padding: 0 16px;
+    color: var(--primary);
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    background: #fff;
+    border: 1px solid #dfe4ff;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.register-check-btn:hover {
+    background: var(--primary-light);
+}
+
+.register-check-btn:disabled {
+    color: #999;
+    background: #f3f4f6;
+    border-color: #e5e7eb;
+    cursor: default;
+}
+
+.register-result {
+    min-height: 18px;
+    margin: -2px 0 10px;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.register-result-success {
+    color: #16803c;
+}
+
+.register-result-error {
+    color: #dc2626;
+}
+
+.email-verification-box {
+    padding: 18px;
+    margin: 4px 0 24px;
+    background: #f8f9ff;
+    border: 1px solid #edf0ff;
+    border-radius: 16px;
+}
