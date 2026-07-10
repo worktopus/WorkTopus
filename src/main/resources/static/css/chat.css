@@ -1,210 +1,872 @@
-/* ===========================
-   AI Chat Modal
-=========================== */
+/* ==========================================================
+   WorkTopus Chat
+   common.css 디자인 시스템 기반
+========================================================== */
 
-#chatModal{
-    display:none;
-    position:fixed;
-    top:80px;
-    right:30px;
-    width:720px;
-    height:760px;
-    background:white;
-    border-radius:16px;
-    box-shadow:0 10px 35px rgba(0,0,0,.2);
-    z-index:9999;
-    overflow:hidden;
+/* ==========================================================
+   Chat Modal
+========================================================== */
+
+#chatModal {
+    display: none;
+    position: fixed;
+    top: 82px;
+    right: 28px;
+    width: min(760px, calc(100vw - 40px));
+    height: min(780px, calc(100vh - 110px));
+
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(228, 236, 247, 0.9);
+    border-radius: var(--radius-lg);
+    box-shadow:
+        0 24px 70px rgba(59, 72, 130, 0.18),
+        0 8px 24px rgba(114, 135, 244, 0.08);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    z-index: 9999;
+    overflow: hidden;
+    isolation: isolate;
 }
 
-/* 헤더 */
-.chat-header{
-    height:60px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 20px;
-    border-bottom:1px solid #e5e5e5;
-    font-size:18px;
-    font-weight:bold;
+/* 열림 상태용 클래스가 있다면 사용 */
+#chatModal.is-open {
+    display: flex;
+    flex-direction: column;
+    animation: chatModalOpen 0.24s ease-out;
 }
 
-/* 상단 탭 */
-.chat-tabs{
-    display:flex;
-    height:48px;
-    border-bottom:1px solid #ddd;
+@keyframes chatModalOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.985);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
-.chat-tabs button{
-    flex:1;
-    border:none;
-    background:white;
-    cursor:pointer;
-    font-weight:bold;
+/* ==========================================================
+   Header
+========================================================== */
+
+.chat-header {
+    min-height: 72px;
+    padding: 0 24px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(114, 210, 255, 0.38),
+            transparent 42%
+        ),
+        linear-gradient(
+            135deg,
+            var(--primary) 0%,
+            var(--primary-dark) 55%,
+            #6577df 100%
+        );
+
+    color: var(--text-right);
 }
 
-.chat-tabs button.active{
-    background:#eef5ff;
-    color:#2d6cdf;
+.chat-header__title,
+.chat-header h2,
+.chat-header strong {
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
 }
 
-/* 본문 */
-.chat-body{
-    display:flex;
-    height:520px;
+.chat-header__subtext,
+.chat-header span {
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 12px;
+    font-weight: 500;
 }
 
-/* 왼쪽 프로젝트 목록 */
-.room-list{
-    width:240px;
-    min-width:240px;
-    border-right:1px solid #e5e5e5;
-    overflow-y:auto;
+.chat-close,
+.chat-header button {
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    color: #fff;
+
+    transition:
+        background var(--transition),
+        transform var(--transition),
+        border-color var(--transition);
 }
 
-/* 오른쪽 채팅 */
-.chat-content{
-    flex:1;
-    display:flex;
-    flex-direction:column;
-    background:#fafafa;
+.chat-close:hover,
+.chat-header button:hover {
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.36);
+    transform: rotate(4deg);
 }
 
-#messageArea{
-    flex:1;
-    padding:15px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+/* ==========================================================
+   Tabs
+========================================================== */
+
+.chat-tabs {
+    min-height: 60px;
+    padding: 10px 14px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    background: var(--primary-soft);
+    border-bottom: 1px solid var(--border);
 }
 
-/* 입력 */
-.chat-input{
-    display:flex;
-    border-top:1px solid #ddd;
+.chat-tabs button {
+    flex: 1;
+    height: 40px;
+    padding: 0 16px;
+
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-sub);
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+        color var(--transition),
+        background var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
 }
 
-.chat-input input{
-    flex:1;
-    border:none;
-    padding:12px;
-    outline:none;
+.chat-tabs button:hover {
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.72);
 }
 
-.chat-input button{
-    width:90px;
+.chat-tabs button.active {
+    background: var(--card);
+    color: var(--primary);
+    box-shadow:
+        0 7px 18px rgba(114, 135, 244, 0.14),
+        inset 0 0 0 1px rgba(114, 135, 244, 0.1);
 }
 
-/* 하단 AI 기능 */
-.chat-footer{
-    display:flex;
-    gap:10px;
-    padding:12px;
-    border-top:1px solid #ddd;
+/* ==========================================================
+   Body Layout
+========================================================== */
+
+.chat-body {
+    min-height: 0;
+    flex: 1;
+
+    display: flex;
+    background: var(--bg);
 }
 
-.chat-footer button{
-    flex:1;
+/* ==========================================================
+   Room / Project List
+========================================================== */
+
+.room-list {
+    width: 250px;
+    min-width: 250px;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            var(--primary-soft) 100%
+        );
+    border-right: 1px solid var(--border);
 }
 
-/* 프로젝트 목록 */
-
-.project-box{
-    border-bottom:1px solid #ececec;
+.room-list::-webkit-scrollbar,
+#messageArea::-webkit-scrollbar {
+    width: 7px;
 }
 
-.project-header{
-    display:flex;
-    align-items:flex-start;
-    gap:10px;
-    padding:12px;
-    cursor:pointer;
-    transition:.2s;
+.room-list::-webkit-scrollbar-thumb,
+#messageArea::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(114, 135, 244, 0.24);
 }
 
-.project-header:hover{
-    background:#f7f9fc;
+.room-list::-webkit-scrollbar-track,
+#messageArea::-webkit-scrollbar-track {
+    background: transparent;
 }
 
-.project-info{
-    display:flex;
-    flex-direction:column;
+/* ==========================================================
+   Project Search
+========================================================== */
+
+.project-search {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+
+    padding: 14px;
+    background: rgba(255, 255, 255, 0.92);
+    border-bottom: 1px solid var(--border);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
 }
 
-.project-title{
-    font-weight:700;
-    font-size:15px;
+.project-search input {
+    width: 100%;
+    height: 42px;
+    padding: 0 15px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+    outline: none;
+
+    background: var(--primary-soft);
+    color: var(--text-main);
+
+    font-size: 13px;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition);
 }
 
-.project-count{
-    margin-top:4px;
-    font-size:12px;
-    color:#888;
+.project-search input::placeholder {
+    color: #9aa3b6;
 }
 
-.project-members{
-    padding-left:35px;
-    padding-bottom:10px;
+.project-search input:hover {
+    background: var(--primary-light);
 }
 
-.member-item{
-    padding:8px 5px;
-    cursor:pointer;
-    border-radius:6px;
-    transition:.2s;
+.project-search input:focus {
+    background: var(--card);
+    border-color: rgba(114, 135, 244, 0.55);
+    box-shadow: 0 0 0 4px rgba(114, 135, 244, 0.12);
 }
 
-.member-item:hover{
-    background:#eef5ff;
+/* ==========================================================
+   Project Card
+========================================================== */
+
+.project-box {
+    margin: 10px;
+    overflow: hidden;
+
+    border: 1px solid rgba(228, 236, 247, 0.9);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.9);
+
+    box-shadow: 0 6px 18px rgba(64, 85, 150, 0.04);
+
+    transition:
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
 }
 
-/* 마지막 메시지 */
-.last-message{
-    margin-top:15px;
-    padding-top:10px;
-    border-top:1px solid #ececec;
+.project-box:hover {
+    border-color: rgba(114, 135, 244, 0.34);
+    box-shadow: 0 14px 28px rgba(114, 135, 244, 0.12);
+    transform: translateY(-1px);
 }
 
-.last-message-text{
-    font-size:13px;
-    color:#555;
+.project-box.active {
+    border-color: rgba(114, 135, 244, 0.5);
+    box-shadow:
+        0 12px 24px rgba(114, 135, 244, 0.14),
+        inset 0 0 0 1px rgba(114, 135, 244, 0.08);
 }
 
-.last-message-time{
-    margin-top:2px;
-    font-size:11px;
-    color:#999;
+/* ==========================================================
+   Project Header
+========================================================== */
+
+.project-header {
+    min-height: 70px;
+    padding: 14px;
+
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+
+    cursor: pointer;
+
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
-.unread-message{
-    margin-top:8px;
-    color:#ff4d4d;
-    font-size:12px;
-    font-weight:bold;
-}
-/* 프로젝트 펼침 애니메이션 */
-.project-members{
-    max-height:0;
-    overflow:hidden;
-    transition:max-height .35s ease;
+.project-header:hover {
+    background: linear-gradient(
+        135deg,
+        rgba(238, 241, 255, 0.8),
+        rgba(245, 247, 255, 0.7)
+    );
 }
 
-/* 프로젝트 검색 */
+.project-header img,
+.project-header__icon {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
 
-.project-search{
-    padding:10px;
-    border-bottom:1px solid #ececec;
+    padding: 8px;
+    border-radius: 12px;
+
+    background: var(--primary-light);
+    object-fit: contain;
 }
 
-.project-search input{
-    width:100%;
-    padding:8px 12px;
-    border:1px solid #ddd;
-    border-radius:8px;
-    outline:none;
-    box-sizing:border-box;
+.project-info {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
 }
 
-.project-search input:focus{
-    border-color:#3b82f6;
+.project-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+}
+
+.project-count {
+    margin-top: 4px;
+    color: #8b95a8;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Project Members
+========================================================== */
+
+.project-members {
+    max-height: 0;
+    padding: 0 8px;
+    overflow: hidden;
+
+    transition:
+        max-height 0.34s ease,
+        padding 0.34s ease;
+}
+
+/* JS에서 open 클래스를 붙일 경우 */
+.project-box.open .project-members {
+    max-height: 420px;
+    padding-bottom: 10px;
+}
+
+.member-item {
+    min-height: 42px;
+    margin: 3px 0;
+    padding: 9px 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    border: 1px solid transparent;
+    border-radius: 12px;
+
+    color: var(--text-sub);
+    cursor: pointer;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    transition:
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition),
+        transform var(--transition);
+}
+
+.member-item:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+    border-color: rgba(114, 135, 244, 0.12);
+    transform: translateX(2px);
+}
+
+.member-item.active {
+    background: var(--primary);
+    color: #fff;
+    box-shadow: 0 8px 18px rgba(114, 135, 244, 0.22);
+}
+
+.member-item img,
+.member-avatar {
+    width: 28px;
+    height: 28px;
+    flex: 0 0 28px;
+
+    border-radius: 50%;
+    object-fit: cover;
+
+    background: var(--primary-light);
+}
+
+/* ==========================================================
+   Last Message
+========================================================== */
+
+.last-message {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border);
+}
+
+.last-message-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text-sub);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+.last-message-time {
+    margin-top: 3px;
+    color: #a0a8b8;
+    font-size: 10px;
+}
+
+.unread-message {
+    width: fit-content;
+    min-width: 20px;
+    height: 20px;
+    margin-top: 7px;
+    padding: 0 7px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--danger);
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+/* ==========================================================
+   Chat Content
+========================================================== */
+
+.chat-content {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(114, 210, 255, 0.08),
+            transparent 34%
+        ),
+        linear-gradient(
+            180deg,
+            #fbfcff 0%,
+            #f7f9ff 100%
+        );
+}
+
+#messageArea {
+    min-height: 0;
+    flex: 1;
+    padding: 20px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+/* 공통 메시지 버블 클래스가 있을 경우 */
+.message,
+.chat-message {
+    max-width: 78%;
+    padding: 11px 14px;
+
+    border-radius: 18px;
+    background: var(--card);
+    color: var(--text-main);
+
+    box-shadow: 0 6px 18px rgba(51, 66, 112, 0.07);
+
+    font-size: 13px;
+    line-height: 1.55;
+    word-break: break-word;
+}
+
+.message.received,
+.chat-message.received,
+.chat-message--received {
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+}
+
+.message.sent,
+.chat-message.sent,
+.chat-message--sent,
+.message.mine {
+    align-self: flex-end;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-dark)
+    );
+    color: var(--text-right);
+
+    border-bottom-right-radius: 6px;
+    box-shadow: 0 10px 22px rgba(114, 135, 244, 0.24);
+}
+
+.message-time,
+.chat-message__time {
+    display: block;
+    margin-top: 5px;
+
+    color: #9aa3b6;
+    font-size: 10px;
+}
+
+.message.sent .message-time,
+.chat-message.sent .chat-message__time,
+.message.mine .message-time {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* 빈 채팅 화면 */
+.chat-empty {
+    margin: auto;
+    padding: 28px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    color: var(--text-sub);
+    text-align: center;
+}
+
+.chat-empty__icon {
+    width: 56px;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 18px;
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.chat-empty strong {
+    color: var(--text-main);
+    font-size: 15px;
+}
+
+/* ==========================================================
+   Chat Input
+========================================================== */
+
+.chat-input {
+    padding: 14px 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: rgba(255, 255, 255, 0.96);
+    border-top: 1px solid var(--border);
+
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.chat-input input {
+    min-width: 0;
+    height: 46px;
+    flex: 1;
+    padding: 0 17px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+    outline: none;
+
+    background: var(--primary-soft);
+    color: var(--text-main);
+
+    font-size: 13px;
+
+    transition:
+        background var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition);
+}
+
+.chat-input input::placeholder {
+    color: #9aa3b6;
+}
+
+.chat-input input:focus {
+    background: var(--card);
+    border-color: rgba(114, 135, 244, 0.5);
+    box-shadow: 0 0 0 4px rgba(114, 135, 244, 0.11);
+}
+
+.chat-input button {
+    min-width: 86px;
+    height: 44px;
+    padding: 0 18px;
+
+    border: 0;
+    border-radius: 999px;
+
+    background: linear-gradient(
+        135deg,
+        var(--primary),
+        var(--primary-dark)
+    );
+    color: var(--text-right);
+
+    font-size: 13px;
+    font-weight: 800;
+
+    box-shadow: 0 9px 20px rgba(114, 135, 244, 0.2);
+
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition),
+        filter var(--transition);
+}
+
+.chat-input button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(114, 135, 244, 0.28);
+    filter: brightness(1.03);
+}
+
+.chat-input button:active {
+    transform: translateY(0);
+}
+
+/* ==========================================================
+   AI Footer Actions
+========================================================== */
+
+.chat-footer {
+    min-height: 66px;
+    padding: 12px 16px;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    background: var(--card);
+    border-top: 1px solid var(--border);
+}
+
+.chat-footer button {
+    min-width: 0;
+    height: 40px;
+    flex: 1;
+    padding: 0 12px;
+
+    border: 1px solid rgba(114, 135, 244, 0.12);
+    border-radius: 13px;
+
+    background: var(--primary-light);
+    color: var(--primary);
+
+    font-size: 12px;
+    font-weight: 750;
+
+    transition:
+        background var(--transition),
+        color var(--transition),
+        border-color var(--transition),
+        box-shadow var(--transition),
+        transform var(--transition);
+}
+
+.chat-footer button:hover {
+    background: var(--primary);
+    color: var(--text-right);
+    border-color: var(--primary);
+    box-shadow: 0 8px 18px rgba(114, 135, 244, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================
+   Accessibility / Disabled
+========================================================== */
+
+.chat-tabs button:focus-visible,
+.chat-close:focus-visible,
+.chat-header button:focus-visible,
+.chat-input button:focus-visible,
+.chat-footer button:focus-visible,
+.member-item:focus-visible,
+.project-header:focus-visible {
+    outline: 3px solid rgba(114, 135, 244, 0.25);
+    outline-offset: 2px;
+}
+
+.chat-input button:disabled,
+.chat-footer button:disabled,
+.chat-tabs button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 900px) {
+    #chatModal {
+        top: 72px;
+        right: 16px;
+        width: calc(100vw - 32px);
+        height: calc(100vh - 92px);
+        border-radius: 22px;
+    }
+}
+
+@media (max-width: 680px) {
+    #chatModal {
+        top: 0;
+        right: 0;
+        width: 100vw;
+        height: 100dvh;
+        border: 0;
+        border-radius: 0;
+    }
+
+    .chat-header {
+        min-height: 64px;
+        padding: 0 18px;
+    }
+
+    .chat-tabs {
+        min-height: 56px;
+        padding: 8px 10px;
+    }
+
+    .room-list {
+        width: 116px;
+        min-width: 116px;
+    }
+
+    .project-search {
+        padding: 10px 8px;
+    }
+
+    .project-search input {
+        padding: 0 11px;
+        font-size: 11px;
+    }
+
+    .project-box {
+        margin: 8px 6px;
+    }
+
+    .project-header {
+        min-height: 62px;
+        padding: 11px 8px;
+    }
+
+    .project-header img,
+    .project-header__icon {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
+        padding: 6px;
+    }
+
+    .project-title {
+        font-size: 12px;
+    }
+
+    .project-count {
+        font-size: 9px;
+    }
+
+    .member-item {
+        padding: 8px;
+        font-size: 11px;
+    }
+
+    #messageArea {
+        padding: 14px 12px;
+    }
+
+    .message,
+    .chat-message {
+        max-width: 88%;
+    }
+
+    .chat-input {
+        padding: 11px;
+    }
+
+    .chat-input button {
+        min-width: 68px;
+        padding: 0 14px;
+    }
+
+    .chat-footer {
+        gap: 7px;
+        padding: 10px;
+    }
+
+    .chat-footer button {
+        padding: 0 8px;
+        font-size: 10px;
+    }
 }

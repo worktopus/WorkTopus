@@ -13,10 +13,10 @@ function loadProjects(){
             id:1,
             name:"AI Collaboration",
             members:[
-                {name:"김여린", online:true, leader:true},
-                {name:"신승민", online:true},
-                {name:"김경규", online:false},
-                {name:"노희진", online:false}
+                {name:"가가가", online:true, leader:true},
+                {name:"나나나", online:true},
+                {name:"다다다", online:false},
+                {name:"라라라", online:false}
             ]
         },
 
@@ -88,7 +88,7 @@ function createMemberList(project){
     html += `
     <div class="last-message">
         <div class="last-message-text">
-            💬 김여린 : 회의자료 올렸습니다...
+            💬 라라라 : 회의자료 올렸습니다...
         </div>
 
         <div class="last-message-time">
