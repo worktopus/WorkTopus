@@ -4,7 +4,6 @@ import com.example.WorkTopus.dto.UserCreateForm;
 import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.repository.UserRepository;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,43 +15,63 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /*
+     * 일반 로그인 시 Spring Security가 자동 호출한다.
+     * USER_ID로 회원을 찾고 로그인 검증에 필요한 정보를 반환한다.
+     */
     @Override
-    public UserDetails loadUserByUsername(String userId) throws UsernameNotFoundException {
-        Users loginUser = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 사용자입니다."));
+    public UserDetails loadUserByUsername(String userId)
+            throws UsernameNotFoundException {
+
+        Users user = userRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "존재하지 않는 사용자입니다."
+                        )
+                );
 
         return User.builder()
-                .username(loginUser.getUserId())
-                .password(loginUser.getPassword())
-                .disabled(!loginUser.isEnabled())
-                .roles(loginUser.getRole().name())
+                .username(user.getUserId())
+                .password(user.getPassword())
+                .disabled(!user.isEnabled())
+                .roles(user.getRole().name())
                 .build();
     }
 
-    @Transactional(readOnly = true)
-    public Users findByUserNum(Long userNum) {
-        return userRepository.findById(userNum)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-    }
-
-    @Transactional(readOnly = true)
+    /*
+     * USER_ID로 사용자 조회
+     * 로그인한 사용자의 실제 Users 엔티티가 필요할 때 사용한다.
+     */
     public Users findByUserId(String userId) {
         return userRepository.findByUserId(userId)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "회원을 찾을 수 없습니다."
+                        )
+                );
     }
 
-    public Users register(@Valid UserCreateForm userForm) throws IllegalAccessException {
-        validateNewUser(userForm.getUserId(), userForm.getEmail());
+    /*
+     * 일반 회원가입
+     */
+    @Transactional
+    public Users register(UserCreateForm userForm) {
+        validateNewUser(
+                userForm.getUserId(),
+                userForm.getEmail()
+        );
 
         Users user = new Users();
         user.setUserId(userForm.getUserId());
-        user.setPassword(passwordEncoder.encode(userForm.getPassword()));
+        user.setPassword(
+                passwordEncoder.encode(userForm.getPassword())
+        );
         user.setName(userForm.getName());
         user.setEmail(userForm.getEmail());
         user.setRole(Role.USER);
@@ -61,13 +80,93 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    private void validateNewUser(String userId, String email) throws IllegalAccessException {
+    /*
+     * 마이페이지에서 이름 변경
+     */
+    @Transactional
+    public void updateName(String userId, String newName) {
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "이름을 입력해주세요."
+            );
+        }
+
+        Users user = findByUserId(userId);
+        user.setName(newName.trim());
+    }
+
+    /*
+     * 마이페이지에서 비밀번호 변경
+     */
+    @Transactional
+    public void changePassword(
+            String userId,
+            String currentPassword,
+            String newPassword
+    ) {
+        Users user = findByUserId(userId);
+
+        if (!passwordEncoder.matches(
+                currentPassword,
+                user.getPassword()
+        )) {
+            throw new IllegalArgumentException(
+                    "현재 비밀번호가 올바르지 않습니다."
+            );
+        }
+
+        if (newPassword == null || newPassword.length() < 4) {
+            throw new IllegalArgumentException(
+                    "새 비밀번호는 4자 이상이어야 합니다."
+            );
+        }
+
+        if (passwordEncoder.matches(
+                newPassword,
+                user.getPassword()
+        )) {
+            throw new IllegalArgumentException(
+                    "현재 비밀번호와 다른 비밀번호를 입력해주세요."
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(newPassword)
+        );
+    }
+
+    /*
+     * 마이페이지에서 프로필 이미지 경로 변경
+     *
+     * picture에는 실제 이미지 파일이 아니라
+     * "/uploads/profile/파일명.png" 같은 경로를 저장한다.
+     */
+    @Transactional
+    public void updatePicture(
+            String userId,
+            String picture
+    ) {
+        Users user = findByUserId(userId);
+        user.setPicture(picture);
+    }
+
+    /*
+     * 아이디·이메일 중복 검사
+     */
+    private void validateNewUser(
+            String userId,
+            String email
+    ) {
         if (userRepository.existsByUserId(userId)) {
-            throw new IllegalAccessException("이미 사용 중인 아이디입니다.");
+            throw new IllegalArgumentException(
+                    "이미 사용 중인 아이디입니다."
+            );
         }
 
         if (userRepository.existsByEmailIgnoreCase(email)) {
-            throw new IllegalAccessException("이미 사용 중인 이메일입니다.");
+            throw new IllegalArgumentException(
+                    "이미 사용 중인 이메일입니다."
+            );
         }
     }
 }
