@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<th:block th:fragment="header">
+    <header class="header">
+
+    <!-- 왼쪽 -->
+        <div class="header__left">
+
+            <button class="header__project-switcher">
+
+                <div class="header__project-bg" >
+                    <span class="header__project-icon" th:block th:insert="~{fragments/icons :: prjopen}" >
+                    </span>
+                </div>
+
+                <div class="header__project-info">
+<!--
+            <span class="header__project-label">
+                현재 프로젝트
+            </span>
+-->
+                    <span class="header__project-name">
+                Worktopus
+            </span>
+
+                </div>
+
+                <img th:src="@{/img/caret-down.svg}"
+                     class="header__project-arrow"
+                     alt="">
+
+            </button>
+
+        </div>
+
+
+    <!-- 오른쪽 -->
+    <div class="header__right">
+
+        <!-- 알림 -->
+        <button class="header__icon" type="button" aria-label="알림">
+
+            <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}">
+            </span>
+
+            <span class="header__badge">
+                3
+            </span>
+
+        </button>
+
+        <!-- 채팅 -->
+        <button id="chatButton"
+                class="header__icon"
+                type="button">
+
+            <span th:insert="~{fragments/icons :: chat}"></span>
+
+        </button>
+
+        <!-- 메모 -->
+        <button id="chatButton2"
+                class="header__icon"
+                type="button">
+
+            <span th:insert="~{fragments/icons :: chat}"></span>
+
+        </button>
+
+        <!-- 프로필 -->
+        <div class="header__profile">
+
+            <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
+
+            <div class="header__info">
+
+                <p class="header__name">
+                    김여린
+                </p>
+
+                <span class="header__role">
+            Backend Developer
+        </span>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</header>
+    <!-- 채팅 팝업 -->
+    <div id="chatModal">
+
+        <div class="chat-header">
+            <span id="chatTitle">
+                AI Collaboration
+            </span>
+            <button onclick="closeChat()">✖</button>
+        </div>
+
+        <!-- 상단 탭 -->
+        <div class="chat-tabs">
+            <button id="groupTab"
+                    class="active"
+                    onclick="switchTab('group')">
+                👥 단체채팅
+            </button>
+
+            <button id="privateTab"
+                    onclick="switchTab('private')">
+                👤 개인채팅
+            </button>
+        </div>
+
+        <div class="chat-body">
+
+            <!-- 왼쪽 : 프로젝트 목록 -->
+            <div class="room-list">
+
+                <!-- 프로젝트 검색 -->
+                <div class="project-search">
+                    <input  type="text"
+                            id="projectSearch"
+                            placeholder="🔍 프로젝트 검색">
+                </div>
+
+                <!-- 프로젝트 목록 -->
+                <div id="projectList">
+                    <!-- project.js가 여기 생성 -->
+                </div>
+            </div>
+
+            <!-- 오른쪽 : 채팅 -->
+            <div class="chat-content">
+
+                <!-- 단체채팅 -->
+                <div id="groupChat">
+                    <div id="messageArea">
+                        <!-- 채팅 출력 -->
+                    </div>
+                </div>
+
+                <!-- 개인채팅 -->
+                <div id="privateChat" style="display:none;">
+                    <div id="privateMessageArea">
+                        팀원을 선택하세요.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input">
+            <input  id="message"
+                    type="text"
+                    placeholder="메시지를 입력하세요">
+            <button id="sendBtn">
+                전송
+            </button>
+        </div>
+
+        <div class="chat-footer">
+            <button id="summaryBtn">
+                🤖 AI 회의요약
+            </button>
+
+            <button id="minutesBtn">
+                📄 회의록 생성
+            </button>
+
+            <button id="boardBtn">
+                📌 게시판 등록
+            </button>
+
+        </div>
+    </div>
+</th:block>
+</body>
+</html>

@@ -1,0 +1,210 @@
+/* ===========================
+   AI Chat Modal
+=========================== */
+
+#chatModal{
+    display:none;
+    position:fixed;
+    top:80px;
+    right:30px;
+    width:720px;
+    height:760px;
+    background:white;
+    border-radius:16px;
+    box-shadow:0 10px 35px rgba(0,0,0,.2);
+    z-index:9999;
+    overflow:hidden;
+}
+
+/* 헤더 */
+.chat-header{
+    height:60px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 20px;
+    border-bottom:1px solid #e5e5e5;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* 상단 탭 */
+.chat-tabs{
+    display:flex;
+    height:48px;
+    border-bottom:1px solid #ddd;
+}
+
+.chat-tabs button{
+    flex:1;
+    border:none;
+    background:white;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+.chat-tabs button.active{
+    background:#eef5ff;
+    color:#2d6cdf;
+}
+
+/* 본문 */
+.chat-body{
+    display:flex;
+    height:520px;
+}
+
+/* 왼쪽 프로젝트 목록 */
+.room-list{
+    width:240px;
+    min-width:240px;
+    border-right:1px solid #e5e5e5;
+    overflow-y:auto;
+}
+
+/* 오른쪽 채팅 */
+.chat-content{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    background:#fafafa;
+}
+
+#messageArea{
+    flex:1;
+    padding:15px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+/* 입력 */
+.chat-input{
+    display:flex;
+    border-top:1px solid #ddd;
+}
+
+.chat-input input{
+    flex:1;
+    border:none;
+    padding:12px;
+    outline:none;
+}
+
+.chat-input button{
+    width:90px;
+}
+
+/* 하단 AI 기능 */
+.chat-footer{
+    display:flex;
+    gap:10px;
+    padding:12px;
+    border-top:1px solid #ddd;
+}
+
+.chat-footer button{
+    flex:1;
+}
+
+/* 프로젝트 목록 */
+
+.project-box{
+    border-bottom:1px solid #ececec;
+}
+
+.project-header{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.project-header:hover{
+    background:#f7f9fc;
+}
+
+.project-info{
+    display:flex;
+    flex-direction:column;
+}
+
+.project-title{
+    font-weight:700;
+    font-size:15px;
+}
+
+.project-count{
+    margin-top:4px;
+    font-size:12px;
+    color:#888;
+}
+
+.project-members{
+    padding-left:35px;
+    padding-bottom:10px;
+}
+
+.member-item{
+    padding:8px 5px;
+    cursor:pointer;
+    border-radius:6px;
+    transition:.2s;
+}
+
+.member-item:hover{
+    background:#eef5ff;
+}
+
+/* 마지막 메시지 */
+.last-message{
+    margin-top:15px;
+    padding-top:10px;
+    border-top:1px solid #ececec;
+}
+
+.last-message-text{
+    font-size:13px;
+    color:#555;
+}
+
+.last-message-time{
+    margin-top:2px;
+    font-size:11px;
+    color:#999;
+}
+
+.unread-message{
+    margin-top:8px;
+    color:#ff4d4d;
+    font-size:12px;
+    font-weight:bold;
+}
+/* 프로젝트 펼침 애니메이션 */
+.project-members{
+    max-height:0;
+    overflow:hidden;
+    transition:max-height .35s ease;
+}
+
+/* 프로젝트 검색 */
+
+.project-search{
+    padding:10px;
+    border-bottom:1px solid #ececec;
+}
+
+.project-search input{
+    width:100%;
+    padding:8px 12px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    outline:none;
+    box-sizing:border-box;
+}
+
+.project-search input:focus{
+    border-color:#3b82f6;
+}

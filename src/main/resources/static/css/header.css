@@ -1,0 +1,286 @@
+/* ==========================================================
+   Header
+========================================================== */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 32px;
+}
+
+/* ==========================================================
+   Left
+========================================================== */
+
+.header__left {
+    display: flex;
+    align-items: center;
+}
+
+.header__title {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.header__subtitle {
+    margin-top: 6px;
+
+    color: var(--text-sub);
+    font-size: 15px;
+}
+
+/* ==========================================================
+   Right
+========================================================== */
+
+.header__right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+/* ==========================================================
+   Search
+========================================================== */
+
+.header__search input {
+    width: 260px;
+    height: 46px;
+
+    padding: 0 18px;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    outline: none;
+
+    transition: var(--transition);
+}
+
+.header__search input:focus {
+    border-color: var(--primary);
+}
+
+/* ==========================================================
+   Icon Button
+========================================================== */
+
+.header__icon {
+    position: relative;
+
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    background: var(--card);
+
+    color: var(--primary-dark);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__icon:hover {
+    transform: translateY(-2px);
+}
+
+/* ==========================================================
+   Notification Badge
+========================================================== */
+
+.header__badge {
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+
+    background: var(--danger);
+    color: var(--text-right);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Profile
+========================================================== */
+
+.header__profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 16px;
+
+    border-radius: var(--radius-md);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__profile:hover {
+    transform: translateY(-2px);
+}
+
+.header__profile img {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+}
+
+.header__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.header__name {
+    font-size: 15px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.header__role {
+    margin-top: 2px;
+
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+/* ==========================================================
+   Project Switcher
+========================================================== */
+
+.header__left {
+    display: flex;
+    align-items: center;
+}
+
+.header__project-switcher {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 250px;
+
+    padding: 12px 18px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__project-switcher:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.header__project-bg {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 12px;
+
+    background: var(--primary-soft);
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+.header__project-icon {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: var(--primary-soft);
+    color: var(--text-sub);
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+.header__project-info {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.header__project-label {
+    margin-bottom: 3px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: var(--text-sub);
+}
+
+.header__project-name {
+    font-size: 17px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.header__project-arrow {
+    width: 18px;
+    height: 18px;
+
+    opacity: .55;
+
+    transition: transform .25s ease;
+}
+
+.header__project-switcher:hover
+.header__project-arrow {
+    transform: rotate(180deg);
+}
