@@ -3,13 +3,14 @@ let subscription = null;
 
 function connect() {
 
+    console.log("connect() 시작");
+
     const socket = new SockJS('/chat');
 
     stompClient = Stomp.over(socket);
 
     stompClient.connect({}, function () {
         console.log("WebSocket 연결 성공");
-
         subscribeRoom(currentRoom);
     });
 }

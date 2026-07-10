@@ -1,8 +1,11 @@
+console.log("chat.js 로드됨");
+
 let chatMode = "group";
 let currentRoom = "group";
 
 function openChat(){
     document.getElementById("chatModal").style.display="block";
+    loadProjects();
     loadTeamMembers();
 }
 
@@ -12,10 +15,15 @@ function closeChat(){
 
 function switchTab(type){
     chatMode = type;
-    const group =  document.getElementById("groupChat");
-    const privateChat =  document.getElementById("privateChat");
 
-    const buttons =  document.querySelectorAll(".tab button");
+    const group =
+        document.getElementById("groupChat");
+
+    const privateChat =
+        document.getElementById("privateChat");
+
+    const buttons =
+        document.querySelectorAll(".chat-tabs button");
 
     buttons.forEach(btn=>btn.classList.remove("active"));
 
@@ -41,9 +49,11 @@ function sendMessage(){
     const input =
         document.getElementById("message");
 
-    if(input.value.trim()===""){
+    const text=input.value.trim();
+    if(text===""){
         return;
     }
+
     stompClient.send("/app/chat.send",{},JSON.stringify({
         sender:currentUser,
         message:input.value,
@@ -53,18 +63,48 @@ function sendMessage(){
     input.value="";
 }
 
-window.onload=function(){
+window.onload = function(){
 
+    console.log("window.onload 실행");
     connect();
-    loadHistory("group");
-    document.getElementById("sendBtn")
+
+    console.log("connect() 호출 완료");
+    loadHistory();
+    loadProjects();
+
+    document
+        .getElementById("sendBtn")
         .addEventListener("click",sendMessage);
 
-    document.getElementById("message")
+    document
+        .getElementById("message")
         .addEventListener("keydown",function(e){
 
             if(e.key==="Enter"){
                 sendMessage();
             }
         });
-};
+}
+
+/* 프로젝트에서 팀원 선택 */
+
+function selectProjectMember(memberName){
+
+    switchTab("private");
+    selectUser(memberName);
+}
+
+/* 개인채팅 선택 */
+
+function selectUser(memberName){
+
+    currentRoom=memberName;
+    subscribeRoom(currentRoom);
+    document.getElementById("privateMessageArea")
+        .innerHTML=`
+        <h3>👤 ${memberName}</h3>
+        <hr>
+        <div id="dmArea"></div>
+    `;
+    loadHistory(currentRoom);
+}
