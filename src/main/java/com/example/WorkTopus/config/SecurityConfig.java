@@ -29,8 +29,9 @@ public class SecurityConfig {
                         // .requestMatchers(
                         //        "/admin/**", "/vupdate", "/vdelete"
                         // ).hasRole("ADMIN")  // 추후 관리자페이지
-                        .requestMatchers("/projects/**")
-                        .authenticated()   // 로그인이 필요
+                        .requestMatchers(
+                                "/projects/**"
+                        ).authenticated()   // 로그인이 필요
                         .anyRequest().authenticated() // 설정하지 않은 다른 요청도 로그인 필요
                 )
                 .formLogin(form->form

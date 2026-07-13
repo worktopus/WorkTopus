@@ -105,7 +105,6 @@ public class HomeController {
 
         return "redirect:/login";
     }
-
     // 아이디 중복확인
     @GetMapping("/home/check-id")
     @ResponseBody
