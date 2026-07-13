@@ -13,7 +13,7 @@
 <body>
 <div class="projects-page">
     <header class="projects-header">
-        <a href="/" class="projects-logo">
+        <a href="/projects" class="projects-logo">
             <img src="/images/logo.png" alt="WorkTopus logo" class="projects-logo-img">
             <span class="projects-logo-text">WorkTopus</span>
         </a>
@@ -78,10 +78,9 @@
             </div>
         </section>
 
-        <section class="projects-empty" th:if="${#lists.isEmpty(projects)}">
 
         <!-- 프로젝트 없을 때 -->
-        <section class="projects-empty">
+        <section class="projects-empty" th:if="${#lists.isEmpty(projects)}">
             <div class="empty-card">
                 <div class="empty-icon">＋</div>
                 <h2 class="empty-title">프로젝트 생성</h2>
