@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>회원 관리 | WorkTopus Admin</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-custom.css}">
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-user.css}">
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+        <aside th:replace="~{admin/admin-sidebar :: sidebar}"></aside>
+
+
+    <main class="admin-main">
+
+        <header class="admin-page-header">
+            <div>
+                <p class="admin-page-header__eyebrow">MEMBER MANAGEMENT</p>
+                <h1 class="admin-page-header__title">회원 관리</h1>
+                <p class="admin-page-header__description">
+                    가입 회원과 계정 상태를 확인하고 관리합니다.
+                </p>
+            </div>
+        </header>
+
+        <!-- 회원 통계 -->
+        <section class="member-summary">
+
+            <article class="member-summary__card">
+                <span class="member-summary__label">전체 회원</span>
+                <strong class="member-summary__value">128</strong>
+                <span class="member-summary__description">
+                    누적 가입 회원
+                </span>
+            </article>
+
+            <article class="member-summary__card">
+                <span class="member-summary__label">활성 회원</span>
+                <strong class="member-summary__value">119</strong>
+                <span class="member-summary__description">
+                    정상 이용 계정
+                </span>
+            </article>
+
+            <article class="member-summary__card">
+                <span class="member-summary__label">탈퇴 회원</span>
+                <strong class="member-summary__value">9</strong>
+                <span class="member-summary__description">
+                    탈퇴 처리된 계정
+                </span>
+            </article>
+
+        </section>
+
+        <!-- 검색 및 필터 -->
+        <section class="member-toolbar">
+
+            <form class="member-search" method="get"
+                  th:action="@{/admin/members}">
+
+                <div class="member-search__field">
+                    <input type="text"
+                           name="keyword"
+                           placeholder="이름 또는 이메일 검색">
+                </div>
+
+                <select name="status"
+                        class="member-search__select">
+                    <option value="">전체 상태</option>
+                    <option value="ACTIVE">활성</option>
+                    <option value="WITHDRAWN">탈퇴</option>
+                    <option value="BLOCKED">차단</option>
+                </select>
+
+                <button type="submit"
+                        class="member-search__button">
+                    검색
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- 회원 목록 -->
+        <section class="member-table-card">
+
+            <div class="member-table-card__header">
+                <div>
+                    <h2>회원 목록</h2>
+                    <p>총 128명의 회원이 조회되었습니다.</p>
+                </div>
+            </div>
+
+            <div class="member-table-wrap">
+
+                <table class="member-table">
+
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>회원</th>
+                        <th>이메일</th>
+                        <th>권한</th>
+                        <th>상태</th>
+                        <th>가입일</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr>
+                        <td>1</td>
+
+                        <td>
+                            <div class="member-profile">
+                                <div class="member-profile__avatar">
+                                    김
+                                </div>
+
+                                <div class="member-profile__info">
+                                    <strong>김여린</strong>
+                                    <span>yeorin</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>member@example.com</td>
+
+                        <td>
+                            <span class="member-role">
+                                일반 회원
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="member-status member-status--active">
+                                활성
+                            </span>
+                        </td>
+
+                        <td>2026.07.03</td>
+
+                        <td>
+                            <button type="button"
+                                    class="member-detail-button">
+                                상세
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>2</td>
+
+                        <td>
+                            <div class="member-profile">
+                                <div class="member-profile__avatar">
+                                    박
+                                </div>
+
+                                <div class="member-profile__info">
+                                    <strong>박민수</strong>
+                                    <span>minsu</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>minsu@example.com</td>
+
+                        <td>
+                            <span class="member-role member-role--admin">
+                                관리자
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="member-status member-status--active">
+                                활성
+                            </span>
+                        </td>
+
+                        <td>2026.06.28</td>
+
+                        <td>
+                            <button type="button"
+                                    class="member-detail-button">
+                                상세
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>3</td>
+
+                        <td>
+                            <div class="member-profile">
+                                <div class="member-profile__avatar">
+                                    이
+                                </div>
+
+                                <div class="member-profile__info">
+                                    <strong>이수진</strong>
+                                    <span>sujin</span>
+                                </div>
+                            </div>
+                        </td>
+
+                        <td>sujin@example.com</td>
+
+                        <td>
+                            <span class="member-role">
+                                일반 회원
+                            </span>
+                        </td>
+
+                        <td>
+                            <span class="member-status member-status--withdrawn">
+                                탈퇴
+                            </span>
+                        </td>
+
+                        <td>2026.06.12</td>
+
+                        <td>
+                            <button type="button"
+                                    class="member-detail-button">
+                                상세
+                            </button>
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- 페이징 -->
+            <nav class="member-pagination">
+                <button type="button" disabled>이전</button>
+                <button type="button" class="member-pagination__button--active">1</button>
+                <button type="button">2</button>
+                <button type="button">3</button>
+                <button type="button">다음</button>
+            </nav>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>
