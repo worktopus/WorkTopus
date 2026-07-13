@@ -81,76 +81,6 @@ public class UserService implements UserDetailsService {
     }
 
     /*
-     * 마이페이지에서 이름 변경
-     */
-    @Transactional
-    public void updateName(String userId, String newName) {
-        if (newName == null || newName.isBlank()) {
-            throw new IllegalArgumentException(
-                    "이름을 입력해주세요."
-            );
-        }
-
-        Users user = findByUserId(userId);
-        user.setName(newName.trim());
-    }
-
-    /*
-     * 마이페이지에서 비밀번호 변경
-     */
-    @Transactional
-    public void changePassword(
-            String userId,
-            String currentPassword,
-            String newPassword
-    ) {
-        Users user = findByUserId(userId);
-
-        if (!passwordEncoder.matches(
-                currentPassword,
-                user.getPassword()
-        )) {
-            throw new IllegalArgumentException(
-                    "현재 비밀번호가 올바르지 않습니다."
-            );
-        }
-
-        if (newPassword == null || newPassword.length() < 4) {
-            throw new IllegalArgumentException(
-                    "새 비밀번호는 4자 이상이어야 합니다."
-            );
-        }
-
-        if (passwordEncoder.matches(
-                newPassword,
-                user.getPassword()
-        )) {
-            throw new IllegalArgumentException(
-                    "현재 비밀번호와 다른 비밀번호를 입력해주세요."
-            );
-        }
-
-        user.setPassword(
-                passwordEncoder.encode(newPassword)
-        );
-    }
-
-    /*
-     * 마이페이지에서 프로필 이미지 경로 변경
-     *
-     * picture에는 실제 이미지 파일이 아니라
-     * "/uploads/profile/파일명.png" 같은 경로를 저장한다.
-     */
-    @Transactional
-    public void updatePicture(
-            String userId,
-            String picture
-    ) {
-        Users user = findByUserId(userId);
-        user.setPicture(picture);
-    }
-
-    /*
      * 아이디·이메일 중복 검사
      */
     private void validateNewUser(
@@ -169,4 +99,37 @@ public class UserService implements UserDetailsService {
             );
         }
     }
+
+    // -------------------------------------------------------------------------------------
+    // 마이페이지에서 정보 수정
+    @Transactional
+    public void updateName(String userId, String newName) {
+        if (newName == null || newName.isBlank()) {
+            throw new IllegalArgumentException(
+                    "이름을 입력해주세요."
+            );
+        }
+
+        Users user = findByUserId(userId);
+        user.setName(newName.trim());
+    }
+
+    // 비밀번호 변경
+    @Transactional
+    public void updatePasswordWithoutCurrent(String userId, String newPassword) {
+        if (newPassword == null || newPassword.trim().isEmpty() || newPassword.length() < 4) {
+            throw new IllegalArgumentException("새 비밀번호는 4자 이상이어야 합니다.");
+        }
+
+        Users user = findByUserId(userId);
+        user.setPassword(passwordEncoder.encode(newPassword.trim()));
+    }
+
+    // 프로필 변경
+    @Transactional
+    public void updatePicture(String userId, String picture) {
+        Users user = findByUserId(userId);
+        user.setPicture(picture);
+    }
+
 }

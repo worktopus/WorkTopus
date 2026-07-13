@@ -12,22 +12,17 @@
 <body>
 <div class="mypage-page">
 
-    <header class="mypage-header">
-        <a href="/" class="mypage-logo">
-            <img src="/images/logo.png" alt="WorkTopus logo" class="mypage-logo-img">
-            <span class="mypage-logo-text">WorkTopus</span>
-        </a>
+    <header th:replace="~{fragments/header :: mainHeader}"></header>
 
-        <a href="/logout" class="mypage-logout"></a>
-    </header>
-
+    <!--wrapper-->
     <div class="mypage-wrapper">
 
+        <!--사이드-->
         <div class="mypage-container">
             <div class="sidebar">
                 <div class="sidebar-title">내 정보</div>
                 <ul class="menu-list">
-                    <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보 수정</button></li>
+                    <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보</button></li>
                     <li class="menu-item" id="menu-todo"><button onclick="switchTab('todo')">오늘의 할 일 (To-do)</button></li>
                     <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
                     <li class="menu-item" id="menu-comments"><button onclick="switchTab('comments')">내가 쓴 댓글</button></li>
@@ -35,26 +30,99 @@
                 </ul>
             </div>
 
+            <!--메인-->
             <div class="main-content">
 
+                <!--내 정보-->
                 <div id="section-info" class="content-section active">
-                    <h2 class="content-title">내 정보 수정</h2>
-                    <div class="user-summary-card">
-                        <span class="user-summary-label">계정 ID</span>
-                        <span class="user-summary-value" th:text="${user.userId}"></span>
-                    </div>
+                    <h2 class="content-title">내 정보</h2>
 
-                    <form th:action="@{/user/mypage}" method="post" th:object="${userForm}">
-                        <label>이름
-                            <input type="text" th:field="*{name}" required placeholder="이름을 입력하세요">
-                        </label>
-                        <label>이메일
-                            <input type="email" th:field="*{email}" required placeholder="example@domain.com">
-                        </label>
-                        <label>새 비밀번호
-                            <input type="password" th:field="*{password}">
-                        </label>
-                        <button type="submit" class="btn-submit">정보 수정 저장</button>
+                    <form th:action="@{/user/mypage}" method="post" th:object="${userForm}" enctype="multipart/form-data" class="info-edit-form">
+
+                        <!-- 프로필 사진 변경 영역 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">프로필 사진</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <!-- 프로필 -->
+                                    <label for="profile-file-input" class="profile-avatar-label">
+                                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                                             title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
+                                    </label>
+                                    <input type="file" id="profile-file-input" name="profilePicture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--이름 수정 영역-->
+                        <div class="info-row-group">
+                            <div class="info-group-label">이름</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="text" id="name-field" th:field="*{name}" required placeholder="이름을 입력하세요">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 계정 정보 조회 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">계정 정보</div>
+                            <div class="info-rows-container">
+
+                                <!-- 계정 ID -->
+                                <div class="info-data-row">
+                                    <span class="data-label">계정 ID</span>
+                                    <span class="data-value font-bold" th:text="${user.userId}">admin</span>
+                                </div>
+
+                                <!-- 이메일 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">이메일</span>
+                                    <span class="data-value" th:text="${user.email}">admin@example.com</span>
+                                </div>
+
+                                <!-- 비밀번호 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">비밀번호</span>
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="password" id="password-field" th:field="*{password}" placeholder="••••••••">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 연결된 서비스 영역 (조회 전용) -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">연결된 서비스</div>
+                            <div class="info-rows-container social-link-zone">
+
+                                <!-- 구글 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/google-icon.png" alt="Google" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'google'} ? '구글 계정으로 등록됨' : '구글 아이디 연결 없음'">구글 연동 상태</span>
+                                </div>
+
+                                <!-- 카카오 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/kakao-icon.png" alt="Kakao" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'kakao'} ? '카카오 계정으로 등록됨' : '카카오 아이디 연결 없음'">카카오 연동 상태</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- [오른쪽 밑 배치] 통합 정보 수정 저장 버튼 -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit-main">수정</button>
+                        </div>
+
                     </form>
                 </div>
 
@@ -113,7 +181,15 @@
     </div>
 
 </div>
-<script>
+<script th:inline="javascript">
+
+    // 값이 있으면 문자열로 대입되고, 없으면 null이 대입됩니다.
+    var msg = /*[[${msg}]]*/ null;
+
+    if (msg) {
+        alert(msg);
+    }
+
     function switchTab(tabName) {
         document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
@@ -177,6 +253,19 @@
 
     function loadMyComments() {
         // 필요시 로직 작성
+    }
+
+    // 프사 미리보기
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var label = document.querySelector('.profile-avatar-label');
+                // 내부를 깨끗이 비우고 새로운 img 태그를 생성해서 주입
+                label.innerHTML = `<img src="${e.target.result}" id="profile-preview" class="profile-click-avatar" title="사진을 클릭하여 변경">`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
 </script>

@@ -5,9 +5,12 @@
 /* 기본 페이지 배경 및 레이아웃 */
 .mypage-page {
     min-height: 100vh;
-    background: #f7f9ff; /* 대시보드와 동일한 연푸른색 배경 */
+    background: #f7f9ff; /* 대시보드 연푸른색 배경 */
     font-family: 'Pretendard', sans-serif;
     color: #1e293b;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* 1. 헤더 영역 */
@@ -19,6 +22,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-sizing: border-box;
 }
 
 .mypage-logo {
@@ -60,21 +64,22 @@
     background: #f0f4ff;
 }
 
-/* 2. 메인 컨테이너 구조 (네이버 밴드 2열 그리드 배치 구조화) */
+/* 2. 메인 컨테이너 구조 */
 .mypage-wrapper {
     max-width: 1440px;
     margin: 0 auto;
     padding: 40px 32px 90px;
+    box-sizing: border-box;
 }
 
 .mypage-container {
     display: grid;
-    grid-template-columns: 280px 1fr; /* 왼쪽 고정 사이드바, 오른쪽 컨텐츠 */
+    grid-template-columns: 280px 1fr; /* 왼쪽 고정 사이드바, 오른쪽 콘텐츠 */
     gap: 32px;
     align-items: start;
 }
 
-/* 3. 사이드바 내비게이션 (밴드 스타일 리메이크) */
+/* 3. 사이드바 내비게이션 */
 .sidebar {
     background: #ffffff;
     padding: 24px;
@@ -127,7 +132,7 @@
     color: #4d7cff;
 }
 
-/* 4. 메인 우측 콘텐츠 영역 */
+/* 4. 메인 콘텐츠 윈도우 */
 .main-content {
     background: #ffffff;
     padding: 40px;
@@ -137,7 +142,7 @@
     min-height: 500px;
 }
 
-/* 섹션 전환 애니메이션 기초 */
+/* 섹션 탭 전환 제어 */
 .content-section {
     display: none;
 }
@@ -154,78 +159,198 @@
     letter-spacing: -0.5px;
 }
 
-/* 5. 회원 정보 폼 컴포넌트 */
-.user-summary-card {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    padding: 16px 20px;
-    border-radius: 14px;
+/* ==========================================================================
+   5. 내 정보 (회원 정보 수정) 컴포넌트 스타일
+   ========================================================================== */
+
+/* 대분류 행 그룹 레이아웃 */
+.info-row-group {
+    padding: 24px 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 24px;
+    flex-direction: row;
+    align-items: flex-start;
 }
 
-.user-summary-label {
-    font-size: 14px;
-    color: #64748b;
-    font-weight: 600;
+.info-row-group:first-of-type {
+    padding-top: 8px;
 }
 
-.user-summary-value {
+/* 좌측 대분류 고정 레이블 너비 */
+.info-group-label {
+    width: 180px;
     font-size: 16px;
-    color: #334155;
     font-weight: 700;
+    color: #1e293b;
+    flex-shrink: 0;
+    padding-top: 10px;
 }
 
-form label {
-    display: block;
+/* 우측 콘텐츠 다중 열 컨테이너 */
+.info-rows-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* 세부 데이터 정렬 단일 행 */
+.info-data-row {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+/* 내부 타이틀 (계정 ID, 이메일, 비밀번호 등) */
+.data-label {
+    width: 120px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* 데이터 출력 텍스트 */
+.data-value {
     font-size: 15px;
-    font-weight: 700;
     color: #334155;
-    margin-bottom: 20px;
 }
 
-form input[type="text"],
-form input[type="email"],
-form input[type="password"] {
+.data-value.font-bold {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* 가로 구분선 */
+.section-divider {
+    border: 0;
+    height: 1px;
+    background: #edf0ff;
+    margin: 12px 0;
+}
+
+/* 5-1. 프로필 이미지 / 기본 SVG 공통 스타일 */
+.profile-avatar-label {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-click-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #edf0ff;
+    box-shadow: 0 4px 12px rgba(114, 135, 244, 0.1);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 기본 SVG 공용 백그라운드 박스 */
+.default-avatar-svg {
+    background: #f1f5f9;
+}
+
+.avatar-svg-icon {
+    width: 60px;
+    height: 60px;
+}
+
+.profile-click-avatar:hover {
+    transform: scale(1.03);
+    filter: brightness(0.95);
+    border-color: #4d7cff;
+}
+
+/* 5-2. 인풋 스타일 최적화 (가득 채우기) */
+.inline-input-group.full-width-input {
     width: 100%;
-    height: 50px;
-    padding: 0 16px;
-    margin-top: 8px;
-    font-size: 15px;
+    max-width: 360px;
+}
+
+.inline-input-group.full-width-input input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
     background: #ffffff;
     border: 1px solid #cbd5e1;
-    border-radius: 14px;
+    border-radius: 12px;
     outline: none;
     box-sizing: border-box;
     transition: all 0.2s;
 }
 
-form input:focus {
+.inline-input-group.full-width-input input:focus {
     border-color: #4d7cff;
-    box-shadow: 0 0 0 4px rgba(77, 124, 255, 0.12);
+    box-shadow: 0 0 0 3px rgba(77, 124, 255, 0.12);
 }
 
-.btn-submit {
-    width: 100%;
-    height: 52px;
-    background: #4d7cff;
-    color: #ffffff;
-    border: none;
+/* 5-3. 연결된 서비스 구역 및 엑스박스 방지 대체 처리 */
+.social-link-zone {
+    gap: 12px;
+}
+
+.social-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f8fafc;
+    padding: 14px 18px;
     border-radius: 14px;
-    font-size: 16px;
+    border: 1px solid #e2e8f0;
+    max-width: 420px;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    /* 만약 아이콘 이미지가 유실되어 엑스박스가 떴을 때 글자가 뭉개지거나 튀어나가는 현상 방지 */
+    min-width: 24px;
+    border-radius: 4px;
+}
+
+.social-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* 5-4. 우측 하단 통합 수정 버튼 정렬 */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+}
+
+.btn-submit-main {
+    padding: 0 24px;
+    height: 46px;
+    background: #eef2ff;
+    color: #4d7cff;
+    border: 1px solid #dfe4ff;
+    border-radius: 12px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 12px;
-    transition: background 0.2s;
+    transition: all 0.2s;
 }
 
-.btn-submit:hover {
-    background: #3b66f5;
+.btn-submit-main:hover {
+    background: #4d7cff;
+    color: #ffffff;
+    border-color: #4d7cff;
+    box-shadow: 0 4px 12px rgba(77, 124, 255, 0.15);
 }
 
-/* 6. 오늘의 할 일 리스트 (To-do) */
+
+/* ==========================================================================
+   6. 오늘의 할 일 리스트 (To-do)
+   ========================================================================== */
 .todo-input-group {
     display: flex;
     gap: 12px;
@@ -294,10 +419,10 @@ form input:focus {
     color: #334155;
 }
 
-/* 완료된 할 일 스타일 */
 .todo-item.completed {
     opacity: 0.6;
 }
+
 .todo-item.completed .todo-text {
     text-decoration: line-through;
     color: #94a3b8;
@@ -312,7 +437,10 @@ form input:focus {
     cursor: pointer;
 }
 
-/* 7. 테이블 디자인 (글/댓글 목록 세련되게 고도화) */
+
+/* ==========================================================================
+   7. 게시판 테이블 및 기타 탭 컴포넌트 디자인
+   ========================================================================== */
 table {
     width: 100%;
     border-collapse: separate;
@@ -339,7 +467,6 @@ td {
     border-bottom: 1px solid #f1f5f9;
 }
 
-/* 상태 배지 기법 */
 .status-badge {
     display: inline-flex;
     padding: 4px 10px;

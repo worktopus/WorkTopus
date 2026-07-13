@@ -21,10 +21,10 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_num")
-    private Long userNum;      // user_num -> userNum 변경
+    private Long userNum;
 
     @Column(name = "user_id", nullable = false, length = 30)
-    private String userId;     // user_id -> userId 변경
+    private String userId;
 
     @Column(nullable = false)
     private String password;
@@ -55,11 +55,11 @@ public class Users {
 
     // ===== 소셜 로그인 =====
     @Column(nullable = false, length = 20)
-    private String provider = "local";   // local, google, kakao
+    private String provider = "local";            // local, google, kakao
 
     @Column(length = 100)
-    private String providerId;           // 구글/카카오 고유 ID
+    private String providerId;                    // 구글/카카오 고유 ID
 
-    @Column(length = 500)
-    private String picture;              // 프로필 사진 URL
+    @Column(length = 500, nullable = false)
+    private String picture = "/images/logo.png";
 }
