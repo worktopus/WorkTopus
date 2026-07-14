@@ -340,10 +340,10 @@
 .todo-modal {
     display: none;
     position: fixed;
-    top: 80px; /* 헤더 아래쪽 적당한 위치 */
+    top: 70px; /* 헤더 아래쪽 적당한 위치 */
     right: 80px;
-    width: 350px;
-    height: 480px;
+    width: 400px;
+    height: 420px;
     background-color: #ffffff;
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.15);
@@ -385,4 +385,54 @@
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+/* --- 헤더 팝업 전용 투두 아이템 스타일 추가 --- */
+#todo-popup-modal .todo-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    background-color: #ffffff;
+    border: 1px solid #f1f5f9;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s ease;
+    margin-bottom: 6px;
+}
+
+#todo-popup-modal .todo-item:hover {
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+#todo-popup-modal .todo-item.completed {
+    background-color: #f8fafc;
+    border-color: #e2e8f0;
+}
+
+#todo-popup-modal .todo-text {
+    font-size: 14px;
+    color: #334155;
+    font-weight: 500;
+}
+
+#todo-popup-modal .todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+/* 삭제 버튼 스타일 정밀 튜닝 */
+#todo-popup-modal .btn-todo-delete {
+    background: none;
+    border: none;
+    color: #fca5a5; /* 연한 빨강 */
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: color 0.15s ease;
+}
+
+#todo-popup-modal .btn-todo-delete:hover {
+    color: #ef4444; /* 마우스 올리면 진한 빨강 */
 }

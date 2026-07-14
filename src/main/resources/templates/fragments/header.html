@@ -38,30 +38,24 @@
             <!-- 프로필 (드롭다운을 감싸는 컨테이너 구조로 변경) -->
             <div class="header__profile-container">
                 <div class="header__profile" id="header-profile-trigger" onclick="toggleProfileDropdown(event)">
-                    <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
+                    <img th:src="${user?.picture} ?: '/images/logo.png'" alt="프로필" onerror="this.src='/images/logo.png';">
+
                     <div class="header__info">
-                        <p class="header__name">김여린</p>
-                        <span class="header__role">Backend Developer</span>
+                        <p class="header__name" th:text="${user?.name} ?: '게스트'"></p>
                     </div>
                 </div>
 
                 <!-- 프로필 클릭 시 나타날 드롭다운 메뉴 -->
                 <div class="profile-dropdown" id="profile-dropdown-menu">
                     <!-- 마이페이지 사이드 항목들 -->
-                    <a href="/user/mypage" class="dropdown-item">내 정보</a>
-                    <a href="/user/mypage?tab=todo" class="dropdown-item">오늘의 할 일 (To-do)</a>
+                    <a href="/user/mypage?tab=info" class="dropdown-item">내 정보</a>
                     <a href="/user/mypage?tab=posts" class="dropdown-item">내가 쓴 글</a>
                     <a href="/user/mypage?tab=comments" class="dropdown-item">내가 쓴 댓글</a>
+                    <a href="/user/mypage?tab=notif" class="dropdown-item">알림</a>
 
                     <div class="dropdown-divider"></div>
 
-                    <!-- 구분선 아래 추가 항목 -->
-                    <a href="/notif" class="dropdown-item">알림창</a>
-                    <a href="/settings" class="dropdown-item">설정</a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <!-- 로그아웃 (스프링 시큐리티 로그아웃 POST 요청을 태우기 위한 폼 형태 권장) -->
+                    <!-- 로그아웃 -->
                     <form th:action="@{/logout}" method="post" style="margin: 0;">
                         <button type="submit" class="dropdown-item logout">로그아웃</button>
                     </form>
@@ -92,9 +86,8 @@
     </div>
 
     <script th:inline="javascript">
-        /* ==========================================
-         * 1. 프로필 드롭다운 제어
-         * ========================================== */
+
+       // 프로필 드롭다운 제어
         function toggleProfileDropdown(event) {
             event.stopPropagation();
             const dropdown = document.getElementById('profile-dropdown-menu');
