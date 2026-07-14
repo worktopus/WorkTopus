@@ -76,6 +76,7 @@
                                name="tag"
                                type="text"
                                class="board_write_input"
+                               th:value="${board.tag}"
                                placeholder="예: 기획, 프론트, 회의">
                     </div>
                 </div>
@@ -249,15 +250,21 @@
                     </div>
                 </div>
 
-                <div th:if="${board.files != null and !board.files.isEmpty()}">
-                    <div class="board_write_hint"
+                <div class="board_write_existing_files"
+                     th:if="${board.files != null and !board.files.isEmpty()}">
+                    <div class="board_write_existing_file"
                          th:each="file : ${board.files}">
-                        <span th:text="${file.originalName}">기존 첨부파일명</span>
-                        <label>
+                        <div class="board_write_existing_file_info">
+                            <span class="board_write_existing_file_icon">📎</span>
+                            <span class="board_write_existing_file_name"
+                                  th:text="${file.originalName}">기존 첨부파일명</span>
+                        </div>
+
+                        <label class="board_write_existing_file_delete">
                             <input type="checkbox"
                                    name="deleteFileIds"
                                    th:value="${file.id}">
-                            삭제
+                            <span>삭제</span>
                         </label>
                     </div>
                 </div>
@@ -284,7 +291,7 @@
                        multiple>
 
                 <div id="selectedFileList"
-                     class="board_write_hint"
+                     class="board_write_selected_files"
                      aria-live="polite"
                      hidden>
                     <strong>새로 선택된 파일</strong>

@@ -104,8 +104,10 @@ public class BoardController {
     @PostMapping
     public ModelAndView create(
             @PathVariable Long projectId,
+            @RequestParam(required = false) String tag,
             @Valid @ModelAttribute BoardCreateRequest request
     ) {
+        request = request.withTag(tag);
         Long boardId = boardService.create(projectId, request);
 
         return new ModelAndView(
@@ -145,8 +147,10 @@ public class BoardController {
     public ModelAndView update(
             @PathVariable Long projectId,
             @PathVariable Long boardId,
+            @RequestParam(required = false) String tag,
             @Valid @ModelAttribute BoardUpdateRequest request
     ) {
+        request = request.withTag(tag);
         boardService.update(projectId, boardId, request);
 
         return new ModelAndView(

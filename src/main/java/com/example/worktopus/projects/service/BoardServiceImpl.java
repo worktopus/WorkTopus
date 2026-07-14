@@ -39,7 +39,8 @@ public class BoardServiceImpl implements BoardService {
                 request.content(),
                 "관리자",
                 request.notice(),
-                request.category()
+                request.category(),
+                request.tag()
         );
 
         Board savedBoard = boardRepository.save(board);
@@ -115,7 +116,8 @@ public class BoardServiceImpl implements BoardService {
                 request.title(),
                 request.content(),
                 request.notice(),
-                request.category()
+                request.category(),
+                request.tag()
         );
 
         if (request.deleteFileIds() != null && !request.deleteFileIds().isEmpty()) {

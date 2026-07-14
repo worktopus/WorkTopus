@@ -200,6 +200,165 @@
     display: none;
 }
 
+.board_write_selected_files {
+    margin-top: 18px;
+}
+
+.board_write_selected_files strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.board_write_selected_files ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.board_write_selected_file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+    transition: .2s;
+}
+
+.board_write_selected_file:hover {
+    background: #f8fafc;
+}
+
+.board_write_selected_file_info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.board_write_selected_file_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.board_write_selected_file_text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.board_write_selected_file_name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.board_write_selected_file_size {
+    font-size: 12px;
+    color: var(--text-sub);
+}
+
+.board_write_selected_file_remove {
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 999px;
+    padding: 7px 10px;
+    background: rgba(239, 68, 68, 0.08);
+    color: var(--danger);
+    font-size: 12px;
+    font-weight: 800;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.board_write_existing_files {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.board_write_existing_file {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+    transition: .2s;
+}
+
+.board_write_existing_file:hover {
+    background: #f8fafc;
+}
+
+.board_write_existing_file_info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.board_write_existing_file_icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    flex-shrink: 0;
+}
+
+.board_write_existing_file_name {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.board_write_existing_file_delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-sub);
+    cursor: pointer;
+}
+
+.board_write_existing_file_delete input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--danger);
+}
+
 /* ==========================================================
    Buttons
 ========================================================== */

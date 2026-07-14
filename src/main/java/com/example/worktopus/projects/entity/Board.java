@@ -56,23 +56,28 @@ public class Board {
     @Column(name = "CATEGORY", nullable = false, length = 30)
     private String category = "FREE";
 
-    public Board(Long projectId, String title, String content, String writerName, boolean notice, String category) {
+    @Column(name = "TAG", length = 200)
+    private String tag;
+
+    public Board(Long projectId, String title, String content, String writerName, boolean notice, String category, String tag) {
         this.projectId = projectId;
         this.title = title;
         this.content = content;
         this.writerName = writerName;
         this.noticeYn = notice ? "Y" : "N";
         this.category = category;
+        this.tag = tag;
     }
 
     /**
      * 게시글 수정
      */
-    public void update(String title, String content, boolean notice, String category) {
+    public void update(String title, String content, boolean notice, String category, String tag) {
         this.title = title;
         this.content = content;
         this.noticeYn = notice ? "Y" : "N";
         this.category = category;
+        this.tag = tag;
     }
 
     /**

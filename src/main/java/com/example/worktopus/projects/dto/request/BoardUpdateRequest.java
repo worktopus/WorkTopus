@@ -17,10 +17,25 @@ public record BoardUpdateRequest(
         @NotBlank
         String category,
 
+        @Size(max = 200)
+        String tag,
+
         boolean notice,
 
         List<Long> deleteFileIds,
 
         List<MultipartFile> files
 ) {
+
+    public BoardUpdateRequest withTag(String tag) {
+        return new BoardUpdateRequest(
+                title,
+                content,
+                category,
+                tag != null ? tag : this.tag,
+                notice,
+                deleteFileIds,
+                files
+        );
+    }
 }

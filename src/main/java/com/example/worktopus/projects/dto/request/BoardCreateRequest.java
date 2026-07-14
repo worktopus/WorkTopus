@@ -21,8 +21,22 @@ public record BoardCreateRequest(
         @NotBlank
         String category,
 
+        @Size(max = 200)
+        String tag,
+
         boolean notice,
 
         List<MultipartFile> files
 ) {
+
+    public BoardCreateRequest withTag(String tag) {
+        return new BoardCreateRequest(
+                title,
+                content,
+                category,
+                tag != null ? tag : this.tag,
+                notice,
+                files
+        );
+    }
 }
