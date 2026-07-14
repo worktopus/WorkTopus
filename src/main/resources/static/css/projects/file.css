@@ -89,6 +89,10 @@
     transition: var(--transition);
 }
 
+.file__row[hidden] {
+    display: none !important;
+}
+
 .file__row:hover {
     background: var(--primary-soft);
 }

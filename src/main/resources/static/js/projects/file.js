@@ -8,19 +8,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const fileRows = document.querySelectorAll(".file__row");
     const searchEmpty = document.getElementById("fileSearchEmpty");
 
+    if (!searchInput || !typeFilter) {
+        return;
+    }
+
     searchInput.addEventListener("input", filterFiles);
     typeFilter.addEventListener("change", filterFiles);
+    filterFiles();
 
     function filterFiles() {
-        const keyword = searchInput.value.trim().toLowerCase();
+        const keyword = normalize(searchInput.value);
         const selectedType = typeFilter.value;
         let visibleCount = 0;
 
         fileRows.forEach((row) => {
-            const fileName = (row.dataset.fileName ?? "").toLowerCase();
-            const boardTitle = (row.dataset.boardTitle ?? "").toLowerCase();
-            const writerName = (row.dataset.writerName ?? "").toLowerCase();
-            const extension = (row.dataset.fileExtension ?? "").toLowerCase();
+            const fileName = normalize(
+                row.dataset.fileName || row.querySelector(".file__filename")?.textContent
+            );
+            const boardTitle = normalize(
+                row.dataset.boardTitle || row.querySelector(".file__board")?.textContent
+            );
+            const writerName = normalize(
+                row.dataset.writerName || row.children[4]?.textContent
+            );
+            const extension = normalize(
+                row.dataset.fileExtension || row.querySelector(".file__meta")?.textContent
+            ).replace(/^\./, "");
 
             const matchesKeyword =
                 fileName.includes(keyword) ||
@@ -62,5 +75,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         return "all";
+    }
+
+    function normalize(value) {
+        return String(value ?? "").trim().toLowerCase();
     }
 });
