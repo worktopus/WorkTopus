@@ -773,6 +773,44 @@
         );
     }
 
+    /* =====================================================
+   저장된 회의록 상세 표시
+===================================================== */
+
+    function showStoredSummary(
+        summary
+    ) {
+
+        /*
+         * 기존 AI 결과 팝업 재사용
+         */
+        openSummaryModal();
+
+        showSummaryResult(
+            summary
+        );
+
+
+        /*
+         * DB에서 이미 저장된 회의록이므로
+         * 다시 저장하지 못하도록 버튼을 잠급니다.
+         */
+        const saveButton =
+            document.getElementById(
+                "aiSummarySaveButton"
+            );
+
+
+        if (saveButton) {
+
+            saveButton.disabled =
+                true;
+
+            saveButton.textContent =
+                "저장된 회의록";
+        }
+    }
+
 
     /* =====================================================
        문자열 목록 출력
@@ -1391,7 +1429,9 @@
 
         openSummaryModal,
 
-        closeSummaryModal
+        closeSummaryModal,
+
+        showStoredSummary
     };
 
 

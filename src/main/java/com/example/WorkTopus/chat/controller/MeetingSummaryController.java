@@ -111,4 +111,30 @@ public class MeetingSummaryController {
         );
     }
 
+    /*
+     * 저장된 AI 회의록 상세 조회
+     *
+     * GET
+     * /api/ai/meeting-summary/detail/1
+     */
+    @GetMapping(
+            "/meeting-summary/detail/{summaryId}"
+    )
+    public ResponseEntity<MeetingSummaryResponse>
+    getMeetingSummaryDetail(
+            @PathVariable Long summaryId
+    ) {
+
+        MeetingSummaryResponse summary =
+                meetingSummaryStorageService
+                        .getSummaryDetail(
+                                summaryId
+                        );
+
+
+        return ResponseEntity.ok(
+                summary
+        );
+    }
+
 }

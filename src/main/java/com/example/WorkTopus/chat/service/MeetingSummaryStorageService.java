@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -45,8 +46,9 @@ public class MeetingSummaryStorageService {
 
 
         /*
-         * List<String> 데이터를
-         * JSON 문자열로 변환합니다.
+         * List<String>
+         * →
+         * JSON 문자열
          */
         String decisionsJson =
                 toJson(
@@ -98,7 +100,7 @@ public class MeetingSummaryStorageService {
 
 
         /*
-         * AI_MEETING_SUMMARY 테이블에 저장
+         * AI_MEETING_SUMMARY 저장
          */
         MeetingSummaryEntity saved =
                 meetingSummaryJpaRepository
@@ -141,18 +143,11 @@ public class MeetingSummaryStorageService {
             Long projectId
     ) {
 
-        /*
-         * 프로젝트 ID 검증
-         */
         validateProjectId(
                 projectId
         );
 
 
-        /*
-         * PROJECT_ID 기준으로 조회하고
-         * 최신 회의록부터 반환합니다.
-         */
         return meetingSummaryJpaRepository
                 .findByProjectIdOrderByGeneratedAtDesc(
                         projectId
@@ -167,9 +162,100 @@ public class MeetingSummaryStorageService {
 
     /*
      * =====================================================
+     * 저장된 AI 회의록 상세 조회
+     * =====================================================
+     */
+    public MeetingSummaryResponse
+    getSummaryDetail(
+            Long summaryId
+    ) {
+
+        /*
+         * 회의록 PK 검증
+         */
+        validateSummaryId(
+                summaryId
+        );
+
+
+        /*
+         * SUMMARY_ID 기준 DB 조회
+         */
+        MeetingSummaryEntity entity =
+                meetingSummaryJpaRepository
+                        .findById(
+                                summaryId
+                        )
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "해당 AI 회의록을 찾을 수 없습니다."
+                                        )
+                        );
+
+
+        /*
+         * JSON 문자열
+         * →
+         * List<String>
+         */
+        List<String> decisions =
+                fromJson(
+                        entity.getDecisionsJson()
+                );
+
+
+        List<String> actionItems =
+                fromJson(
+                        entity.getActionItemsJson()
+                );
+
+
+        List<String> keywords =
+                fromJson(
+                        entity.getKeywordsJson()
+                );
+
+
+        /*
+         * 기존 AI 회의요약 팝업에서 사용하는
+         * MeetingSummaryResponse 형태로 반환
+         */
+        return MeetingSummaryResponse
+                .builder()
+                .projectId(
+                        entity.getProjectId()
+                )
+                .roomId(
+                        entity.getRoomId()
+                )
+                .summary(
+                        entity.getSummaryContent()
+                )
+                .decisions(
+                        decisions
+                )
+                .actionItems(
+                        actionItems
+                )
+                .keywords(
+                        keywords
+                )
+                .messageCount(
+                        entity.getMessageCount()
+                )
+                .generatedAt(
+                        entity.getGeneratedAt()
+                )
+                .build();
+    }
+
+
+    /*
+     * =====================================================
      * Entity
      * →
-     * 회의록 목록용 DTO
+     * 회의록 목록 DTO
      * =====================================================
      */
     private MeetingSummaryListItem toListItem(
@@ -213,13 +299,6 @@ public class MeetingSummaryStorageService {
 
         try {
 
-            /*
-             * null이면 빈 배열로 저장합니다.
-             *
-             * null
-             * →
-             * []
-             */
             List<String> safeValues =
                     values == null
                             ? Collections.emptyList()
@@ -243,6 +322,102 @@ public class MeetingSummaryStorageService {
 
     /*
      * =====================================================
+     * JSON 문자열
+     * →
+     * List<String>
+     * =====================================================
+     */
+    private List<String> fromJson(
+            String json
+    ) {
+
+        /*
+         * DB 값이 없으면
+         * 빈 목록 반환
+         */
+        if (
+                json == null
+                        ||
+                        json.isBlank()
+        ) {
+
+            return Collections.emptyList();
+        }
+
+
+        try {
+
+            var root =
+                    objectMapper
+                            .readTree(
+                                    json
+                            );
+
+
+            /*
+             * JSON 배열이 아니면
+             * 빈 목록 반환
+             */
+            if (
+                    root == null
+                            ||
+                            !root.isArray()
+            ) {
+
+                return Collections.emptyList();
+            }
+
+
+            List<String> result =
+                    new ArrayList<>();
+
+
+            for (
+                    var item :
+                    root
+            ) {
+
+                if (
+                        item == null
+                                ||
+                                item.isNull()
+                ) {
+
+                    continue;
+                }
+
+
+                String value =
+                        item
+                                .asText()
+                                .trim();
+
+
+                if (
+                        !value.isBlank()
+                ) {
+
+                    result.add(
+                            value
+                    );
+                }
+            }
+
+
+            return result;
+
+        } catch (Exception exception) {
+
+            throw new IllegalStateException(
+                    "저장된 회의록 JSON 데이터를 읽지 못했습니다.",
+                    exception
+            );
+        }
+    }
+
+
+    /*
+     * =====================================================
      * 프로젝트 ID 검증
      * =====================================================
      */
@@ -258,6 +433,28 @@ public class MeetingSummaryStorageService {
 
             throw new IllegalArgumentException(
                     "올바른 projectId가 필요합니다."
+            );
+        }
+    }
+
+
+    /*
+     * =====================================================
+     * 회의록 PK 검증
+     * =====================================================
+     */
+    private void validateSummaryId(
+            Long summaryId
+    ) {
+
+        if (
+                summaryId == null
+                        ||
+                        summaryId <= 0
+        ) {
+
+            throw new IllegalArgumentException(
+                    "올바른 summaryId가 필요합니다."
             );
         }
     }
@@ -316,16 +513,8 @@ public class MeetingSummaryStorageService {
 
 
         /*
-         * 현재 AI 회의록은
-         * 프로젝트 단체채팅만 저장합니다.
-         *
-         * 예:
-         *
-         * projectId = 2
-         *
-         * 올바른 roomId:
-         *
-         * project_2_group
+         * 현재는 프로젝트 단체채팅의
+         * AI 회의록만 저장
          */
         String expectedRoomId =
                 "project_"
