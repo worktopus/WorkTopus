@@ -3,6 +3,7 @@
 // ==========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+    const calendar = document.querySelector(".calendar");
     const calendarGrid = document.getElementById("calendarGrid");
     const calendarTitle = document.getElementById("calendarTitle");
     const prevButton = document.getElementById("prevMonth");
@@ -17,6 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("calendarForm");
     const titleInput = document.getElementById("scheduleTitle");
     const dateInput = document.getElementById("scheduleDate");
+    const endDateInput = document.getElementById("scheduleEndDate");
     const typeInput = document.getElementById("scheduleType");
     const contentInput = document.getElementById("scheduleContent");
     const modalTitle = document.querySelector(".calendar-modal__header h2");
@@ -24,39 +26,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const deleteButton = document.getElementById("scheduleDelete");
 
     const today = new Date();
+    const apiBase = calendar?.dataset.apiBase;
 
     let currentYear = today.getFullYear();
     let currentMonth = today.getMonth();
     let editingScheduleId = null;
+    let schedules = [];
 
-    const schedules = [
-        {
-            id: 1,
-            title: "팀 회의",
-            date: "2026-07-10",
-            type: "meeting"
-        },
-        {
-            id: 2,
-            title: "칸반보드 마감",
-            date: "2026-07-12",
-            type: "deadline"
-        },
-        {
-            id: 3,
-            title: "1차 화면 리뷰",
-            date: "2026-07-15",
-            type: "meeting"
-        },
-        {
-            id: 4,
-            title: "프론트 배포",
-            date: "2026-07-18",
-            type: "release"
-        }
-    ];
-
-    renderCalendar();
+    loadSchedules();
 
     addButton.addEventListener("click", () => {
         openModal();
@@ -65,35 +42,36 @@ document.addEventListener("DOMContentLoaded", () => {
     modalClose.addEventListener("click", closeModal);
     modalOverlay.addEventListener("click", closeModal);
 
-    form.addEventListener("submit", (event) => {
+    form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const schedule = {
-            id: editingScheduleId || Date.now(),
             title: titleInput.value.trim(),
-            date: dateInput.value,
-            type: typeInput.value,
-            content: contentInput.value.trim()
+            startDate: dateInput.value,
+            endDate: endDateInput.value || dateInput.value,
+            type: typeInput.value.toUpperCase(),
+            description: contentInput.value.trim()
         };
 
-        if (!schedule.title || !schedule.date) {
-            alert("제목과 날짜를 입력해 주세요.");
+        if (!schedule.title || !schedule.startDate) {
+            alert("제목과 시작일을 입력해 주세요.");
             return;
         }
 
-        if (editingScheduleId) {
-            const index = schedules.findIndex((item) => item.id === editingScheduleId);
-
-            if (index !== -1) {
-                schedules[index] = schedule;
+        try {
+            if (editingScheduleId) {
+                await updateSchedule(editingScheduleId, schedule);
+            } else {
+                await createSchedule(schedule);
             }
-        } else {
-            schedules.push(schedule);
-        }
 
-        renderCalendar();
-        form.reset();
-        closeModal();
+            await loadSchedules();
+            form.reset();
+            closeModal();
+        } catch (error) {
+            console.error("캘린더 일정 저장 오류:", error, error?.stack);
+            alert("일정을 저장하지 못했습니다.");
+        }
     });
 
     prevButton.addEventListener("click", () => {
@@ -189,6 +167,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="calendar__events"></div>
             `;
 
+            cell.addEventListener("click", () => {
+                openModal(dateString);
+            });
+
             renderEvents(cell, dateString);
 
             calendarGrid.appendChild(cell);
@@ -199,18 +181,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const eventBox = cell.querySelector(".calendar__events");
 
         const daySchedules = schedules.filter((schedule) => {
-            return schedule.date === dateString;
+            return isDateWithinSchedule(dateString, schedule);
         });
 
         daySchedules.forEach((schedule) => {
             const event = document.createElement("button");
 
             event.type = "button";
-            event.className = `calendar__event calendar__event--${schedule.type}`;
+            event.className = `calendar__event calendar__event--${getScheduleTypeValue(schedule)}`;
             event.textContent = schedule.title;
 
             event.addEventListener("click", (e) => {
                 e.stopPropagation();
+
+                if (schedule.readOnly) {
+                    return;
+                }
+
                 openEditModal(schedule.id);
             });
 
@@ -223,6 +210,90 @@ document.addEventListener("DOMContentLoaded", () => {
         const dateText = String(date).padStart(2, "0");
 
         return `${year}-${monthText}-${dateText}`;
+    }
+
+    async function loadSchedules() {
+        if (!apiBase) {
+            renderCalendar();
+            return;
+        }
+
+        try {
+            schedules = await requestJson(apiBase, {method: "GET"}) ?? [];
+            renderCalendar();
+        } catch (error) {
+            console.error("캘린더 일정 조회 오류:", error, error?.stack);
+            renderCalendar();
+        }
+    }
+
+    async function createSchedule(schedule) {
+        return requestJson(apiBase, {
+            method: "POST",
+            body: JSON.stringify(schedule)
+        });
+    }
+
+    async function updateSchedule(scheduleId, schedule) {
+        return requestJson(`${apiBase}/${encodeURIComponent(scheduleId)}`, {
+            method: "PUT",
+            body: JSON.stringify(schedule)
+        });
+    }
+
+    async function deleteSchedule(scheduleId) {
+        const response = await fetch(`${apiBase}/${encodeURIComponent(scheduleId)}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    }
+
+    async function requestJson(url, options) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                ...(options.headers ?? {})
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const contentType = response.headers.get("Content-Type") ?? "";
+
+        if (!contentType.includes("application/json")) {
+            return null;
+        }
+
+        const text = await response.text();
+
+        if (!text) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.warn("JSON 응답 파싱 실패:", error, error?.stack);
+            return null;
+        }
+    }
+
+    function isDateWithinSchedule(dateString, schedule) {
+        const startDate = schedule.startDate || schedule.date;
+        const endDate = schedule.endDate || startDate;
+
+        return startDate <= dateString && dateString <= endDate;
+    }
+
+    function getScheduleTypeValue(schedule) {
+        return schedule.typeValue || String(schedule.type ?? "meeting").toLowerCase();
     }
 
     function isToday(year, month, date) {
@@ -241,6 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (date) {
             dateInput.value = date;
+            endDateInput.value = date;
         }
 
         modal.classList.add("active");
@@ -261,9 +333,10 @@ document.addEventListener("DOMContentLoaded", () => {
         modalTitle.textContent = "일정 수정";
 
         titleInput.value = schedule.title;
-        dateInput.value = schedule.date;
-        typeInput.value = schedule.type;
-        contentInput.value = schedule.content || "";
+        dateInput.value = schedule.startDate || schedule.date;
+        endDateInput.value = schedule.endDate || schedule.startDate || schedule.date;
+        typeInput.value = getScheduleTypeValue(schedule);
+        contentInput.value = schedule.description || schedule.content || "";
 
         modal.classList.add("active");
         titleInput.focus();
@@ -276,7 +349,7 @@ document.addEventListener("DOMContentLoaded", () => {
         editingScheduleId = null;
     }
 
-    deleteButton.addEventListener("click", () => {
+    deleteButton.addEventListener("click", async () => {
         if (!editingScheduleId) {
             return;
         }
@@ -287,15 +360,15 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        const index = schedules.findIndex((item) => item.id === editingScheduleId);
-
-        if (index !== -1) {
-            schedules.splice(index, 1);
+        try {
+            await deleteSchedule(editingScheduleId);
+            await loadSchedules();
+            form.reset();
+            closeModal();
+        } catch (error) {
+            console.error("캘린더 일정 삭제 오류:", error, error?.stack);
+            alert("일정을 삭제하지 못했습니다.");
         }
-
-        renderCalendar();
-        form.reset();
-        closeModal();
     });
 });
 

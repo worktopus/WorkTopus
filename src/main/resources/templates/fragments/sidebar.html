@@ -54,7 +54,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/boards/kanban}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: kanban}">
                         </span>
                         <span class="sidebar__text">칸반보드</span>
@@ -62,7 +62,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/boards/calendar}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: calender}">
                         </span>
                         <span class="sidebar__text">캘린더</span>

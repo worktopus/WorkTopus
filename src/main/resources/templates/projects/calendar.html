@@ -29,7 +29,9 @@
 
         <main class="main">
 
-            <section class="calendar">
+            <section class="calendar"
+                     th:data-project-id="${projectId}"
+                     th:data-api-base="@{/projects/{projectId}/boards/calendar/schedules(projectId=${projectId})}">
 
                 <section class="calendar__header">
 
@@ -121,8 +123,13 @@
                         </div>
 
                         <div class="calendar-modal__group">
-                            <label>날짜</label>
+                            <label>시작일</label>
                             <input type="date" id="scheduleDate" required>
+                        </div>
+
+                        <div class="calendar-modal__group">
+                            <label>종료일</label>
+                            <input type="date" id="scheduleEndDate">
                         </div>
 
                         <div class="calendar-modal__group">
