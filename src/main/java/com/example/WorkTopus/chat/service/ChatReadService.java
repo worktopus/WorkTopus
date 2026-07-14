@@ -2,38 +2,25 @@ package com.example.WorkTopus.chat.service;
 
 import com.example.WorkTopus.chat.dto.ChatMessage;
 import com.example.WorkTopus.chat.dto.ChatRead;
+import com.example.WorkTopus.chat.entity.ChatReadEntity;
+import com.example.WorkTopus.chat.repository.ChatReadJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatReadService {
 
     /*
-     * 현재는 DB 연결 전이므로 메모리에 저장합니다.
-     *
-     * Key 형식:
-     * roomId:userNum
-     *
-     * 예:
-     * project_2_group:1
+     * 기존 ConcurrentHashMap 대신
+     * Oracle의 CHAT_READ 테이블을 사용합니다.
      */
-    private final Map<String, ChatRead> readInfoMap =
-            new ConcurrentHashMap<>();
-
-    /*
-     * 임시 읽음 정보 PK
-     *
-     * DB 연결 후에는 시퀀스 또는 IDENTITY로 교체합니다.
-     */
-    private final AtomicLong readSequence =
-            new AtomicLong(0);
+    private final ChatReadJpaRepository
+            chatReadJpaRepository;
 
     private final ChatService chatService;
 
@@ -41,6 +28,7 @@ public class ChatReadService {
     /*
      * 현재 채팅방의 마지막 메시지까지 읽음 처리
      */
+    @Transactional
     public ChatRead markRoomAsRead(
             Long projectId,
             String roomId,
@@ -52,26 +40,30 @@ public class ChatReadService {
                 userNum
         );
 
-        List<ChatMessage> messages =
-                chatService.getMessages(
-                        roomId
+        String normalizedRoomId =
+                roomId.trim();
+
+        /*
+         * 현재 채팅방의 마지막 메시지를 조회합니다.
+         */
+        ChatMessage lastMessage =
+                chatService.getLastMessage(
+                        normalizedRoomId
                 );
 
+        /*
+         * 메시지가 하나도 없는 방은
+         * 0번까지 읽은 것으로 저장합니다.
+         */
         Long lastMessageId =
-                messages.stream()
-                        .map(
-                                ChatMessage::getMessageId
-                        )
-                        .filter(
-                                messageId ->
-                                        messageId != null
-                        )
-                        .max(Long::compareTo)
-                        .orElse(0L);
+                lastMessage == null ||
+                        lastMessage.getMessageId() == null
+                        ? 0L
+                        : lastMessage.getMessageId();
 
-        return saveReadInfo(
+        return markAsRead(
                 projectId,
-                roomId,
+                normalizedRoomId,
                 userNum,
                 lastMessageId
         );
@@ -81,8 +73,10 @@ public class ChatReadService {
     /*
      * 특정 메시지 번호까지 읽음 처리
      *
-     * 나중에 스크롤 기반 읽음 처리에도 사용할 수 있습니다.
+     * 나중에 스크롤 위치를 기준으로 읽음 처리할 때도
+     * 사용할 수 있습니다.
      */
+    @Transactional
     public ChatRead markAsRead(
             Long projectId,
             String roomId,
@@ -107,83 +101,99 @@ public class ChatReadService {
             );
         }
 
-        ChatRead currentRead =
-                getReadInfo(
-                        roomId,
-                        userNum
-                );
-
-        /*
-         * 이미 더 최신 메시지까지 읽었다면
-         * 과거 메시지 번호로 되돌리지 않습니다.
-         */
-        if (
-                currentRead != null &&
-                        currentRead.getLastReadMessageId() != null &&
-                        currentRead.getLastReadMessageId() >= messageId
-        ) {
-            return currentRead;
-        }
-
-        return saveReadInfo(
-                projectId,
-                roomId,
-                userNum,
-                messageId
-        );
-    }
-
-
-    /*
-     * 읽음 정보 저장 또는 갱신
-     */
-    private ChatRead saveReadInfo(
-            Long projectId,
-            String roomId,
-            Long userNum,
-            Long lastReadMessageId
-    ) {
         String normalizedRoomId =
                 roomId.trim();
 
-        String key =
-                createReadKey(
-                        normalizedRoomId,
-                        userNum
+        ChatReadEntity existingEntity =
+                chatReadJpaRepository
+                        .findByRoomIdAndUserNum(
+                                normalizedRoomId,
+                                userNum
+                        )
+                        .orElse(null);
+
+        /*
+         * 이미 더 최신 메시지까지 읽은 상태라면
+         * 과거 메시지 번호로 되돌리지 않습니다.
+         */
+        if (
+                existingEntity != null &&
+                        existingEntity.getLastReadMessageId() != null &&
+                        existingEntity.getLastReadMessageId() >= messageId
+        ) {
+            return toDto(
+                    existingEntity
+            );
+        }
+
+        ChatReadEntity readEntity;
+
+        if (existingEntity == null) {
+            /*
+             * 이 방에 대한 읽음 정보가 처음이면
+             * 새 Entity를 생성합니다.
+             */
+            readEntity =
+                    ChatReadEntity.builder()
+                            .projectId(
+                                    projectId
+                            )
+                            .roomId(
+                                    normalizedRoomId
+                            )
+                            .userNum(
+                                    userNum
+                            )
+                            .lastReadMessageId(
+                                    messageId
+                            )
+                            .readAt(
+                                    OffsetDateTime.now()
+                            )
+                            .build();
+
+        } else {
+            /*
+             * 기존 읽음 정보가 있으면
+             * 마지막 읽은 메시지 번호를 갱신합니다.
+             */
+            readEntity =
+                    existingEntity;
+
+            readEntity.setProjectId(
+                    projectId
+            );
+
+            readEntity.setRoomId(
+                    normalizedRoomId
+            );
+
+            readEntity.setUserNum(
+                    userNum
+            );
+
+            readEntity.setLastReadMessageId(
+                    messageId
+            );
+
+            readEntity.setReadAt(
+                    OffsetDateTime.now()
+            );
+        }
+
+        ChatReadEntity savedEntity =
+                chatReadJpaRepository.save(
+                        readEntity
                 );
 
-        ChatRead existingRead =
-                readInfoMap.get(key);
-
-        ChatRead readInfo =
-                ChatRead.builder()
-                        .readId(
-                                existingRead != null
-                                        ? existingRead.getReadId()
-                                        : readSequence.incrementAndGet()
-                        )
-                        .projectId(projectId)
-                        .roomId(normalizedRoomId)
-                        .userNum(userNum)
-                        .lastReadMessageId(
-                                lastReadMessageId
-                        )
-                        .readAt(
-                                OffsetDateTime.now()
-                        )
-                        .build();
-
-        readInfoMap.put(
-                key,
-                readInfo
+        return toDto(
+                savedEntity
         );
-
-        return readInfo;
     }
 
 
     /*
-     * 특정 사용자의 채팅방 읽음 정보 조회
+     * 특정 사용자의 특정 채팅방 읽음 정보 조회
      */
     public ChatRead getReadInfo(
             String roomId,
@@ -197,12 +207,13 @@ public class ChatReadService {
             return null;
         }
 
-        return readInfoMap.get(
-                createReadKey(
+        return chatReadJpaRepository
+                .findByRoomIdAndUserNum(
                         roomId.trim(),
                         userNum
                 )
-        );
+                .map(this::toDto)
+                .orElse(null);
     }
 
 
@@ -226,14 +237,15 @@ public class ChatReadService {
             return 0L;
         }
 
-        return readInfo.getLastReadMessageId();
+        return readInfo
+                .getLastReadMessageId();
     }
 
 
     /*
-     * 특정 채팅방의 안 읽은 메시지 수
+     * 특정 채팅방의 안 읽은 메시지 수 계산
      *
-     * 본인이 보낸 메시지는 제외합니다.
+     * 본인이 작성한 메시지는 제외합니다.
      */
     public int getUnreadCount(
             String roomId,
@@ -247,36 +259,69 @@ public class ChatReadService {
             return 0;
         }
 
+        String normalizedRoomId =
+                roomId.trim();
+
         Long lastReadMessageId =
                 getLastReadMessageId(
-                        roomId,
+                        normalizedRoomId,
                         userNum
                 );
 
-        return (int) chatService
-                .getMessages(roomId)
-                .stream()
-                .filter(message ->
-                        message.getMessageId() != null
-                )
-                .filter(message ->
-                        message.getMessageId() >
-                                lastReadMessageId
-                )
-                .filter(message ->
-                        message.getSenderNum() != null
-                )
-                .filter(message ->
-                        !userNum.equals(
-                                message.getSenderNum()
+        long unreadCount =
+                chatService
+                        .getMessages(
+                                normalizedRoomId
                         )
-                )
-                .count();
+                        .stream()
+
+                        /*
+                         * 메시지 번호가 없는 잘못된 데이터 제외
+                         */
+                        .filter(message ->
+                                message.getMessageId() != null
+                        )
+
+                        /*
+                         * 마지막으로 읽은 메시지보다
+                         * 뒤에 작성된 메시지만 계산
+                         */
+                        .filter(message ->
+                                message.getMessageId() >
+                                        lastReadMessageId
+                        )
+
+                        /*
+                         * 작성자 번호가 없는 데이터 제외
+                         */
+                        .filter(message ->
+                                message.getSenderNum() != null
+                        )
+
+                        /*
+                         * 본인이 보낸 메시지는
+                         * 안 읽은 메시지에 포함하지 않음
+                         */
+                        .filter(message ->
+                                !userNum.equals(
+                                        message.getSenderNum()
+                                )
+                        )
+                        .count();
+
+        if (
+                unreadCount >
+                        Integer.MAX_VALUE
+        ) {
+            return Integer.MAX_VALUE;
+        }
+
+        return (int) unreadCount;
     }
 
 
     /*
-     * 프로젝트 단체 채팅의 안 읽은 메시지 수
+     * 프로젝트 단체 채팅방의 안 읽은 메시지 수
      */
     public int getProjectUnreadCount(
             Long projectId,
@@ -330,9 +375,7 @@ public class ChatReadService {
 
 
     /*
-     * 개인 메시지의 상대방 읽음 여부 확인
-     *
-     * receiverUserNum이 해당 메시지까지 읽었다면 true입니다.
+     * 개인 메시지를 상대방이 읽었는지 확인
      */
     public boolean isMessageReadByUser(
             ChatMessage message,
@@ -356,10 +399,11 @@ public class ChatReadService {
 
 
     /*
-     * 읽음 정보 삭제
+     * 특정 사용자의 특정 방 읽음 정보 삭제
      *
      * 개발 테스트용입니다.
      */
+    @Transactional
     public void clearReadInfo(
             String roomId,
             Long userNum
@@ -372,35 +416,27 @@ public class ChatReadService {
             return;
         }
 
-        readInfoMap.remove(
-                createReadKey(
+        chatReadJpaRepository
+                .findByRoomIdAndUserNum(
                         roomId.trim(),
                         userNum
                 )
-        );
+                .ifPresent(
+                        chatReadJpaRepository::delete
+                );
     }
 
 
     /*
-     * 전체 임시 읽음 정보 삭제
+     * 전체 읽음 정보 삭제
      *
-     * 개발 테스트용입니다.
+     * 개발 테스트용이며 실제 운영 화면에서는
+     * 사용하지 않습니다.
      */
+    @Transactional
     public void clearAll() {
-        readInfoMap.clear();
-    }
-
-
-    /*
-     * 읽음 정보 Key 생성
-     */
-    private String createReadKey(
-            String roomId,
-            Long userNum
-    ) {
-        return roomId +
-                ":" +
-                userNum;
+        chatReadJpaRepository
+                .deleteAllInBatch();
     }
 
 
@@ -413,6 +449,39 @@ public class ChatReadService {
         return "project_" +
                 projectId +
                 "_group";
+    }
+
+
+    /*
+     * Entity를 DTO로 변환
+     */
+    private ChatRead toDto(
+            ChatReadEntity entity
+    ) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ChatRead.builder()
+                .readId(
+                        entity.getReadId()
+                )
+                .projectId(
+                        entity.getProjectId()
+                )
+                .roomId(
+                        entity.getRoomId()
+                )
+                .userNum(
+                        entity.getUserNum()
+                )
+                .lastReadMessageId(
+                        entity.getLastReadMessageId()
+                )
+                .readAt(
+                        entity.getReadAt()
+                )
+                .build();
     }
 
 
