@@ -1,31 +1,33 @@
 package com.example.WorkTopus.chat.repository;
 
 import com.example.WorkTopus.chat.dto.ChatMessage;
+import com.example.WorkTopus.chat.entity.ChatMessageEntity;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Repository
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatRepository {
 
     /*
-     * 임시 채팅 메시지 저장소
+     * Spring Data JPA Repository
      *
-     * ArrayList는 여러 사용자가 동시에 메시지를 저장하거나
-     * 조회할 때 문제가 발생할 수 있으므로
-     * CopyOnWriteArrayList를 사용합니다.
-     *
-     * 애플리케이션을 재실행하면 저장된 메시지는 사라집니다.
-     * 이후 DB 저장 방식으로 교체합니다.
+     * 기존 CopyOnWriteArrayList를 대신해서
+     * Oracle CHAT_MESSAGE 테이블을 사용합니다.
      */
-    private final List<ChatMessage> messages =
-            new CopyOnWriteArrayList<>();
+    private final ChatMessageJpaRepository
+            chatMessageJpaRepository;
 
 
     /*
      * 메시지 저장
      */
+    @Transactional
     public ChatMessage save(
             ChatMessage message
     ) {
@@ -35,22 +37,39 @@ public class ChatRepository {
             );
         }
 
-        messages.add(message);
+        ChatMessageEntity entity =
+                toEntity(
+                        message
+                );
 
-        return message;
+        ChatMessageEntity savedEntity =
+                chatMessageJpaRepository.save(
+                        entity
+                );
+
+        return toDto(
+                savedEntity
+        );
     }
 
 
     /*
-     * 전체 메시지 조회
+     * 모든 메시지 조회
      *
-     * 내부 리스트를 그대로 반환하지 않고
-     * 수정할 수 없는 복사본을 반환합니다.
+     * 메시지 번호가 작은 순서,
+     * 즉 오래된 메시지부터 반환합니다.
      */
     public List<ChatMessage> findAll() {
-        return List.copyOf(
-                messages
-        );
+        return chatMessageJpaRepository
+                .findAll(
+                        Sort.by(
+                                Sort.Direction.ASC,
+                                "messageId"
+                        )
+                )
+                .stream()
+                .map(this::toDto)
+                .toList();
     }
 
 
@@ -67,23 +86,18 @@ public class ChatRepository {
             return List.of();
         }
 
-        String normalizedRoomId =
-                roomId.trim();
-
-        return messages.stream()
-                .filter(message ->
-                        normalizedRoomId.equals(
-                                message.getRoomId()
-                        )
+        return chatMessageJpaRepository
+                .findByRoomIdOrderByMessageIdAsc(
+                        roomId.trim()
                 )
+                .stream()
+                .map(this::toDto)
                 .toList();
     }
 
 
     /*
-     * 특정 프로젝트의 모든 채팅 조회
-     *
-     * 이후 AI 요약 기능에서도 사용할 수 있습니다.
+     * 특정 프로젝트의 전체 메시지 조회
      */
     public List<ChatMessage> findByProjectId(
             Long projectId
@@ -92,12 +106,12 @@ public class ChatRepository {
             return List.of();
         }
 
-        return messages.stream()
-                .filter(message ->
-                        projectId.equals(
-                                message.getProjectId()
-                        )
+        return chatMessageJpaRepository
+                .findByProjectIdOrderByMessageIdAsc(
+                        projectId
                 )
+                .stream()
+                .map(this::toDto)
                 .toList();
     }
 
@@ -108,33 +122,148 @@ public class ChatRepository {
     public ChatMessage findLastByRoom(
             String roomId
     ) {
-        List<ChatMessage> roomMessages =
-                findByRoom(roomId);
-
-        if (roomMessages.isEmpty()) {
+        if (
+                roomId == null ||
+                        roomId.isBlank()
+        ) {
             return null;
         }
 
-        return roomMessages.get(
-                roomMessages.size() - 1
-        );
+        return chatMessageJpaRepository
+                .findTopByRoomIdOrderByMessageIdDesc(
+                        roomId.trim()
+                )
+                .map(this::toDto)
+                .orElse(null);
     }
 
 
     /*
-     * 개발 중 저장된 전체 메시지 초기화
+     * 테스트용 전체 메시지 삭제
      *
-     * 실제 운영 기능에서는 사용하지 않습니다.
+     * 실제 운영 화면에서는 호출하지 않습니다.
      */
+    @Transactional
     public void clear() {
-        messages.clear();
+        chatMessageJpaRepository
+                .deleteAllInBatch();
     }
 
 
     /*
-     * 현재 저장된 메시지 수
+     * 저장된 전체 메시지 수
      */
     public int count() {
-        return messages.size();
+        long count =
+                chatMessageJpaRepository.count();
+
+        if (count > Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+
+        return (int) count;
+    }
+
+
+    /*
+     * DTO를 DB Entity로 변환
+     */
+    private ChatMessageEntity toEntity(
+            ChatMessage message
+    ) {
+        String type =
+                message.getType();
+
+        if (
+                type == null ||
+                        type.isBlank()
+        ) {
+            type = "TALK";
+        }
+
+        return ChatMessageEntity.builder()
+                /*
+                 * messageId는 넣지 않습니다.
+                 *
+                 * Oracle DB가 자동으로 생성해야 하므로
+                 * 새 메시지는 항상 null 상태로 저장합니다.
+                 */
+                .projectId(
+                        message.getProjectId()
+                )
+                .roomId(
+                        message.getRoomId() == null
+                                ? null
+                                : message.getRoomId()
+                                .trim()
+                )
+                .senderNum(
+                        message.getSenderNum()
+                )
+                .senderName(
+                        message.getSenderName() == null
+                                ? null
+                                : message.getSenderName()
+                                .trim()
+                )
+                .message(
+                        message.getMessage() == null
+                                ? null
+                                : message.getMessage()
+                                .trim()
+                )
+                .type(
+                        type.trim()
+                                .toUpperCase()
+                )
+                .createdAt(
+                        message.getCreatedAt()
+                )
+                .build();
+    }
+
+
+    /*
+     * DB Entity를 화면 전송용 DTO로 변환
+     */
+    private ChatMessage toDto(
+            ChatMessageEntity entity
+    ) {
+        if (entity == null) {
+            return null;
+        }
+
+        return ChatMessage.builder()
+                .messageId(
+                        entity.getMessageId()
+                )
+                .projectId(
+                        entity.getProjectId()
+                )
+                .roomId(
+                        entity.getRoomId()
+                )
+                .senderNum(
+                        entity.getSenderNum()
+                )
+                .senderName(
+                        entity.getSenderName()
+                )
+                .message(
+                        entity.getMessage()
+                )
+                .type(
+                        entity.getType()
+                )
+                .createdAt(
+                        entity.getCreatedAt()
+                )
+                /*
+                 * 읽음 여부는 CHAT_MESSAGE 컬럼이 아니라
+                 * 읽음 정보에서 별도로 계산합니다.
+                 */
+                .unreadCount(null)
+                .readYn(null)
+                .build();
     }
 }

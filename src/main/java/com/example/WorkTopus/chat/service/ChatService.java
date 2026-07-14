@@ -4,26 +4,19 @@ import com.example.WorkTopus.chat.dto.ChatMessage;
 import com.example.WorkTopus.chat.repository.ChatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ChatService {
 
-    private static final int MAX_MESSAGE_LENGTH = 2000;
-
-    /*
-     * 현재는 메모리 저장 방식이므로
-     * 임시 메시지 번호를 생성합니다.
-     *
-     * DB 연결 후에는 DB 시퀀스 또는 IDENTITY가 담당합니다.
-     */
-    private final AtomicLong messageSequence =
-            new AtomicLong(0);
+    private static final int MAX_MESSAGE_LENGTH =
+            2000;
 
     private final ChatRepository chatRepository;
 
@@ -31,25 +24,48 @@ public class ChatService {
     /*
      * 채팅 메시지 저장
      */
-    public ChatMessage save(ChatMessage message) {
-
-        validateMessage(message);
+    @Transactional
+    public ChatMessage save(
+            ChatMessage message
+    ) {
+        validateMessage(
+                message
+        );
 
         /*
          * 메시지 앞뒤 공백 제거
          */
         message.setMessage(
-                message.getMessage().trim()
+                message.getMessage()
+                        .trim()
         );
 
         /*
-         * 메시지 유형 기본값
+         * 발신자 이름 앞뒤 공백 제거
+         */
+        message.setSenderName(
+                message.getSenderName()
+                        .trim()
+        );
+
+        /*
+         * 채팅방 ID 앞뒤 공백 제거
+         */
+        message.setRoomId(
+                message.getRoomId()
+                        .trim()
+        );
+
+        /*
+         * 메시지 유형 기본값 설정
          */
         if (
                 message.getType() == null ||
                         message.getType().isBlank()
         ) {
-            message.setType("TALK");
+            message.setType(
+                    "TALK"
+            );
 
         } else {
             message.setType(
@@ -60,52 +76,54 @@ public class ChatService {
         }
 
         /*
-         * Controller 이외의 위치에서 저장해도
-         * 작성 시간이 없으면 서버 시간이 들어갑니다.
+         * Controller가 작성 시간을 넣지 않은 경우
+         * 서버 시간을 사용합니다.
          */
-        if (message.getCreatedAt() == null) {
+        if (
+                message.getCreatedAt() == null
+        ) {
             message.setCreatedAt(
                     OffsetDateTime.now()
             );
         }
 
         /*
-         * 현재 메모리 저장 단계의 임시 PK입니다.
+         * 기존 AtomicLong 메시지 번호 생성은 삭제했습니다.
+         *
+         * Oracle DB가 MESSAGE_ID를 자동 생성하고,
+         * 저장된 결과를 다시 ChatMessage로 반환합니다.
          */
-        if (message.getMessageId() == null) {
-            message.setMessageId(
-                    messageSequence.incrementAndGet()
-            );
-        }
-
-        chatRepository.save(message);
-
-        return message;
+        return chatRepository.save(
+                message
+        );
     }
 
 
     /*
      * 특정 채팅방의 이전 메시지 조회
-     *
-     * 작성 시간 순서로 반환합니다.
      */
     public List<ChatMessage> getMessages(
             String roomId
     ) {
-        validateRoomId(roomId);
+        validateRoomId(
+                roomId
+        );
 
         return chatRepository
-                .findByRoom(roomId.trim())
+                .findByRoom(
+                        roomId.trim()
+                )
                 .stream()
-                .sorted(messageComparator())
+                .sorted(
+                        messageComparator()
+                )
                 .toList();
     }
 
 
     /*
-     * 프로젝트 전체 채팅 조회
+     * 특정 프로젝트의 전체 채팅 조회
      *
-     * 이후 AI 회의 요약과 회의록 생성에서 사용합니다.
      * 단체 채팅과 개인 채팅이 모두 포함됩니다.
      */
     public List<ChatMessage> getProjectMessages(
@@ -118,25 +136,25 @@ public class ChatService {
         }
 
         return chatRepository
-                .findAll()
-                .stream()
-                .filter(message ->
-                        projectId.equals(
-                                message.getProjectId()
-                        )
+                .findByProjectId(
+                        projectId
                 )
-                .sorted(messageComparator())
+                .stream()
+                .sorted(
+                        messageComparator()
+                )
                 .toList();
     }
 
 
     /*
-     * 프로젝트 단체 채팅만 조회
+     * 특정 프로젝트의 단체 채팅만 조회
      *
-     * AI 회의 요약은 기본적으로
-     * 단체 채팅 내용을 사용합니다.
+     * AI 회의요약과 회의록 생성에서
+     * 기본적으로 사용할 메시지입니다.
      */
-    public List<ChatMessage> getProjectGroupMessages(
+    public List<ChatMessage>
+    getProjectGroupMessages(
             Long projectId
     ) {
         if (projectId == null) {
@@ -150,28 +168,43 @@ public class ChatService {
                         projectId +
                         "_group";
 
-        return getMessages(groupRoomId);
+        return getMessages(
+                groupRoomId
+        );
     }
 
 
     /*
-     * 채팅방의 마지막 메시지 조회
-     *
-     * 프로젝트 목록의 마지막 메시지 출력에 사용합니다.
+     * 특정 채팅방의 마지막 메시지 조회
      */
     public ChatMessage getLastMessage(
             String roomId
     ) {
-        List<ChatMessage> messages =
-                getMessages(roomId);
-
-        if (messages.isEmpty()) {
-            return null;
-        }
-
-        return messages.get(
-                messages.size() - 1
+        validateRoomId(
+                roomId
         );
+
+        return chatRepository
+                .findLastByRoom(
+                        roomId.trim()
+                );
+    }
+
+
+    /*
+     * 현재 저장된 전체 메시지 수
+     */
+    public int getMessageCount() {
+        return chatRepository.count();
+    }
+
+
+    /*
+     * 개발 테스트용 전체 메시지 초기화
+     */
+    @Transactional
+    public void clearMessages() {
+        chatRepository.clear();
     }
 
 
@@ -187,7 +220,9 @@ public class ChatService {
             );
         }
 
-        if (message.getProjectId() == null) {
+        if (
+                message.getProjectId() == null
+        ) {
             throw new IllegalArgumentException(
                     "프로젝트 번호가 없습니다."
             );
@@ -197,7 +232,9 @@ public class ChatService {
                 message.getRoomId()
         );
 
-        if (message.getSenderNum() == null) {
+        if (
+                message.getSenderNum() == null
+        ) {
             throw new IllegalArgumentException(
                     "메시지 발신자 번호가 없습니다."
             );
@@ -205,7 +242,8 @@ public class ChatService {
 
         if (
                 message.getSenderName() == null ||
-                        message.getSenderName().isBlank()
+                        message.getSenderName()
+                                .isBlank()
         ) {
             throw new IllegalArgumentException(
                     "메시지 발신자 이름이 없습니다."
@@ -214,7 +252,8 @@ public class ChatService {
 
         if (
                 message.getMessage() == null ||
-                        message.getMessage().isBlank()
+                        message.getMessage()
+                                .isBlank()
         ) {
             throw new IllegalArgumentException(
                     "메시지 내용을 입력하세요."
@@ -257,16 +296,19 @@ public class ChatService {
      * 1. 작성 시간
      * 2. 메시지 번호
      */
-    private Comparator<ChatMessage> messageComparator() {
+    private Comparator<ChatMessage>
+    messageComparator() {
         return Comparator
                 .comparing(
                         ChatMessage::getCreatedAt,
+
                         Comparator.nullsLast(
                                 Comparator.naturalOrder()
                         )
                 )
                 .thenComparing(
                         ChatMessage::getMessageId,
+
                         Comparator.nullsLast(
                                 Comparator.naturalOrder()
                         )
