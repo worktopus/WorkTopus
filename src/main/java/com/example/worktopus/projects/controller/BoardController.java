@@ -24,14 +24,6 @@ public class BoardController {
 
     private final BoardService boardService;
 
-    @GetMapping("/dashboard")
-    public ModelAndView projectDashboard(@PathVariable Long projectId) {
-        ModelAndView mav = new ModelAndView("projects/dashboard");
-        mav.addObject("projectId", projectId);
-
-        return mav;
-    }
-
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,

@@ -18,6 +18,14 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             Pageable pageable
     );
 
+    Page<Board> findByProjectIdAndDeletedYnOrderByCreatedAtDesc(
+            Long projectId,
+            String deletedYn,
+            Pageable pageable
+    );
+
+    long countByProjectIdAndDeletedYn(Long projectId, String deletedYn);
+
     // 상세/수정/삭제용 단건 조회
     Optional<Board> findByIdAndProjectIdAndDeletedYn(
             Long boardId,

@@ -44,7 +44,7 @@
                         </div>
 
                         <span class="assignment-overlay__badge">
-                완료 100%
+                완료 <span th:text="${dashboard.completionRate}">0</span>%
             </span>
                     </div>
 
@@ -52,16 +52,21 @@
 
                         <div class="assignment-progress__top">
                             <span> 과제 진행도</span>
-                            <strong>6 / 11</strong>
+                            <strong>
+                                <span th:text="${dashboard.doneCount}">0</span>
+                                /
+                                <span th:text="${dashboard.kanbanCardCount}">0</span>
+                            </strong>
                         </div>
 
                         <div class="assignment-progress__bar">
 
                             <!-- width만 변경하면 된다 -->
-                            <div class="assignment-progress__fill" style="width:54.5%;">
+                            <div class="assignment-progress__fill"
+                                 th:style="${'width:' + dashboard.completionRate + '%;'}">
 
                             <span class="assignment-progress__text">
-                                54%
+                                <span th:text="${dashboard.completionRate}">0</span>%
                             </span>
 
                             </div>
@@ -81,10 +86,13 @@
                     <span class="dashboard__notice-icon"><img th:src="@{/img/megaphone.svg}"></span>
                     <strong>공지사항</strong>
                     <span class="dashboard__notice-badge">NEW</span>
-                    <p>전체 회의는 매주 금요일 10시입니다.</p>
+                    <p th:text="${dashboard.recentBoards.isEmpty() ? '최근 게시글이 없습니다.' : dashboard.recentBoards[0].title}">
+                        최근 게시글
+                    </p>
                 </div>
 
-                <a href="#" class="dashboard__notice-more">더보기 ›</a>
+                <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                   class="dashboard__notice-more">더보기 ›</a>
             </section>
 
             <!-- 작업 카드 + 차트 -->
@@ -93,13 +101,20 @@
                 <article class="task-card">
                     <div class="task-card__title">
                         <h3>해야 할 일</h3>
-                        <span>11</span>
+                        <span th:text="${dashboard.todoCount}">0</span>
                     </div>
 
                     <ul>
-                        <li><span class="dot dot--blue"></span>UI 디자인 수정 <strong>5</strong></li>
-                        <li><span class="dot dot--green"></span>API 연동 <strong>3</strong></li>
-                        <li><span class="dot dot--red"></span>테스트 및 검토 <strong>3</strong></li>
+                        <li th:each="card : ${dashboard.todoCards}">
+                            <span class="dot dot--blue"></span>
+                            <span th:text="${card.title}">UI 디자인 수정</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.todoCards.isEmpty()}">
+                            <span class="dot dot--blue"></span>
+                            <span>해야 할 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
                     </ul>
 
                     <button type="button">자세히 보기⌄</button>
@@ -108,13 +123,20 @@
                 <article class="task-card">
                     <div class="task-card__title">
                         <h3>진행 중</h3>
-                        <span>11</span>
+                        <span th:text="${dashboard.inProgressCount}">0</span>
                     </div>
 
                     <ul>
-                        <li><span class="dot dot--blue"></span>칸반보드 드래그 기능 <strong>4</strong></li>
-                        <li><span class="dot dot--green"></span>캘린더 연동 <strong>4</strong></li>
-                        <li><span class="dot dot--purple"></span>파일 업로드 API <strong>3</strong></li>
+                        <li th:each="card : ${dashboard.inProgressCards}">
+                            <span class="dot dot--blue"></span>
+                            <span th:text="${card.title}">로그인 기능</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.inProgressCards.isEmpty()}">
+                            <span class="dot dot--blue"></span>
+                            <span>진행 중인 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
                     </ul>
 
                     <button type="button">자세히 보기⌄</button>
@@ -123,13 +145,20 @@
                 <article class="task-card">
                     <div class="task-card__title">
                         <h3>검토 중</h3>
-                        <span>11</span>
+                        <span th:text="${dashboard.reviewCount}">0</span>
                     </div>
 
                     <ul>
-                        <li><span class="dot dot--green"></span>로그인 기능 구현 <strong>4</strong></li>
-                        <li><span class="dot dot--orange"></span>알림 기능 기획 <strong>4</strong></li>
-                        <li><span class="dot dot--purple"></span>프로젝트 생성 <strong>3</strong></li>
+                        <li th:each="card : ${dashboard.reviewCards}">
+                            <span class="dot dot--green"></span>
+                            <span th:text="${card.title}">PR 검토</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.reviewCards.isEmpty()}">
+                            <span class="dot dot--green"></span>
+                            <span>검토 중인 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
                     </ul>
 
                     <button type="button">자세히 보기⌄</button>
@@ -139,14 +168,19 @@
                     <h3>프로젝트 작업 진행도</h3>
 
                     <div class="chart-card__body">
-                        <div class="donut-chart"></div>
+                        <div class="donut-chart"
+                             th:data-todo-rate="${dashboard.todoRate}"
+                             th:data-progress-rate="${dashboard.inProgressRate}"
+                             th:data-review-rate="${dashboard.reviewRate}"
+                             th:data-done-rate="${dashboard.doneRate}">
+                        </div>
 
                         <ul class="chart-legend">
-                            <li><span class="dot dot--blue"></span>UI/UX <strong>25%</strong></li>
-                            <li><span class="dot dot--purple"></span>프론트엔드 <strong>30%</strong></li>
-                            <li><span class="dot dot--green"></span>백엔드 <strong>20%</strong></li>
-                            <li><span class="dot dot--orange"></span>기획 <strong>15%</strong></li>
-                            <li><span class="dot dot--red"></span>기타 <strong>10%</strong></li>
+                            <li><span class="dot dot--blue"></span>해야 할 일 <strong th:text="${dashboard.todoRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--orange"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--purple"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--green"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
+
                         </ul>
                     </div>
                 </article>
@@ -161,88 +195,31 @@
                         <button type="button">›</button>
                     </div>
 
-                    <h3>2024년 5월 20일 ~ 6월 2일</h3>
+                    <h3>
+                        <span th:text="${#temporals.format(dashboard.calendarDays[0].date, 'yyyy년 M월 d일')}">시작일</span>
+                        ~
+                        <span th:text="${#temporals.format(dashboard.calendarDays[13].date, 'M월 d일')}">종료일</span>
+                    </h3>
                 </div>
 
                 <div class="calendar">
-                    <div class="calendar__day">
-                        <strong>20 <span>월</span></strong>
-                        <p class="schedule schedule--blue">10:00 팀 회의</p>
-                        <p class="schedule schedule--green">14:00 프로젝트 회의</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>21 <span>화</span></strong>
-                        <p class="schedule schedule--orange">10:00 디자인 리뷰</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>22 <span>수</span></strong>
-                        <p class="schedule schedule--purple">11:00 마케팅 회의</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>23 <span>목</span></strong>
-                        <p class="schedule schedule--green">15:00 1:1 미팅</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>24 <span>금</span></strong>
-                        <p class="schedule schedule--red">13:00 클라이언트 미팅</p>
-                        <p class="schedule schedule--blue">17:00 주간 리포트 제출</p>
-                    </div>
-
-                    <div class="calendar__day calendar__day--sat">
-                        <strong>25 <span>토</span></strong>
-                        <p class="schedule schedule--blue">11:00 업데이트</p>
-                    </div>
-
-                    <div class="calendar__day calendar__day--sun">
-                        <strong>26 <span>일</span></strong>
-                        <p class="schedule schedule--red">휴식</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>27 <span>월</span></strong>
-                        <p class="schedule schedule--blue">10:00 팀 데일리</p>
-                        <p class="schedule schedule--green">14:00 프로젝트 회의</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>28 <span>화</span></strong>
-                        <p class="schedule schedule--orange">10:00 디자인 리뷰</p>
-                        <p class="schedule schedule--purple">16:00 컨텐츠 검토</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>29 <span>수</span></strong>
-                        <p class="schedule schedule--red">11:00 마케팅 전략 회의</p>
-                        <p class="schedule schedule--green">15:00 1:1 미팅</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>30 <span>목</span></strong>
-                        <p class="schedule schedule--blue">10:00 서버 세팅</p>
-                    </div>
-
-                    <div class="calendar__day">
-                        <strong>31 <span>금</span></strong>
-                        <p class="schedule schedule--red">13:00 클라이언트 미팅</p>
-                        <p class="schedule schedule--blue">17:00 주간 리포트 제출</p>
-                    </div>
-
-                    <div class="calendar__day calendar__day--sat">
-                        <strong>6/1 <span>토</span></strong>
-                        <p class="schedule schedule--purple">10:00 성과 분석</p>
-                    </div>
-
-                    <div class="calendar__day calendar__day--sun">
-                        <strong>6/2 <span>일</span></strong>
-                        <p class="schedule schedule--red">휴식</p>
+                    <div th:each="day : ${dashboard.calendarDays}"
+                         th:class="${day.dayClass()}">
+                        <strong>
+                            <span th:text="${#temporals.format(day.date, 'd')}">1</span>
+                            <span th:text="${day.dayOfWeekLabel}">월</span>
+                        </strong>
+                        <p class="schedule"
+                           th:each="schedule : ${day.schedules}"
+                           th:classappend="${schedule.styleClass}"
+                           th:text="${schedule.title}">일정</p>
                     </div>
                 </div>
 
-                <p class="calendar-card__help">ⓘ 일정을 클릭하면 상세 내용을 확인할 수 있습니다.</p>
+                <p class="calendar-card__help"
+                   th:text="${dashboard.upcomingSchedules.isEmpty() ? '다가오는 일정이 없습니다.' : 'ⓘ 일반 일정과 칸반 마감일을 함께 표시합니다.'}">
+                    ⓘ 일반 일정과 칸반 마감일을 함께 표시합니다.
+                </p>
             </section>
 
         </section>
@@ -252,6 +229,7 @@
 </div>
 
 <script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/projects/dashboard.js}"></script>
 
 </body>
 </html>

@@ -36,4 +36,37 @@ public interface BoardFileRepository extends JpaRepository<BoardFile, Long> {
     List<ProjectFileResponse> findProjectFiles(
             @Param("projectId") Long projectId
     );
+
+    @Query("""
+        SELECT new com.example.worktopus.projects.dto.response.ProjectFileResponse(
+            f.id,
+            f.boardId,
+            f.originalName,
+            f.fileExtension,
+            f.fileSize,
+            b.title,
+            b.writerName,
+            f.createdAt
+        )
+        FROM BoardFile f
+        JOIN Board b ON b.id = f.boardId
+        WHERE b.projectId = :projectId
+          AND b.deletedYn = 'N'
+          AND f.deletedYn = 'N'
+        ORDER BY f.createdAt DESC
+    """)
+    List<ProjectFileResponse> findRecentProjectFiles(
+            @Param("projectId") Long projectId,
+            org.springframework.data.domain.Pageable pageable
+    );
+
+    @Query("""
+        SELECT COUNT(f)
+        FROM BoardFile f
+        JOIN Board b ON b.id = f.boardId
+        WHERE b.projectId = :projectId
+          AND b.deletedYn = 'N'
+          AND f.deletedYn = 'N'
+    """)
+    long countProjectFiles(@Param("projectId") Long projectId);
 }

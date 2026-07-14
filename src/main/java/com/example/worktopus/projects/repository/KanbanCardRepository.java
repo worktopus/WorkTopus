@@ -2,8 +2,10 @@ package com.example.worktopus.projects.repository;
 
 import com.example.worktopus.projects.entity.KanbanCard;
 import com.example.worktopus.projects.entity.KanbanStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,13 @@ public interface KanbanCardRepository extends JpaRepository<KanbanCard, Long> {
     List<KanbanCard> findByProjectIdAndDeletedYnAndDueDateIsNotNullOrderByDueDateAscCreatedAtAsc(
             Long projectId,
             String deletedYn
+    );
+
+    List<KanbanCard> findByProjectIdAndDeletedYnAndDueDateGreaterThanEqualOrderByDueDateAscCreatedAtAsc(
+            Long projectId,
+            String deletedYn,
+            LocalDate dueDate,
+            Pageable pageable
     );
 
     long countByProjectIdAndDeletedYn(Long projectId, String deletedYn);
