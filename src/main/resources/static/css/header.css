@@ -1,0 +1,388 @@
+/* ==========================================================
+   Header
+========================================================== */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin-bottom: 32px;
+}
+
+/* ==========================================================
+   Left
+========================================================== */
+
+.header__left {
+    display: flex;
+    align-items: center;
+}
+
+.header__title {
+    font-size: 34px;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.header__subtitle {
+    margin-top: 6px;
+
+    color: var(--text-sub);
+    font-size: 15px;
+}
+
+/* ==========================================================
+   Right
+========================================================== */
+
+.header__right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+/* ==========================================================
+   Search
+========================================================== */
+
+.header__search input {
+    width: 260px;
+    height: 46px;
+
+    padding: 0 18px;
+
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    outline: none;
+
+    transition: var(--transition);
+}
+
+.header__search input:focus {
+    border-color: var(--primary);
+}
+
+/* ==========================================================
+   Icon Button
+========================================================== */
+
+.header__icon {
+    position: relative;
+
+    width: 50px;
+    height: 50px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    background: var(--card);
+
+    color: var(--primary-dark);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__icon:hover {
+    transform: translateY(-2px);
+}
+
+/* ==========================================================
+   Notification Badge
+========================================================== */
+
+.header__badge {
+    position: absolute;
+
+    top: 6px;
+    right: 6px;
+
+    width: 18px;
+    height: 18px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 50%;
+
+    background: var(--danger);
+    color: var(--text-right);
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Profile
+========================================================== */
+
+.header__profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    padding: 8px 16px;
+
+    border-radius: var(--radius-md);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__profile:hover {
+    transform: translateY(-2px);
+}
+
+.header__profile img {
+    width: 46px;
+    height: 46px;
+
+    border-radius: 50%;
+
+    object-fit: cover;
+}
+
+.header__info {
+    display: flex;
+    flex-direction: column;
+}
+
+.header__name {
+    font-size: 15px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.header__role {
+    margin-top: 2px;
+
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+/* ==========================================================
+   Project Switcher
+========================================================== */
+
+.header__left {
+    display: flex;
+    align-items: center;
+}
+
+.header__project-switcher {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    min-width: 250px;
+
+    padding: 12px 18px;
+
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+
+    background: var(--card);
+
+    box-shadow: var(--shadow);
+
+    cursor: pointer;
+
+    transition: var(--transition);
+}
+
+.header__project-switcher:hover {
+    transform: translateY(-2px);
+    border-color: var(--primary);
+}
+
+.header__project-bg {
+    width: 46px;
+    height: 46px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 12px;
+
+    background: var(--primary-soft);
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+.header__project-icon {
+    width: 25px;
+    height: 25px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: var(--primary-soft);
+    color: var(--text-sub);
+
+    font-size: 22px;
+
+    flex-shrink: 0;
+}
+
+.header__project-info {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.header__project-label {
+    margin-bottom: 3px;
+
+    font-size: 12px;
+    font-weight: 600;
+
+    color: var(--text-sub);
+}
+
+.header__project-name {
+    font-size: 17px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.header__project-arrow {
+    width: 18px;
+    height: 18px;
+
+    opacity: .55;
+
+    transition: transform .25s ease;
+}
+
+.header__project-switcher:hover
+.header__project-arrow {
+    transform: rotate(180deg);
+}
+
+/**************************************************************************************************/
+/* --- 프로필 드롭다운 메뉴 스타일 --- */
+.header__profile-container {
+    position: relative;
+    display: inline-block;
+}
+.header__profile {
+    cursor: pointer;
+}
+.profile-dropdown {
+    display: none;
+    position: absolute;
+    top: 55px;
+    right: 0;
+    width: 180px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+    padding: 8px 0;
+    z-index: 1000;
+    text-align: left;
+}
+.profile-dropdown.active {
+    display: block;
+}
+.dropdown-item {
+    display: block;
+    width: 100%;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #334155;
+    text-decoration: none;
+    background: none;
+    border: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+.dropdown-item:hover {
+    background-color: #f1f5f9;
+}
+.dropdown-divider {
+    height: 1px;
+    background-color: #e2e8f0;
+    margin: 6px 0;
+}
+.dropdown-item.logout {
+    color: #ef4444;
+}
+
+/* --- 투두리스트 메모 모달 스타일 --- */
+.todo-modal {
+    display: none;
+    position: fixed;
+    top: 80px; /* 헤더 아래쪽 적당한 위치 */
+    right: 80px;
+    width: 350px;
+    height: 480px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    border: 1px solid #e2e8f0;
+    z-index: 999;
+    flex-direction: column;
+    overflow: hidden;
+}
+.todo-modal.active {
+    display: flex;
+}
+.todo-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    background-color: #f8fafc;
+}
+.todo-modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+.todo-modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #94a3b8;
+}
+.todo-modal-close:hover {
+    color: #64748b;
+}
+.todo-modal-body {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}

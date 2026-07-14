@@ -24,12 +24,19 @@ spring:
 #    username: test
 #    password: 1234
 
+  hikari:
+    maximum-pool-size: 2
+    minimum-idle: 1
+    connection-timeout: 30000
+    idle-timeout: 300000
+    max-lifetime: 600000
+
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
 
     hibernate:
-      ddl-auto: update
-      #ddl-auto: none
+      #ddl-auto: update
+      ddl-auto: validate
 
     show-sql: true
     properties:

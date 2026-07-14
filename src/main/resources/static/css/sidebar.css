@@ -1,0 +1,215 @@
+/* ==========================================================
+   Sidebar
+========================================================== */
+
+.sidebar {
+    width: 260px;
+    height: 100vh;
+    padding: 20px 16px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+
+    background: var(--card);
+    border-right: 1px solid var(--border);
+    box-shadow: var(--shadow);
+
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+
+    overflow-y: auto;
+
+    transition: width .25s ease, padding .25s ease;
+}
+
+/* ===========================
+   Header
+=========================== */
+
+.sidebar__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar__logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    text-decoration: none;
+
+    color: var(--text-main);
+
+    font-size: 18px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+.sidebar__logo-icon {
+    font-size: 24px;
+}
+
+.sidebar__logo-text {
+    white-space: nowrap;
+}
+
+/* ===========================
+   Toggle
+=========================== */
+
+.sidebar__toggle {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    background: var(--primary-soft);
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.sidebar__toggle:hover {
+    background: var(--primary-light);
+}
+
+/* ===========================
+   Navigation
+=========================== */
+
+.sidebar__nav {
+    flex: 1;
+}
+
+.sidebar__menu {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+}
+
+.sidebar__item {
+    width: 100%;
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border-radius: var(--radius-sm);
+
+    color: var(--text-sub);
+
+    text-decoration: none;
+
+    transition: .2s;
+}
+
+.sidebar__link:hover {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.sidebar__link--active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.sidebar__icon {
+    width: 22px;
+    min-width: 22px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebar__icon svg {
+    width: 20px;
+    height: 20px;
+}
+
+.sidebar__text {
+    white-space: nowrap;
+}
+
+/* ===========================
+   Footer
+=========================== */
+
+.sidebar__footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+}
+
+.sidebar__footer .sidebar__link {
+    width: auto;
+    padding: 10px;
+    justify-content: center;
+}
+
+.sidebar__divider{
+    width:1px;
+    height:20px;
+    background:var(--border);
+}
+/* ==========================================================
+   Collapse
+========================================================== */
+
+.sidebar--collapsed {
+    width: var(--sidebar-collapsed-width);
+    padding: 20px 10px;
+}
+
+/* 헤더는 토글 버튼만 가운데 */
+.sidebar--collapsed .sidebar__header {
+    justify-content: center;
+}
+
+/* 로고 숨김 */
+.sidebar--collapsed .sidebar__logo {
+    display: none;
+}
+
+/* 메뉴 전체 숨김 */
+.sidebar--collapsed .sidebar__nav {
+    display: none;
+}
+
+/* 하단 설정/로그아웃 숨김 */
+.sidebar--collapsed .sidebar__footer {
+    display: none;
+}
+
+/* 토글 버튼만 보이게 */
+.sidebar--collapsed .sidebar__toggle {
+    display: flex;
+    margin: 0 auto;
+}

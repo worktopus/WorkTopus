@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // .csrf(csrf -> csrf.disable())
+                .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/","/index.html",
@@ -30,7 +30,7 @@ public class SecurityConfig {
                         //        "/admin/**", "/vupdate", "/vdelete"
                         // ).hasRole("ADMIN")  // 추후 관리자페이지
                         .requestMatchers(
-                                "/projects/**"
+                                "/projects/**", "/user/**", "/api/**"
                         ).authenticated()   // 로그인이 필요
                         .anyRequest().authenticated() // 설정하지 않은 다른 요청도 로그인 필요
                 )
