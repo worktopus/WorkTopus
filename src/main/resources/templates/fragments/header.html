@@ -96,87 +96,188 @@
     <!-- 채팅 팝업 -->
     <div id="chatModal">
 
-        <div class="chat-header">
-            <span id="chatTitle">
-                AI Collaboration
-            </span>
-            <button onclick="closeChat()">✖</button>
-        </div>
+        <!-- =========================================
+             1. 채팅방 목록 화면
+        ========================================== -->
+        <div id="chatListView">
 
-        <!-- 상단 탭 -->
-        <div class="chat-tabs">
-            <button id="groupTab"
-                    class="active"
-                    onclick="switchTab('group')">
-                👥 단체채팅
-            </button>
+            <div class="chat-header">
+                <strong>채팅</strong>
 
-            <button id="privateTab"
-                    onclick="switchTab('private')">
-                👤 개인채팅
-            </button>
-        </div>
-
-        <div class="chat-body">
-
-            <!-- 왼쪽 : 프로젝트 목록 -->
-            <div class="room-list">
-
-                <!-- 프로젝트 검색 -->
-                <div class="project-search">
-                    <input  type="text"
-                            id="projectSearch"
-                            placeholder="🔍 프로젝트 검색">
-                </div>
-
-                <!-- 프로젝트 목록 -->
-                <div id="projectList">
-                    <!-- project.js가 여기 생성 -->
-                </div>
+                <button
+                        type="button"
+                        onclick="closeChat()"
+                        aria-label="채팅 닫기">
+                    ✖
+                </button>
             </div>
 
-            <!-- 오른쪽 : 채팅 -->
-            <div class="chat-content">
+            <!-- 전체 / 프로젝트 / 개인 -->
+            <div class="chat-list-tabs">
 
-                <!-- 단체채팅 -->
-                <div id="groupChat">
-                    <div id="messageArea">
-                        <!-- 채팅 출력 -->
-                    </div>
-                </div>
+                <button
+                        id="allRoomTab"
+                        class="active"
+                        type="button"
+                        onclick="filterRoomList('all')">
+                    전체
+                </button>
 
-                <!-- 개인채팅 -->
-                <div id="privateChat" style="display:none;">
-                    <div id="privateMessageArea">
-                        팀원을 선택하세요.
-                    </div>
-                </div>
+                <button
+                        id="groupRoomTab"
+                        type="button"
+                        onclick="filterRoomList('group')">
+                    프로젝트
+                </button>
+
+                <button
+                        id="privateRoomTab"
+                        type="button"
+                        onclick="filterRoomList('private')">
+                    개인
+                </button>
+
             </div>
-        </div>
 
-        <div class="chat-input">
-            <input  id="message"
-                    type="text"
-                    placeholder="메시지를 입력하세요">
-            <button id="sendBtn">
-                전송
-            </button>
-        </div>
+            <!-- 채팅방 검색 -->
+            <div class="chat-search-area">
 
-        <div class="chat-footer">
-            <button id="summaryBtn">
-                🤖 AI 회의요약
-            </button>
+                <input
+                        id="chatRoomSearchInput"
+                        type="text"
+                        placeholder="프로젝트 / 사용자 검색"
+                        oninput="searchChatRooms()">
 
-            <button id="minutesBtn">
-                📄 회의록 생성
-            </button>
+            </div>
 
-            <button id="boardBtn">
-                📌 게시판 등록
-            </button>
+            <!-- 채팅방 목록 -->
+            <div class="chat-room-list-wrap">
+
+                <div id="chatRoomList">
+                    <!-- chatList.js에서 생성 -->
+                </div>
+
+            </div>
 
         </div>
+
+
+        <!-- =========================================
+             2. 실제 대화 화면
+        ========================================== -->
+        <div id="chatRoomView" style="display:none;">
+
+            <div class="chat-header">
+
+                <div class="chat-room-header-left">
+
+                    <button
+                            type="button"
+                            class="chat-back-btn"
+                            onclick="backToChatList()"
+                            aria-label="채팅방 목록으로 돌아가기">
+                        ←
+                    </button>
+
+                    <div class="chat-room-header-text">
+
+                        <strong id="chatRoomTitle">
+                            채팅방
+                        </strong>
+
+                        <span id="chatRoomSubTitle"></span>
+
+                    </div>
+
+                </div>
+
+                <button
+                        type="button"
+                        onclick="closeChat()"
+                        aria-label="채팅 닫기">
+                    ✖
+                </button>
+
+            </div>
+
+
+            <!-- 메시지 영역 -->
+            <div class="chat-body">
+
+                <div class="chat-content">
+
+                    <!-- 프로젝트 단체 채팅 -->
+                    <div id="groupChat">
+
+                        <div id="messageArea">
+                            <!-- groupChat.js에서 메시지 생성 -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- 개인 채팅 -->
+                    <div
+                            id="privateChat"
+                            style="display:none;">
+
+                        <div id="privateMessageArea">
+
+                            <div id="dmArea">
+                                <!-- privateChat.js에서 메시지 생성 -->
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- 메시지 입력 -->
+            <div class="chat-input">
+
+                <input
+                        id="message"
+                        type="text"
+                        placeholder="메시지를 입력하세요">
+
+                <button
+                        id="sendBtn"
+                        type="button">
+                    전송
+                </button>
+
+            </div>
+
+
+            <!-- 프로젝트 단체 채팅에서만 표시 -->
+            <div class="chat-footer">
+
+                <button
+                        id="summaryBtn"
+                        type="button">
+                    🤖 AI 회의요약
+                </button>
+
+                <button
+                        id="minutesBtn"
+                        type="button">
+                    📄 회의록 생성
+                </button>
+
+                <button
+                        id="boardBtn"
+                        type="button">
+                    📌 게시판 등록
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
 </th:block>
 </body>

@@ -10,6 +10,7 @@
 #chatModal {
     display: none;
     position: fixed;
+    flex-direction: column;
     top: 82px;
     right: 28px;
     width: min(760px, calc(100vw - 40px));
@@ -33,7 +34,6 @@
 /* 열림 상태용 클래스가 있다면 사용 */
 #chatModal.is-open {
     display: flex;
-    flex-direction: column;
     animation: chatModalOpen 0.24s ease-out;
 }
 
@@ -47,6 +47,14 @@
         opacity: 1;
         transform: translateY(0) scale(1);
     }
+}
+
+
+/* JS에서 style.display = "block"으로 열어도 flex 구조 유지 */
+#chatModal[style*="display: block"],
+#chatModal[style*="display:block"] {
+    display: flex !important;
+    flex-direction: column;
 }
 
 /* ==========================================================
@@ -176,9 +184,10 @@
 
 .chat-body {
     min-height: 0;
-    flex: 1;
+    flex: 1 1 auto;
 
     display: flex;
+    overflow: hidden;
     background: var(--bg);
 }
 
@@ -189,6 +198,8 @@
 .room-list {
     width: 250px;
     min-width: 250px;
+    height: 100%;
+    min-height: 0;
 
     overflow-y: auto;
     overscroll-behavior: contain;
@@ -489,10 +500,12 @@
 
 .chat-content {
     min-width: 0;
-    flex: 1;
+    min-height: 0;
+    flex: 1 1 auto;
 
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 
     background:
         radial-gradient(
@@ -509,7 +522,7 @@
 
 #messageArea {
     min-height: 0;
-    flex: 1;
+    flex: 1 1 auto;
     padding: 20px;
 
     display: flex;
@@ -868,5 +881,607 @@
     .chat-footer button {
         padding: 0 8px;
         font-size: 10px;
+    }
+}
+
+/* 개인 채팅 말풍선 크기 조정 */
+#dmArea .chat-message {
+    width: fit-content !important;
+    min-width: 0 !important;
+    max-width: 70% !important;
+    box-sizing: border-box;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+/* 내가 보낸 개인 메시지 */
+#dmArea .chat-message.sent {
+    margin-left: auto;
+    margin-right: 12px;
+}
+
+/* 상대방이 보낸 개인 메시지 */
+#dmArea .chat-message.received {
+    margin-left: 12px;
+    margin-right: auto;
+}
+
+/* ==========================================================
+   Chat Room List View
+   채팅방 목록 화면
+========================================================== */
+
+#chatListView {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    background:
+            linear-gradient(
+                    180deg,
+                    #ffffff 0%,
+                    #f8faff 100%
+            );
+}
+
+
+/* ==========================================================
+   Chat Room Filter Tabs
+========================================================== */
+
+.chat-list-tabs {
+    padding: 14px 16px 7px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    background: rgba(255, 255, 255, 0.96);
+}
+
+.chat-list-tabs button {
+    min-width: 64px;
+    height: 36px;
+    padding: 0 16px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+
+    background: var(--primary-soft);
+    color: var(--text-sub);
+
+    font-size: 13px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+            color var(--transition),
+            background var(--transition),
+            border-color var(--transition),
+            box-shadow var(--transition),
+            transform var(--transition);
+}
+
+.chat-list-tabs button:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.chat-list-tabs button.active {
+    background: linear-gradient(
+            135deg,
+            var(--primary),
+            var(--primary-dark)
+    );
+
+    color: #ffffff;
+
+    box-shadow:
+            0 7px 18px rgba(114, 135, 244, 0.22);
+}
+
+
+/* ==========================================================
+   Chat Room Search
+========================================================== */
+
+.chat-search-area {
+    padding: 7px 16px 14px;
+
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid var(--border);
+}
+
+.chat-search-area input {
+    width: 100%;
+    height: 43px;
+    padding: 0 17px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+    outline: none;
+
+    background: var(--primary-soft);
+    color: var(--text-main);
+
+    font-size: 13px;
+
+    box-sizing: border-box;
+
+    transition:
+            background var(--transition),
+            border-color var(--transition),
+            box-shadow var(--transition);
+}
+
+.chat-search-area input::placeholder {
+    color: #9aa3b6;
+}
+
+.chat-search-area input:hover {
+    background: var(--primary-light);
+}
+
+.chat-search-area input:focus {
+    background: #ffffff;
+    border-color: rgba(114, 135, 244, 0.5);
+
+    box-shadow:
+            0 0 0 4px rgba(114, 135, 244, 0.11);
+}
+
+
+/* ==========================================================
+   Chat Room List
+========================================================== */
+
+.chat-room-list-wrap {
+    min-height: 0;
+    flex: 1 1 auto;
+
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+#chatRoomList {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-room-list-wrap::-webkit-scrollbar {
+    width: 7px;
+}
+
+.chat-room-list-wrap::-webkit-scrollbar-thumb {
+    border-radius: 999px;
+    background: rgba(114, 135, 244, 0.24);
+}
+
+.chat-room-list-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+
+/* ==========================================================
+   Chat Room Item
+========================================================== */
+
+.chat-room-item {
+    appearance: none;
+
+    width: 100%;
+    min-height: 84px;
+    padding: 13px 18px;
+
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    border: 0;
+    border-bottom: 1px solid rgba(228, 236, 247, 0.9);
+
+    background: transparent;
+    color: var(--text-main);
+
+    text-align: left;
+    cursor: pointer;
+
+    box-sizing: border-box;
+
+    transition:
+            background var(--transition),
+            transform var(--transition),
+            box-shadow var(--transition);
+}
+
+.chat-room-item:hover {
+    background:
+            linear-gradient(
+                    135deg,
+                    rgba(238, 241, 255, 0.8),
+                    rgba(247, 249, 255, 0.9)
+            );
+}
+
+.chat-room-item:active {
+    background: var(--primary-light);
+}
+
+.chat-room-item:focus-visible {
+    position: relative;
+    z-index: 1;
+
+    outline: 3px solid rgba(114, 135, 244, 0.22);
+    outline-offset: -3px;
+}
+
+
+/* ==========================================================
+   Avatar Area
+========================================================== */
+
+.chat-room-avatar-area {
+    width: 52px;
+    height: 52px;
+    flex: 0 0 52px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* 개인 채팅 프로필 */
+
+.chat-room-avatar {
+    width: 48px;
+    height: 48px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 17px;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    var(--primary-light),
+                    var(--primary-soft)
+            );
+
+    color: var(--primary);
+
+    font-size: 18px;
+    font-weight: 800;
+
+    box-shadow:
+            inset 0 0 0 1px rgba(114, 135, 244, 0.1);
+}
+
+.chat-room-avatar--default {
+    font-size: 21px;
+}
+
+
+/* 프로젝트 참여자 프로필 2 × 2 */
+
+.chat-room-group-avatars {
+    width: 48px;
+    height: 48px;
+
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 2px;
+}
+
+.chat-room-mini-avatar {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background:
+            linear-gradient(
+                    135deg,
+                    var(--primary-light),
+                    #e8edff
+            );
+
+    color: var(--primary);
+
+    font-size: 10px;
+    font-weight: 800;
+
+    box-shadow:
+            inset 0 0 0 1px rgba(114, 135, 244, 0.1);
+}
+
+
+/* ==========================================================
+   Chat Room Content
+========================================================== */
+
+.chat-room-content {
+    min-width: 0;
+    flex: 1 1 auto;
+
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.chat-room-top,
+.chat-room-bottom {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.chat-room-name-wrap {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+.chat-room-name {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text-main);
+
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: -0.015em;
+}
+
+.chat-room-member-count {
+    flex: 0 0 auto;
+
+    color: #9aa3b6;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.chat-room-member-count::after {
+    content: "명";
+}
+
+
+/* 개인 채팅 온라인 상태 */
+
+.chat-room-online-status {
+    width: 8px;
+    height: 8px;
+    flex: 0 0 8px;
+
+    border-radius: 50%;
+}
+
+.chat-room-online-status.online {
+    background: #22c55e;
+
+    box-shadow:
+            0 0 0 3px rgba(34, 197, 94, 0.12);
+}
+
+
+/* ==========================================================
+   Last Message / Time / Unread
+========================================================== */
+
+.chat-room-last-message {
+    min-width: 0;
+    flex: 1;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: var(--text-sub);
+
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.chat-room-time {
+    flex: 0 0 auto;
+
+    color: #a0a8b8;
+
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.chat-room-unread {
+    min-width: 21px;
+    height: 21px;
+    padding: 0 6px;
+    flex: 0 0 auto;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 999px;
+
+    background: #ff5e68;
+    color: #ffffff;
+
+    font-size: 10px;
+    font-weight: 800;
+
+    box-shadow:
+            0 5px 12px rgba(255, 94, 104, 0.22);
+}
+
+
+/* ==========================================================
+   Empty Room List
+========================================================== */
+
+.chat-room-list-empty {
+    min-height: 260px;
+    padding: 40px 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: var(--text-sub);
+
+    font-size: 13px;
+    text-align: center;
+}
+
+
+/* ==========================================================
+   Room View Structure
+========================================================== */
+
+#chatRoomView {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    flex-direction: column;
+}
+
+#chatRoomView[style*="display: block"],
+#chatRoomView[style*="display:block"] {
+    display: flex !important;
+}
+
+.chat-room-header-left {
+    min-width: 0;
+    flex: 1;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.chat-back-btn {
+    margin: 0;
+}
+
+.chat-room-header-text {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+#chatRoomTitle {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 800;
+}
+
+#chatRoomSubTitle {
+    color: rgba(255, 255, 255, 0.72);
+
+    font-size: 11px;
+}
+
+#groupChat,
+#privateChat {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+#groupChat {
+    display: flex;
+    flex-direction: column;
+}
+
+#privateMessageArea,
+#dmArea {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+
+    overflow-y: auto;
+}
+
+
+/* ==========================================================
+   Responsive Room List
+========================================================== */
+
+@media (max-width: 680px) {
+    .chat-list-tabs {
+        padding:
+                11px
+                12px
+                6px;
+    }
+
+    .chat-list-tabs button {
+        min-width: 0;
+        flex: 1;
+        padding: 0 10px;
+    }
+
+    .chat-search-area {
+        padding:
+                6px
+                12px
+                11px;
+    }
+
+    .chat-room-item {
+        min-height: 78px;
+        padding: 11px 13px;
+        gap: 11px;
+    }
+
+    .chat-room-avatar-area {
+        width: 46px;
+        height: 46px;
+        flex-basis: 46px;
+    }
+
+    .chat-room-avatar,
+    .chat-room-group-avatars {
+        width: 44px;
+        height: 44px;
+    }
+
+    .chat-room-name {
+        font-size: 13px;
+    }
+
+    .chat-room-last-message {
+        font-size: 11px;
     }
 }
