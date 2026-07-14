@@ -1812,3 +1812,52 @@
 
     white-space: pre-wrap;
 }
+
+/* =========================================================
+   AI 회의록 저장 버튼
+========================================================= */
+
+.ai-summary-actions {
+    display: flex;
+    justify-content: flex-end;
+
+    margin-top: 20px;
+}
+
+
+.ai-summary-save-button {
+    min-width: 120px;
+
+    padding:
+            11px
+            18px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: #7c3aed;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #ffffff;
+
+    cursor: pointer;
+
+    transition:
+            opacity 0.2s ease,
+            transform 0.2s ease;
+}
+
+
+.ai-summary-save-button:hover:not(:disabled) {
+    transform:
+            translateY(-1px);
+}
+
+
+.ai-summary-save-button:disabled {
+    opacity: 0.55;
+
+    cursor: default;
+}
