@@ -9,9 +9,15 @@ public class GeminiConfig {
     @Value("${gemini.api-key}")
     private String apiKey;
 
+    @Value("${gemini.model}")
+    private String model;
+
 
     /*
-     * 실제 API 키 자체는 외부로 반환하지 않습니다.
+     * Gemini API Key
+     *
+     * 외부 Controller나 브라우저로
+     * 직접 반환하면 안 됩니다.
      */
     public String getApiKey() {
         return apiKey;
@@ -19,7 +25,15 @@ public class GeminiConfig {
 
 
     /*
-     * API 키가 설정되어 있는지만 확인합니다.
+     * 사용할 Gemini 모델
+     */
+    public String getModel() {
+        return model;
+    }
+
+
+    /*
+     * API Key 설정 여부 확인
      */
     public boolean hasApiKey() {
         return apiKey != null &&
