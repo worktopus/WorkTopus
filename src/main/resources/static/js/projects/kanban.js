@@ -3,6 +3,7 @@
 // ==========================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+    const kanban = document.querySelector(".kanban");
     const lists = document.querySelectorAll(".kanban__list");
 
     const modal = document.getElementById("taskModal");
@@ -17,26 +18,32 @@ document.addEventListener("DOMContentLoaded", () => {
     const dateInput = document.getElementById("taskDate");
     const descInput = document.getElementById("taskDesc");
 
+    const apiBase = kanban?.dataset.apiBase;
+    const listsByStatus = new Map(
+        [...lists].map((list) => [list.dataset.status, list])
+    );
+
     let draggedCard = null;
+    let dragSourceList = null;
     let editingCard = null;
 
     initCards();
     updateColumnCounts();
+    loadTasks();
 
-    openBtn.addEventListener("click", openModal);
-    closeBtn.addEventListener("click", closeModal);
-    overlay.addEventListener("click", closeModal);
+    openBtn?.addEventListener("click", openModal);
+    closeBtn?.addEventListener("click", closeModal);
+    overlay?.addEventListener("click", closeModal);
 
-    form.addEventListener("submit", (event) => {
+    form?.addEventListener("submit", async (event) => {
         event.preventDefault();
 
         const task = {
             title: titleInput.value.trim(),
-            user: userInput.value.trim() || "미정",
+            assignee: userInput.value.trim(),
             priority: priorityInput.value,
-            dueDate: dateInput.value || "마감일 없음",
-            desc: descInput.value.trim() || "설명이 없습니다.",
-            tags: ["Task"]
+            dueDate: dateInput.value || null,
+            description: descInput.value.trim()
         };
 
         if (!task.title) {
@@ -44,27 +51,32 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        if (editingCard) {
-            updateTaskCard(editingCard, task);
-            editingCard = null;
-        } else {
-            const todoList = document.getElementById("todoList");
+        try {
+            if (editingCard) {
+                const updatedCard = await updateTask(editingCard.dataset.cardId, task);
+                updateTaskCard(editingCard, updatedCard);
+                editingCard = null;
+            } else {
+                const createdCard = await createTask(task);
+                const todoList = document.getElementById("todoList");
 
-            if (!todoList) {
-                console.error("todoList를 찾지 못했습니다.");
-                return;
+                if (!todoList) {
+                    console.error("todoList를 찾지 못했습니다.");
+                    return;
+                }
+
+                const card = createTaskCard(createdCard);
+                todoList.appendChild(card);
+                bindDragEvent(card);
+                bindCardMenu(card);
             }
 
-            const card = createTaskCard(task);
-
-            todoList.appendChild(card);
-            bindDragEvent(card);
-            bindCardMenu(card);
+            updateColumnCounts();
+            closeModal();
+        } catch (error) {
+            console.error("칸반 카드 저장 오류:", error);
+            alert("업무를 저장하지 못했습니다.");
         }
-
-        updateColumnCounts();
-        form.reset();
-        closeModal();
     });
 
     lists.forEach((list) => {
@@ -84,7 +96,60 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        list.addEventListener("drop", () => {
+        list.addEventListener("drop", async () => {
+            if (!draggedCard) {
+                return;
+            }
+
+            const currentCard = draggedCard;
+            const sourceList = dragSourceList;
+            const nextStatus = list.dataset.status;
+            const cardId = currentCard.dataset.cardId;
+
+            if (currentCard.dataset.updating === "true") {
+                updateColumnCounts();
+                return;
+            }
+
+            if (!cardId || !nextStatus || currentCard.dataset.status === nextStatus) {
+                updateColumnCounts();
+                return;
+            }
+
+            let updatedCard = null;
+            currentCard.dataset.updating = "true";
+
+            try {
+                updatedCard = await updateTaskStatus(cardId, nextStatus);
+                currentCard.dataset.status = nextStatus;
+            } catch (error) {
+                console.error("칸반 카드 상태 변경 오류:", error, error?.stack);
+
+                if (sourceList) {
+                    sourceList.appendChild(currentCard);
+                }
+
+                console.error("칸반 카드 상태 변경 실패 상세:", {
+                    message: error?.message,
+                    cardId,
+                    nextStatus,
+                    currentStatus: currentCard.dataset.status
+                });
+                alert("업무 상태를 변경하지 못했습니다.");
+                updateColumnCounts();
+                return;
+            } finally {
+                delete currentCard.dataset.updating;
+            }
+
+            if (updatedCard) {
+                try {
+                    updateTaskCard(currentCard, updatedCard);
+                } catch (error) {
+                    console.error("칸반 카드 화면 갱신 오류:", error, error?.stack);
+                }
+            }
+
             updateColumnCounts();
         });
     });
@@ -93,9 +158,46 @@ document.addEventListener("DOMContentLoaded", () => {
         const cards = document.querySelectorAll(".kanban__card");
 
         cards.forEach((card) => {
+            const list = card.closest(".kanban__list");
+
+            if (list?.dataset.status) {
+                card.dataset.status = list.dataset.status;
+            }
+
             bindDragEvent(card);
             bindCardMenu(card);
         });
+    }
+
+    async function loadTasks() {
+        if (!apiBase) {
+            return;
+        }
+
+        try {
+            const tasks = await requestJson(apiBase, {method: "GET"});
+
+            lists.forEach((list) => {
+                list.replaceChildren();
+            });
+
+            tasks.forEach((task) => {
+                const list = listsByStatus.get(task.status);
+
+                if (!list) {
+                    return;
+                }
+
+                const card = createTaskCard(task);
+                list.appendChild(card);
+                bindDragEvent(card);
+                bindCardMenu(card);
+            });
+
+            updateColumnCounts();
+        } catch (error) {
+            console.error("칸반 카드 조회 오류:", error);
+        }
     }
 
     function bindDragEvent(card) {
@@ -103,87 +205,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         card.addEventListener("dragstart", () => {
             draggedCard = card;
+            dragSourceList = card.closest(".kanban__list");
             card.classList.add("is-dragging");
         });
 
         card.addEventListener("dragend", () => {
             card.classList.remove("is-dragging");
             draggedCard = null;
+            dragSourceList = null;
 
             updateColumnCounts();
         });
-
     }
 
-    // CARD 삭제
-    function bindCardMenu(card) {
-
-        const moreBtn = card.querySelector(".kanban__more");
-
-        if (!moreBtn) {
-            return;
-        }
-
-        moreBtn.addEventListener("click", () => {
-
-            const result = confirm("이 업무를 삭제하시겠습니까?");
-
-            if (!result) {
-                return;
-            }
-
-            card.remove();
-
-            updateColumnCounts();
-
-        });
-
-    }
-    // CARD 생성
-    function createTaskCard(task) {
-        const card = document.createElement("article");
-        card.className = "kanban__card";
-
-        const priorityLabel = getPriorityLabel(task.priority);
-
-        card.innerHTML = `
-            <div class="kanban__card-top">
-                <span class="kanban__badge kanban__badge--${task.priority}">
-                    ${priorityLabel}
-                </span>
-
-                <button type="button" class="kanban__more">
-                    ⋯
-                </button>
-            </div>
-
-            <h3 class="kanban__card-title">
-                ${escapeHtml(task.title)}
-            </h3>
-
-            <p class="kanban__card-desc">
-                ${escapeHtml(task.desc)}
-            </p>
-
-            <div class="kanban__tags">
-                ${task.tags.map(tag => `<span>${escapeHtml(tag)}</span>`).join("")}
-            </div>
-
-            <div class="kanban__card-footer">
-                <span class="kanban__avatar">
-                    ${escapeHtml(task.user.slice(0, 2))}
-                </span>
-
-                <span class="kanban__date">
-                    ${formatDate(task.dueDate)}
-                </span>
-            </div>
-        `;
-
-        return card;
-    }
-
-    // CARD 수정
     function bindCardMenu(card) {
         const moreBtn = card.querySelector(".kanban__more");
         const menu = card.querySelector(".kanban-menu");
@@ -208,7 +242,7 @@ document.addEventListener("DOMContentLoaded", () => {
             openEditModal(card);
         });
 
-        deleteBtn.addEventListener("click", (event) => {
+        deleteBtn.addEventListener("click", async (event) => {
             event.stopPropagation();
 
             const result = confirm("이 업무를 삭제하시겠습니까?");
@@ -217,56 +251,222 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            card.remove();
-            updateColumnCounts();
+            try {
+                await deleteTask(card.dataset.cardId);
+                card.remove();
+                updateColumnCounts();
+            } catch (error) {
+                console.error("칸반 카드 삭제 오류:", error);
+                alert("업무를 삭제하지 못했습니다.");
+            }
         });
+    }
+
+    function createTaskCard(task) {
+        const card = document.createElement("article");
+        card.className = "kanban__card";
+        applyCardDataset(card, task);
+
+        card.innerHTML = `
+            <div class="kanban__card-top">
+                <span class="kanban__badge kanban__badge--${getPriorityValue(task.priority)}">
+                    ${getPriorityLabel(task.priority)}
+                </span>
+
+                <button type="button" class="kanban__more">
+                    ⋯
+                </button>
+            </div>
+
+            <h3 class="kanban__card-title">
+                ${escapeHtml(task.title)}
+            </h3>
+
+            <p class="kanban__card-desc">
+                ${escapeHtml(getDescriptionLabel(task.description))}
+            </p>
+
+            <div class="kanban__tags">
+                <span>Task</span>
+            </div>
+
+            <div class="kanban__card-footer">
+                <span class="kanban__avatar">
+                    ${escapeHtml(getAssigneeInitial(task.assignee))}
+                </span>
+
+                <span class="kanban__date">
+                    ${formatDate(task.dueDate)}
+                </span>
+            </div>
+
+            <div class="kanban-menu">
+                <button type="button" class="kanban-menu__button" data-action="edit">
+                    수정
+                </button>
+                <button type="button" class="kanban-menu__button kanban-menu__button--danger" data-action="delete">
+                    삭제
+                </button>
+            </div>
+        `;
+
+        return card;
+    }
+
+    function openModal() {
+        editingCard = null;
+        form.reset();
+        priorityInput.value = "medium";
+        modal.classList.add("active");
+        titleInput.focus();
     }
 
     function openEditModal(card) {
         editingCard = card;
 
-        const title = card.querySelector(".kanban__card-title")?.textContent.trim();
-        const desc = card.querySelector(".kanban__card-desc")?.textContent.trim();
-        const user = card.querySelector(".kanban__avatar")?.textContent.trim();
-        const badge = card.querySelector(".kanban__badge");
-
-        titleInput.value = title || "";
-        descInput.value = desc || "";
-        userInput.value = user || "";
-
-        if (badge.classList.contains("kanban__badge--high")) {
-            priorityInput.value = "high";
-        } else if (badge.classList.contains("kanban__badge--medium")) {
-            priorityInput.value = "medium";
-        } else {
-            priorityInput.value = "low";
-        }
+        titleInput.value = card.dataset.title || "";
+        descInput.value = card.dataset.description || "";
+        userInput.value = card.dataset.assignee || "";
+        dateInput.value = card.dataset.dueDate || "";
+        priorityInput.value = getPriorityValue(card.dataset.priority || "medium");
 
         modal.classList.add("active");
         titleInput.focus();
     }
 
     function updateTaskCard(card, task) {
-        card.querySelector(".kanban__card-title").textContent = task.title;
-        card.querySelector(".kanban__card-desc").textContent = task.desc;
-        card.querySelector(".kanban__avatar").textContent = task.user.slice(0, 2);
-        card.querySelector(".kanban__date").textContent = formatDate(task.dueDate);
+        applyCardDataset(card, task);
 
+        const title = card.querySelector(".kanban__card-title");
+        const desc = card.querySelector(".kanban__card-desc");
+        const avatar = card.querySelector(".kanban__avatar");
+        const date = card.querySelector(".kanban__date");
         const badge = card.querySelector(".kanban__badge");
-        badge.className = `kanban__badge kanban__badge--${task.priority}`;
-        badge.textContent = getPriorityLabel(task.priority);
+
+        if (title) title.textContent = task.title;
+        if (desc) desc.textContent = getDescriptionLabel(task.description);
+        if (avatar) avatar.textContent = getAssigneeInitial(task.assignee);
+        if (date) date.textContent = formatDate(task.dueDate);
+
+        if (badge) {
+            badge.className = `kanban__badge kanban__badge--${getPriorityValue(task.priority)}`;
+            badge.textContent = getPriorityLabel(task.priority);
+        }
     }
 
+    function applyCardDataset(card, task) {
+        card.dataset.cardId = task.id;
+        card.dataset.title = task.title ?? "";
+        card.dataset.assignee = task.assignee ?? "";
+        card.dataset.dueDate = task.dueDate ?? "";
+        card.dataset.priority = getPriorityValue(task.priority);
+        card.dataset.status = task.status ?? "TODO";
+        card.dataset.description = getDescriptionLabel(task.description);
+    }
+
+    async function createTask(task) {
+        return requestJson(apiBase, {
+            method: "POST",
+            body: JSON.stringify(toRequestBody(task))
+        });
+    }
+
+    async function updateTask(cardId, task) {
+        return requestJson(`${apiBase}/${encodeURIComponent(cardId)}`, {
+            method: "PUT",
+            body: JSON.stringify(toRequestBody(task))
+        });
+    }
+
+    async function updateTaskStatus(cardId, status) {
+        return requestJson(`${apiBase}/${encodeURIComponent(cardId)}/status`, {
+            method: "PATCH",
+            body: JSON.stringify({status})
+        });
+    }
+
+    async function deleteTask(cardId) {
+        const response = await fetch(`${apiBase}/${encodeURIComponent(cardId)}`, {
+            method: "DELETE"
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+    }
+
+    async function requestJson(url, options) {
+        const response = await fetch(url, {
+            ...options,
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                ...(options.headers ?? {})
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+
+        const contentType = response.headers.get("Content-Type") ?? "";
+
+        if (!contentType.includes("application/json")) {
+            return null;
+        }
+
+        const text = await response.text();
+
+        if (!text) {
+            return null;
+        }
+
+        try {
+            return JSON.parse(text);
+        } catch (error) {
+            console.warn("JSON 응답 파싱 실패:", error, error?.stack);
+            return null;
+        }
+    }
+
+    function toRequestBody(task) {
+        return {
+            title: task.title,
+            assignee: task.assignee,
+            dueDate: task.dueDate,
+            priority: String(task.priority ?? "medium").toUpperCase(),
+            description: task.description
+        };
+    }
+
+    function getPriorityValue(priority) {
+        return String(priority ?? "MEDIUM").toLowerCase();
+    }
 
     function getPriorityLabel(priority) {
-        if (priority === "high") return "High";
-        if (priority === "medium") return "Medium";
-        return "Low";
+        const normalizedPriority = String(priority ?? "MEDIUM").toUpperCase();
+
+        if (normalizedPriority === "HIGH") return "High";
+        if (normalizedPriority === "LOW") return "Low";
+        return "Medium";
+    }
+
+    function getDescriptionLabel(description) {
+        if (!description || !description.trim()) {
+            return "설명이 없습니다.";
+        }
+
+        return description;
+    }
+
+    function getAssigneeInitial(assignee) {
+        const label = assignee && assignee.trim() ? assignee.trim() : "미정";
+        return label.length <= 2 ? label : label.slice(0, 2);
     }
 
     function formatDate(date) {
-        if (date === "마감일 없음") {
-            return date;
+        if (!date) {
+            return "마감일 없음";
         }
 
         const parsedDate = new Date(date);
@@ -302,6 +502,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateColumnCounts() {
         const columns = document.querySelectorAll(".kanban__column");
+        const cards = document.querySelectorAll(".kanban__card");
+        const inProgressCards = document.querySelectorAll(".kanban__list[data-status='IN_PROGRESS'] .kanban__card");
+        const doneCards = document.querySelectorAll(".kanban__list[data-status='DONE'] .kanban__card");
 
         columns.forEach((column) => {
             const count = column.querySelectorAll(".kanban__card").length;
@@ -311,19 +514,28 @@ document.addEventListener("DOMContentLoaded", () => {
                 countEl.textContent = count;
             }
         });
+
+        setText("#totalTaskCount", cards.length);
+        setText("#inProgressTaskCount", inProgressCards.length);
+        setText("#doneTaskCount", doneCards.length);
     }
 
-    function openModal() {
-        modal.classList.add("active");
-        titleInput.focus();
+    function setText(selector, value) {
+        const element = document.querySelector(selector);
+
+        if (element) {
+            element.textContent = value;
+        }
     }
 
     function closeModal() {
         modal.classList.remove("active");
+        editingCard = null;
+        form.reset();
     }
 
     function escapeHtml(value) {
-        return value
+        return String(value ?? "")
             .replaceAll("&", "&amp;")
             .replaceAll("<", "&lt;")
             .replaceAll(">", "&gt;")
