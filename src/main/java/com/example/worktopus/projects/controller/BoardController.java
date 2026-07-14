@@ -24,6 +24,14 @@ public class BoardController {
 
     private final BoardService boardService;
 
+    @GetMapping("/dashboard")
+    public ModelAndView projectDashboard(@PathVariable Long projectId) {
+        ModelAndView mav = new ModelAndView("projects/dashboard");
+        mav.addObject("projectId", projectId);
+
+        return mav;
+    }
+
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,
@@ -49,8 +57,8 @@ public class BoardController {
         return mav;
     }
 
-    // 모달형 게시물 리스트
-    @GetMapping
+
+    @GetMapping("/modal-list")
     public ModelAndView list1(
             @PathVariable Long projectId,
             @RequestParam(required = false) String keyword,
@@ -75,16 +83,14 @@ public class BoardController {
         return mav;
     }
 
+    // 모달형 게시물 리스트
     @GetMapping("/{boardId}/modal")
     @ResponseBody
     public BoardDetailModalResponse modal(
-
             @PathVariable Long projectId,
             @PathVariable Long boardId
     ) {
-
         return boardService.getModal(projectId, boardId);
-
     }
 
     @GetMapping("/write")
@@ -100,7 +106,7 @@ public class BoardController {
             @PathVariable Long projectId,
             @Valid @ModelAttribute BoardCreateRequest request
     ) {
-        Long boardId = boardService.create(request);
+        Long boardId = boardService.create(projectId, request);
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId

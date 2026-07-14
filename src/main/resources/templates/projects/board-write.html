@@ -42,7 +42,6 @@
               th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
               method="post"
               enctype="multipart/form-data">
-            <input type="hidden" name="projectId" th:value="${projectId}">
             <input type="hidden" name="notice" value="false">
 
             <!-- 기본 정보 -->
@@ -248,12 +247,22 @@
 
                 <label for="files" class="board_write_file_box">
                     <span class="board_write_file_icon">📎</span>
+
                     <span class="board_write_file_text">
-                                    파일을 선택하거나 여기에 업로드하세요
-                                </span>
+            파일을 선택하거나 여기에 업로드하세요
+        </span>
+
                     <span class="board_write_file_sub">
-                                    최대 10MB까지 첨부 가능
-                                </span>
+            최대 10MB까지 첨부 가능
+        </span>
+
+                    <div id="selectedFileList"
+                         class="board_write_selected_files"
+                         aria-live="polite"
+                         hidden>
+                        <strong>선택된 파일</strong>
+                        <ul id="selectedFileItems"></ul>
+                    </div>
                 </label>
 
                 <input id="files"

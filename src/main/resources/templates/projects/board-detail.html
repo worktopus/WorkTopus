@@ -110,9 +110,23 @@
                                 첨부파일
                             </h2>
 
-                            <div class="board-detail_file">
+                            <div class="board-detail_file"
+                                th:each="file : ${board.files}">
                                 <span class="board-detail_file-icon">📎</span>
-                                <span class="board-detail_file-name">첨부파일 기능 준비 중</span>
+                                <a class="board-detail_file-name"
+                                   th:href="@{/projects/{projectId}/files/{fileId}/download(
+                                       projectId=${projectId},
+                                       fileId=${file.id}
+                                   )}"
+                                   th:text="${file.originalName}">
+                                    첨부파일명
+                                </a>
+                            </div>
+
+                            <div class="board-detail_file"
+                                 th:if="${board.files == null or board.files.isEmpty()}">
+                                <span class="board-detail_file-icon">📎</span>
+                                <span class="board-detail_file-name">첨부파일이 없습니다.</span>
                             </div>
                         </section>
 

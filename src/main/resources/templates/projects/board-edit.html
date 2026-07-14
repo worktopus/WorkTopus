@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>게시글 작성 | WorkTopus</title>
+    <title>게시글 수정 | WorkTopus</title>
 
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
@@ -249,6 +249,24 @@
                     </div>
                 </div>
 
+                <div th:if="${board.files != null and !board.files.isEmpty()}">
+                    <div class="board_write_hint"
+                         th:each="file : ${board.files}">
+                        <span th:text="${file.originalName}">기존 첨부파일명</span>
+                        <label>
+                            <input type="checkbox"
+                                   name="deleteFileIds"
+                                   th:value="${file.id}">
+                            삭제
+                        </label>
+                    </div>
+                </div>
+
+                <p class="board_write_hint"
+                   th:if="${board.files == null or board.files.isEmpty()}">
+                    기존 첨부파일이 없습니다.
+                </p>
+
                 <label for="files" class="board_write_file_box">
                     <span class="board_write_file_icon">📎</span>
                     <span class="board_write_file_text">
@@ -264,6 +282,14 @@
                        type="file"
                        class="board_write_file_input"
                        multiple>
+
+                <div id="selectedFileList"
+                     class="board_write_hint"
+                     aria-live="polite"
+                     hidden>
+                    <strong>새로 선택된 파일</strong>
+                    <ul id="selectedFileItems"></ul>
+                </div>
             </div>
 
             <!-- 버튼 -->

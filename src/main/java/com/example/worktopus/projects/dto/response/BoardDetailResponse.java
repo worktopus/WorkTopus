@@ -3,30 +3,35 @@ package com.example.worktopus.projects.dto.response;
 import com.example.worktopus.projects.entity.Board;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public record BoardDetailResponse(
         Long id,
         Long projectId,
         String title,
         String content,
+        String category,
         String writerName,
         Long viewCount,
         boolean notice,
         LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        LocalDateTime updatedAt,
+        List<FileResponse> files
 ) {
 
-    public static BoardDetailResponse from(Board board) {
+    public static BoardDetailResponse from(Board board, List<FileResponse> files) {
         return new BoardDetailResponse(
                 board.getId(),
                 board.getProjectId(),
                 board.getTitle(),
                 board.getContent(),
+                board.getCategory(),
                 board.getWriterName(),
                 board.getViewCount(),
                 "Y".equals(board.getNoticeYn()),
                 board.getCreatedAt(),
-                board.getUpdatedAt()
+                board.getUpdatedAt(),
+                files
         );
     }
 }

@@ -8,7 +8,7 @@
 
         <div class="sidebar__header">
 
-            <a th:href="@{projests/dashboard}" class="sidebar__logo">
+            <a th:href="@{projects/dashboard}" class="sidebar__logo">
                 <span class="sidebar__logo-icon">🐙</span>
                 <span class="sidebar__logo-text">Worktopus</span>
             </a>
@@ -26,7 +26,7 @@
             <ul class="sidebar__menu">
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/dashboard}"
+                    <a th:href="@{/projects/{projectId}/boards/dashboard(projectId=${projectId})}"
                        class="sidebar__link sidebar__link--active">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: dashboard}">
 
@@ -36,23 +36,25 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/board-list}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
-                        </span>
+                    <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                       class="sidebar__link">
+        <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
+        </span>
                         <span class="sidebar__text">프로젝트(일반)</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/board-list1}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: project1}">
-                        </span>
+                    <a th:href="@{/projects/{projectId}/boards/modal-list(projectId=${projectId})}"
+                       class="sidebar__link">
+        <span class="sidebar__icon" th:insert="~{fragments/icons :: project1}">
+        </span>
                         <span class="sidebar__text">프로젝트(팝업형)</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/kanban}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/kanban}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: kanban}">
                         </span>
                         <span class="sidebar__text">칸반보드</span>
@@ -60,7 +62,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/calendar}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/calendar}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: calender}">
                         </span>
                         <span class="sidebar__text">캘린더</span>
@@ -68,7 +70,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/file}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/files(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: file}">
                         </span>
                         <span class="sidebar__text">파일</span>
@@ -84,7 +86,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/prj-setting}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/prj-setting}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
                         </span>
                         <span class="sidebar__text">설정</span>

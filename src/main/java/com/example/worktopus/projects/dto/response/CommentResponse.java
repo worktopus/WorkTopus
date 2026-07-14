@@ -5,32 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BoardDetailModalResponse {
+public class CommentResponse {
 
     private Long id;
-
-    private String title;
-
-    private String content;
-
     private String writerName;
-
-    private Long viewCount;
-
-    private boolean notice;
-
+    private String content;
     private String createdAt;
-
-    private Long commentCount;
-
-    private List<FileResponse> files;
-
-    private List<CommentResponse> comments;
-
 }

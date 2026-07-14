@@ -10,7 +10,7 @@ import org.springframework.data.domain.Pageable;
 
 public interface BoardService {
 
-    Long create(BoardCreateRequest request);
+    Long create(Long projectId, BoardCreateRequest request);
 
     Page<BoardListResponse> findBoards(Long projectId, Pageable pageable);
 

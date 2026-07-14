@@ -64,7 +64,86 @@
                     </div>
 
                     <div class="file__list" id="fileList">
-                        <!-- JS 렌더링 -->
+                        <article class="file__row"
+                                 th:each="file : ${files}"
+                                 th:data-file-name="${file.originalName}"
+                                 th:data-board-title="${file.boardTitle}"
+                                 th:data-writer-name="${file.writerName}"
+                                 th:data-file-extension="${file.fileExtension}">
+
+                            <div class="file__name">
+                                <span class="file__icon"
+                                      th:text="${file.fileExtension != null and !#strings.isEmpty(file.fileExtension)
+                                          ? #strings.toUpperCase(file.fileExtension)
+                                          : 'FILE'}">
+                                    FILE
+                                </span>
+
+                                <div>
+                                    <div class="file__filename"
+                                         th:text="${file.originalName}">
+                                        파일명
+                                    </div>
+                                    <div class="file__meta"
+                                         th:text="${file.fileExtension != null and !#strings.isEmpty(file.fileExtension)
+                                             ? '.' + file.fileExtension
+                                             : ''}">
+                                        .ext
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="file__board"
+                                 th:text="${file.boardTitle}">
+                                게시글 제목
+                            </div>
+
+                            <div class="file__text"
+                                 th:text="${file.formattedFileSize()}">
+                                0 B
+                            </div>
+
+                            <div class="file__text"
+                                 th:text="${file.createdAt != null
+                                     ? #temporals.format(file.createdAt, 'yyyy-MM-dd')
+                                     : '-'}">
+                                -
+                            </div>
+
+                            <div class="file__text"
+                                 th:text="${file.writerName}">
+                                작성자
+                            </div>
+
+                            <div class="file__actions">
+                                <a class="file__button"
+                                   th:href="@{/projects/{projectId}/files/{fileId}/download(
+                                       projectId=${projectId},
+                                       fileId=${file.fileId}
+                                   )}">
+                                    다운로드
+                                </a>
+
+                                <a class="file__button file__button--sub"
+                                   th:href="@{/projects/{projectId}/boards/{boardId}(
+                                       projectId=${projectId},
+                                       boardId=${file.boardId}
+                                   )}">
+                                    게시글
+                                </a>
+                            </div>
+                        </article>
+
+                        <div class="file__empty"
+                             th:if="${files == null or files.isEmpty()}">
+                            등록된 첨부파일이 없습니다.
+                        </div>
+
+                        <div class="file__empty"
+                             id="fileSearchEmpty"
+                             hidden>
+                            검색 결과가 없습니다.
+                        </div>
                     </div>
 
                 </section>
