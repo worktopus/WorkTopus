@@ -6,23 +6,24 @@ spring:
     name: WorkTopus
 
 
+
 # oracle 설정
   datasource:
 #    driver-class-name: oracle.jdbc.OracleDriver
-#    url: jdbc:oracle:thin:@localhost:1521:xe
-#    username: spring
-#    password: 1234
-    driver-class-name: oracle.jdbc.OracleDriver
-    url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
-    username: ADMIN
-    password: 'WorkTopus1234!'
+#    url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
+      url: jdbc:h2:mem:worktopus
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
 
     hibernate:
-      ddl-auto: update
-      #ddl-auto: none
+      #ddl-auto: update
+      ddl-auto: none
 
     show-sql: true
     properties:
