@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Worktopus Dashboard</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/dashboard.css}">
+</head>
+
+<body>
+
+<div class="layout">
+
+    <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+    <main class="layout__content">
+
+        <th:block th:replace="~{fragments/header :: header}"></th:block>
+
+        <section class="dashboard">
+
+            <!-- 개인 과제 진행률 -->
+            <section class="assignment-overlay">
+
+                <div class="assignment-overlay__profile">
+                    <div class="dashboard__avatar">
+                        <img th:src="@{/img/circle-user-round.svg}" class="user_icon" >
+                    </div>
+                </div>
+
+                <div class="assignment-overlay__content">
+
+                    <div class="assignment-overlay__top">
+                        <div>
+
+                            <p class="assignment-overlay__user">
+                                이름 <br>
+                                담당
+                            </p>
+                        </div>
+
+                        <span class="assignment-overlay__badge">
+                완료 <span th:text="${dashboard.completionRate}">0</span>%
+            </span>
+                    </div>
+
+                    <div class="assignment-progress">
+
+                        <div class="assignment-progress__top">
+                            <span> 과제 진행도</span>
+                            <strong>
+                                <span th:text="${dashboard.doneCount}">0</span>
+                                /
+                                <span th:text="${dashboard.kanbanCardCount}">0</span>
+                            </strong>
+                        </div>
+
+                        <div class="assignment-progress__bar">
+
+                            <!-- width만 변경하면 된다 -->
+                            <div class="assignment-progress__fill"
+                                 th:style="${'width:' + dashboard.completionRate + '%;'}">
+
+                            <span class="assignment-progress__text">
+                                <span th:text="${dashboard.completionRate}">0</span>%
+                            </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- 공지사항 -->
+            <section class="dashboard__notice">
+                <div class="dashboard__notice-left">
+                    <span class="dashboard__notice-icon"><img th:src="@{/img/megaphone.svg}"></span>
+                    <strong>공지사항</strong>
+                    <span class="dashboard__notice-badge">NEW</span>
+                    <p th:text="${dashboard.recentBoards.isEmpty() ? '최근 게시글이 없습니다.' : dashboard.recentBoards[0].title}">
+                        최근 게시글
+                    </p>
+                </div>
+
+                <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                   class="dashboard__notice-more">더보기 ›</a>
+            </section>
+
+            <!-- 작업 카드 + 차트 -->
+            <section class="dashboard__summary">
+
+                <article class="task-card">
+                    <div class="task-card__title">
+                        <h3>해야 할 일</h3>
+                        <span th:text="${dashboard.todoCount}">0</span>
+                    </div>
+
+                    <ul>
+                        <li th:each="card : ${dashboard.todoCards}">
+                            <span class="dot dot--blue"></span>
+                            <span th:text="${card.title}">UI 디자인 수정</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.todoCards.isEmpty()}">
+                            <span class="dot dot--blue"></span>
+                            <span>해야 할 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
+                    </ul>
+
+                    <button type="button">자세히 보기⌄</button>
+                </article>
+
+                <article class="task-card">
+                    <div class="task-card__title">
+                        <h3>진행 중</h3>
+                        <span th:text="${dashboard.inProgressCount}">0</span>
+                    </div>
+
+                    <ul>
+                        <li th:each="card : ${dashboard.inProgressCards}">
+                            <span class="dot dot--blue"></span>
+                            <span th:text="${card.title}">로그인 기능</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.inProgressCards.isEmpty()}">
+                            <span class="dot dot--blue"></span>
+                            <span>진행 중인 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
+                    </ul>
+
+                    <button type="button">자세히 보기⌄</button>
+                </article>
+
+                <article class="task-card">
+                    <div class="task-card__title">
+                        <h3>검토 중</h3>
+                        <span th:text="${dashboard.reviewCount}">0</span>
+                    </div>
+
+                    <ul>
+                        <li th:each="card : ${dashboard.reviewCards}">
+                            <span class="dot dot--green"></span>
+                            <span th:text="${card.title}">PR 검토</span>
+                            <strong th:text="${card.assigneeInitial()}">담당</strong>
+                        </li>
+                        <li th:if="${dashboard.reviewCards.isEmpty()}">
+                            <span class="dot dot--green"></span>
+                            <span>검토 중인 일이 없습니다.</span>
+                            <strong>0</strong>
+                        </li>
+                    </ul>
+
+                    <button type="button">자세히 보기⌄</button>
+                </article>
+
+                <article class="chart-card">
+                    <h3>프로젝트 작업 진행도</h3>
+
+                    <div class="chart-card__body">
+                        <div class="donut-chart"
+                             th:data-todo-rate="${dashboard.todoRate}"
+                             th:data-progress-rate="${dashboard.inProgressRate}"
+                             th:data-review-rate="${dashboard.reviewRate}"
+                             th:data-done-rate="${dashboard.doneRate}">
+                        </div>
+
+                        <ul class="chart-legend">
+                            <li><span class="dot dot--blue"></span>해야 할 일 <strong th:text="${dashboard.todoRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--orange"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--purple"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--green"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
+
+                        </ul>
+                    </div>
+                </article>
+
+            </section>
+
+            <!-- 2주 캘린더 -->
+            <section class="calendar-card">
+                <div class="calendar-card__header">
+                    <div class="calendar-card__nav">
+                        <button type="button">‹</button>
+                        <button type="button">›</button>
+                    </div>
+
+                    <h3>
+                        <span th:text="${#temporals.format(dashboard.calendarDays[0].date, 'yyyy년 M월 d일')}">시작일</span>
+                        ~
+                        <span th:text="${#temporals.format(dashboard.calendarDays[13].date, 'M월 d일')}">종료일</span>
+                    </h3>
+                </div>
+
+                <div class="calendar">
+                    <div th:each="day : ${dashboard.calendarDays}"
+                         th:class="${day.dayClass()}">
+                        <strong>
+                            <span th:text="${#temporals.format(day.date, 'd')}">1</span>
+                            <span th:text="${day.dayOfWeekLabel}">월</span>
+                        </strong>
+                        <p class="schedule"
+                           th:each="schedule : ${day.schedules}"
+                           th:classappend="${schedule.styleClass}"
+                           th:text="${schedule.title}">일정</p>
+                    </div>
+                </div>
+
+                <p class="calendar-card__help"
+                   th:text="${dashboard.upcomingSchedules.isEmpty() ? '다가오는 일정이 없습니다.' : 'ⓘ 일반 일정과 칸반 마감일을 함께 표시합니다.'}">
+                    ⓘ 일반 일정과 칸반 마감일을 함께 표시합니다.
+                </p>
+            </section>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+<script th:src="@{/js/projects/dashboard.js}"></script>
+
+</body>
+</html>

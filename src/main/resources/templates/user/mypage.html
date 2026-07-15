@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>마이페이지 - WorkTopus</title>
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/mypage.css">
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="mypage-page">
+
+    <!--wrapper-->
+    <div class="mypage-wrapper">
+
+        <!--사이드-->
+        <div class="mypage-container">
+            <div class="sidebar">
+                <div class="sidebar-title">내 정보</div>
+                <ul class="menu-list">
+                    <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보</button></li>
+                    <li class="menu-item" id="menu-todo"><button onclick="switchTab('todo')">오늘의 할 일 (To-do)</button></li>
+                    <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
+                    <li class="menu-item" id="menu-comments"><button onclick="switchTab('comments')">내가 쓴 댓글</button></li>
+                    <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">프로젝트 알림창</button></li>
+                </ul>
+            </div>
+
+            <!--메인-->
+            <div class="main-content">
+
+                <!--내 정보-->
+                <div id="section-info" class="content-section active">
+                    <h2 class="content-title">내 정보</h2>
+
+                    <form th:action="@{/user/mypage}" method="post" th:object="${userForm}" enctype="multipart/form-data" class="info-edit-form">
+
+                        <!-- 프로필 사진 변경 영역 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">프로필 사진</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <!-- 프로필 -->
+                                    <label for="profile-file-input" class="profile-avatar-label">
+                                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                                             title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
+                                    </label>
+                                    <input type="file" id="profile-file-input" name="profilePicture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--이름 수정 영역-->
+                        <div class="info-row-group">
+                            <div class="info-group-label">이름</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="text" id="name-field" th:field="*{name}" required placeholder="이름을 입력하세요">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 계정 정보 조회 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">계정 정보</div>
+                            <div class="info-rows-container">
+
+                                <!-- 계정 ID -->
+                                <div class="info-data-row">
+                                    <span class="data-label">계정 ID</span>
+                                    <span class="data-value font-bold" th:text="${user.userId}">admin</span>
+                                </div>
+
+                                <!-- 이메일 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">이메일</span>
+                                    <span class="data-value" th:text="${user.email}">admin@example.com</span>
+                                </div>
+
+                                <!-- 비밀번호 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">비밀번호</span>
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="password" id="password-field" th:field="*{password}" placeholder="••••••••">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 연결된 서비스 영역 (조회 전용) -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">연결된 서비스</div>
+                            <div class="info-rows-container social-link-zone">
+
+                                <!-- 구글 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/google-icon.png" alt="Google" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'google'} ? '구글 계정으로 등록됨' : '구글 아이디 연결 없음'">구글 연동 상태</span>
+                                </div>
+
+                                <!-- 카카오 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/kakao-icon.png" alt="Kakao" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'kakao'} ? '카카오 계정으로 등록됨' : '카카오 아이디 연결 없음'">카카오 연동 상태</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- [오른쪽 밑 배치] 통합 정보 수정 저장 버튼 -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit-main">수정</button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <div id="section-todo" class="content-section">
+                    <h2 class="content-title">오늘의 할 일</h2>
+                    <div class="todo-input-group">
+                        <input type="text" id="todo-input" placeholder="오늘 해야 할 업무나 일정을 입력하세요." onkeypress="if(event.keyCode==13) addTodo()">
+                        <button class="btn-todo-add" onclick="addTodo()">추가</button>
+                    </div>
+                    <ul class="todo-list" id="todo-list-container">
+                        <li class="todo-item">
+                            <div class="todo-left">
+                                <input type="checkbox" class="todo-checkbox" onchange="toggleTodo(this)">
+                                <span class="todo-text">SAMPLE</span>
+                            </div>
+                            <button class="btn-todo-delete" onclick="deleteTodo(this)">삭제</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div id="section-posts" class="content-section">
+                    <h2 class="content-title">내가 쓴 글 목록</h2>
+                    <table>
+                        <thead>
+                        <tr><th>번호</th><th>제목</th><th>작성일</th></tr>
+                        </thead>
+                        <tbody id="posts-tbody">
+                        <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px 0;">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="section-comments" class="content-section">
+                    <h2 class="content-title">내가 쓴 댓글 목록</h2>
+                    <table>
+                        <thead>
+                        <tr><th>댓글 내용</th><th>원문 제목</th><th>작성일</th></tr>
+                        </thead>
+                        <tbody id="comments-tbody">
+                        <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px 0;">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="section-notif" class="content-section">
+                    <h2 class="content-title">프로젝트 알림</h2>
+                    <ul id="notif-list" style="padding: 0; list-style: none; margin: 0;">
+                        <li style="padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px; text-align: center; color: #64748b; font-size: 14px; background-color: #f8fafc;">
+                            새로운 시스템 및 프로젝트 알림이 존재하지 않습니다.
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:inline="javascript">
+
+    // 값이 있으면 문자열로 대입되고, 없으면 null이 대입됩니다.
+    var msg = /*[[${msg}]]*/ null;
+
+    if (msg) {
+        alert(msg);
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+        document.getElementById('section-' + tabName).classList.add('active');
+        document.getElementById('menu-' + tabName).classList.add('active');
+
+        if (tabName === 'posts') { loadMyPosts(); }
+        else if (tabName === 'comments') { loadMyComments(); }
+    }
+
+    function addTodo() {
+        const input = document.getElementById('todo-input');
+        const text = input.value.trim();
+        if(!text) return;
+
+        const container = document.getElementById('todo-list-container');
+        const li = document.createElement('li');
+        li.className = 'todo-item';
+        li.innerHTML = `
+            <div class="todo-left">
+                <input type="checkbox" class="todo-checkbox" onchange="toggleTodo(this)">
+                <span class="todo-text">${text}</span>
+            </div>
+            <button class="btn-todo-delete" onclick="deleteTodo(this)">삭제</button>
+        `;
+        container.prepend(li);
+        input.value = '';
+    }
+
+    function toggleTodo(checkbox) {
+        const item = checkbox.closest('.todo-item');
+        if(checkbox.checked) { item.classList.add('completed'); }
+        else { item.classList.remove('completed'); }
+    }
+
+    function deleteTodo(button) {
+        if(confirm('이 항목을 삭제하시겠습니까?')) { button.closest('.todo-item').remove(); }
+    }
+
+    function loadMyPosts() {
+        fetch("/api/user/posts")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('posts-tbody');
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:30px 0;">작성한 게시글이 없습니다.</td></tr>`;
+                    return;
+                }
+                data.forEach(post => {
+                    const row = `<tr>
+                        <td><span class="status-badge">${post.id}</span></td>
+                        <td><a href="/board/view/${post.id}" style="color:#4d7cff; text-decoration:none; font-weight:600;">${post.title}</a></td>
+                        <td style="color:#64748b;">${post.writeDate}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }).catch(err => console.error(err));
+    }
+
+    function loadMyComments() {
+        // 필요시 로직 작성
+    }
+
+    // 프사 미리보기
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var label = document.querySelector('.profile-avatar-label');
+                // 내부를 깨끗이 비우고 새로운 img 태그를 생성해서 주입
+                label.innerHTML = `<img src="${e.target.result}" id="profile-preview" class="profile-click-avatar" title="사진을 클릭하여 변경">`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+</script>
+</body>
+</html>
