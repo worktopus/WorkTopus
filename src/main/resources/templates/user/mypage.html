@@ -2,8 +2,14 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>마이페이지 - WorkTopus</title>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
@@ -27,9 +33,16 @@
                     <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
                     <li class="menu-item" id="menu-comments"><button onclick="switchTab('comments')">내가 쓴 댓글</button></li>
                     <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">알림</button></li>
-                    <li class="menu-item"><form th:action="@{/logout}" method="post">
-                        <button type="submit" class="dropdown-item logout">로그아웃</button>
-                    </form></li>
+                    <li class="menu-item">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="logout">로그아웃</button>
+                        </form>
+                    </li>
+                    <li class="menu-item">
+                        <form th:action="@{/user/delete}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 작성하신 정보가 모두 삭제되며 되돌릴 수 없습니다.');">
+                            <button type="submit" class="delete">회원탈퇴</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
 
@@ -205,8 +218,7 @@
         // 현재 선택한 유효 탭 정보를 브라우저에 저장
         localStorage.setItem('mypageActiveTab', tabName);
 
-        if (tabName === 'todo') { loadTodoList(); }
-        else if (tabName === 'posts') { loadMyPosts(); }
+        if (tabName === 'posts') { loadMyPosts(); }
         else if (tabName === 'comments') { loadMyComments(); }
     }
 

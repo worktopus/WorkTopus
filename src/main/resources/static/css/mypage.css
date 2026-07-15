@@ -425,3 +425,42 @@ td {
     color: #4d7cff;
     border-radius: 999px;
 }
+
+/* ==========================================================================
+   [추가] 로그아웃 & 회원탈퇴 전용 위험/경고(Danger) 버튼 스타일 최적화
+   ========================================================================== */
+
+/* 로그아웃 & 회원탈퇴 폼 내부 버튼 공통 정의 */
+.menu-item .logout,
+.menu-item .delete {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;       /* 다른 메뉴보다 살짝 슬림하게 조절 */
+    font-size: 13.5px;        /* 일반 메뉴(15px)보다 살짝 작게 */
+    font-weight: 600;
+    background: none;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 1. 로그아웃 버튼 색상 설정 */
+.menu-item .logout {
+    color: #94a3b8;           /* 평소에는 기본 사이드바 서브 타이틀처럼 은은한 회색 */
+}
+
+.menu-item .logout:hover {
+    background: #f8fafc;
+    color: #475569;           /* 마우스 올렸을 때 진한 먹색으로 반전 */
+}
+
+/* 2. 회원탈퇴 버튼 색상 설정 (위험 구역) */
+.menu-item .delete {
+    color: #fda4af;           /* 평소에는 톤다운된 부드러운 핑크빛 빨강 (시선을 너무 빼앗지 않게) */
+}
+
+.menu-item .delete:hover {
+    background: #fff1f2;      /* 마우스 올렸을 때 부드러운 레드 계열 배경 */
+    color: #e11d48;           /* 텍스트는 선명하고 경고 의미가 강한 빨간색 */
+}

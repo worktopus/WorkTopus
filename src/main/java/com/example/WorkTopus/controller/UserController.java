@@ -120,7 +120,34 @@ public class UserController {
 
         mv.setViewName("redirect:/user/mypage");
         return mv;
+    }
 
+    // 회원탈퇴 처리
+    @PostMapping("/delete")
+    public String deleteUser(
+            Authentication authentication,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+
+        if (authentication != null) {
+            String userId = authentication.getName();
+
+            try {
+                userService.deleteUser(userId);
+
+                new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                        .logout(request, response, authentication);
+
+                redirectAttributes.addFlashAttribute("msg", "회원탈퇴가 성공적으로 처리되었습니다.");
+                return "redirect:/";
+
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("msg", "회원탈퇴 중 오류가 발생했습니다: " + e.getMessage());
+                return "redirect:/user/mypage";
+            }
+        }
+        return "redirect:/";
     }
 
 }

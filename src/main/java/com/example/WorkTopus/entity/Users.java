@@ -9,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name="users")
@@ -57,9 +58,20 @@ public class Users {
     @Column(nullable = false, length = 20)
     private String provider = "local";            // local, google, kakao
 
-    @Column(length = 100)
+    @Column(length = 100, name = "provider_id")
     private String providerId;                    // 구글/카카오 고유 ID
 
     @Column(length = 500, nullable = false)
     private String picture = "/images/logo.png";
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Todo> todoList;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Projects> ownedProjects;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ProjectMember> projectMembers;
+
 }
