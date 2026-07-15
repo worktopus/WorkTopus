@@ -34,3 +34,5 @@ out/
 /.nb-gradle/
 
 src/main/resources/application-secret.yml
+.metadata/
+

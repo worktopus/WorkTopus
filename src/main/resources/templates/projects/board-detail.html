@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Worktopus | 게시글 상세</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/board-detail.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+</head>
+
+<body>
+<div class="layout">
+
+    <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+    <div class="layout__content">
+
+        <th:block th:replace="~{fragments/header :: header}"></th:block>
+
+        <main class="board-detail">
+
+            <div class="board-detail_breadcrumb">
+                <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}">
+                    프로젝트 게시판
+                </a>
+                <span>/</span>
+                <span>게시글 상세</span>
+            </div>
+
+            <section class="board-detail_card">
+
+                <div class="board-detail_layout">
+
+                    <div class="board-detail_main">
+
+                        <div class="board-detail_top">
+
+                            <div>
+                                <div class="board-detail_badges">
+                                    <span class="board-detail_badge board-detail_badge-dev"
+                                          th:if="${board.notice}">
+                                        공지
+                                    </span>
+                                    <span class="board-detail_status">게시글</span>
+                                </div>
+
+                                <h1 class="board-detail_title"
+                                    th:text="${board.title}">
+                                    게시글 제목
+                                </h1>
+
+                                <div class="board-detail_meta">
+                                    <span th:text="'👤 ' + ${board.writerName}">
+                                        👤 작성자
+                                    </span>
+
+                                    <span th:text="${board.createdAt != null ? '📅 ' + #temporals.format(board.createdAt, 'yyyy.MM.dd HH:mm') : '📅 -'}">
+                                        📅 -
+                                    </span>
+
+                                    <span th:text="'👁 조회 ' + ${board.viewCount}">
+                                        👁 조회 0
+                                    </span>
+
+                                    <span>💬 댓글 0</span>
+                                </div>
+                            </div>
+
+                            <div class="board-detail_actions">
+
+                                <a th:href="@{/projects/{projectId}/boards/{boardId}/edit(
+                                        projectId=${projectId},
+                                        boardId=${board.id}
+                                   )}"
+                                   class="board-detail_btn board-detail_btn-sub">
+                                    수정
+                                </a>
+
+                                <form th:action="@{/projects/{projectId}/boards/{boardId}/delete(
+                                            projectId=${projectId},
+                                            boardId=${board.id}
+                                      )}"
+                                      method="post">
+
+                                    <button type="submit"
+                                            class="board-detail_btn board-detail_btn-danger"
+                                            onclick="return confirm('게시글을 삭제할까요?');">
+                                        삭제
+                                    </button>
+
+                                </form>
+
+                            </div>
+
+                        </div>
+
+                        <hr class="board-detail_divider">
+
+                        <div class="board-detail_content"
+                             th:utext="${board.content}">
+                            게시글 내용
+                        </div>
+
+                        <section class="board-detail_files">
+                            <h2 class="board-detail_section-title">
+                                첨부파일
+                            </h2>
+
+                            <div class="board-detail_file"
+                                th:each="file : ${board.files}">
+                                <span class="board-detail_file-icon">📎</span>
+                                <a class="board-detail_file-name"
+                                   th:href="@{/projects/{projectId}/files/{fileId}/download(
+                                       projectId=${projectId},
+                                       fileId=${file.id}
+                                   )}"
+                                   th:text="${file.originalName}">
+                                    첨부파일명
+                                </a>
+                            </div>
+
+                            <div class="board-detail_file"
+                                 th:if="${board.files == null or board.files.isEmpty()}">
+                                <span class="board-detail_file-icon">📎</span>
+                                <span class="board-detail_file-name">첨부파일이 없습니다.</span>
+                            </div>
+                        </section>
+
+                    </div>
+
+                    <aside class="board-detail_side">
+
+                        <h2 class="board-detail_side-title">
+                            게시글 정보
+                        </h2>
+
+                        <div class="board-detail_info-list">
+
+                            <div class="board-detail_info-item">
+                                <span>작성자</span>
+                                <strong th:text="${board.writerName}">작성자</strong>
+                            </div>
+
+                            <div class="board-detail_info-item">
+                                <span>조회수</span>
+                                <strong th:text="${board.viewCount}">0</strong>
+                            </div>
+
+                            <div class="board-detail_info-item">
+                                <span>프로젝트</span>
+                                <strong th:text="${projectId}">1</strong>
+                            </div>
+
+                            <div class="board-detail_info-item">
+                                <span>작성일</span>
+                                <strong th:text="${board.createdAt != null ? #temporals.format(board.createdAt, 'yyyy.MM.dd') : '-'}">
+                                    -
+                                </strong>
+                            </div>
+
+                        </div>
+
+                    </aside>
+
+                </div>
+
+            </section>
+
+            <section class="board-detail_comments">
+
+                <h2 class="board-detail_section-title">
+                    댓글 0개
+                </h2>
+
+                <div class="board-detail_comment-form">
+                    <textarea placeholder="댓글 기능은 준비 중입니다."></textarea>
+                    <button type="button">댓글 등록</button>
+                </div>
+
+            </section>
+
+            <div class="board-detail_bottom">
+                <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                   class="board-detail_back">
+                    ← 목록으로
+                </a>
+            </div>
+
+        </main>
+
+    </div>
+
+</div>
+
+<script th:src="@{/js/sidebar.js}"></script>
+</body>
+</html>

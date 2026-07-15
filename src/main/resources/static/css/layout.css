@@ -1,0 +1,31 @@
+/* ==========================================================
+   Layout
+========================================================== */
+
+.layout {
+    display: flex;
+    min-height: 100vh;
+    background: var(--bg);
+
+    align-items: flex-start;
+}
+
+.layout__content {
+    flex: 1;
+    min-height: 100vh;
+
+    padding: 28px 32px;
+
+    transition: margin-left var(--transition);
+}
+
+.layout.layout--collapsed .layout__content {
+    margin-left: var(--sidebar-collapsed-width);
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+}
