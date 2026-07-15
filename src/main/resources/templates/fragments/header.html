@@ -30,12 +30,12 @@
             <!-- 채팅 -->
             <button class="header__icon" th:insert="~{fragments/icons :: chat}"></button>
 
-            <!-- 메모 (클릭 시 투두리스트 팝업 토글) -->
+            <!-- 메모 -->
             <button class="header__icon" id="header-memo-btn" onclick="toggleTodoModal(event)">
                 <span th:replace="~{fragments/icons :: memo}"></span>
             </button>
 
-            <!-- 프로필 (드롭다운을 감싸는 컨테이너 구조로 변경) -->
+            <!-- 프로필 -->
             <div class="header__profile-container">
                 <div class="header__profile" id="header-profile-trigger" onclick="toggleProfileDropdown(event)">
                     <img th:src="${user?.picture} ?: '/images/logo.png'" alt="프로필" onerror="this.src='/images/logo.png';">
@@ -65,7 +65,7 @@
         </div>
     </header>
 
-    <!-- 팝업 형태의 독립된 투두리스트 (화면 우상단에 레이어로 뜸) -->
+    <!-- 팝업 형태의 독립된 투두리스트 -->
     <div class="todo-modal" id="todo-popup-modal">
         <div class="todo-modal-header">
             <span class="todo-modal-title">TODO</span>
@@ -87,11 +87,9 @@
 
     <script th:inline="javascript">
 
-        // 1. 공통 CSRF 토큰 설정 (HTML 헤더에 등록된 메타 태그로부터 읽어옵니다)
-        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        //  공통 CSRF 토큰 설정
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
-
-        // 💡 [수정 포인트] 맨 위에 정의되어 있던 연습용 fetch('/api/todo') 부분은 에러를 발생시키므로 삭제했습니다.
 
         // 프로필 드롭다운 제어
         function toggleProfileDropdown(event) {
@@ -103,9 +101,7 @@
             document.getElementById('todo-popup-modal').classList.remove('active');
         }
 
-        /* ==========================================
-         * 2. 투두리스트 모달 제어 및 API 비동기 처리
-         * ========================================== */
+        // 투두리스트 모달 제어, API 비동기 처리
         function toggleTodoModal(event) {
             event.stopPropagation();
             const modal = document.getElementById('todo-popup-modal');
@@ -130,7 +126,7 @@
             e.stopPropagation();
         });
 
-        // 투두리스트 로드 (GET 요청은 CSRF 토큰이 필요하지 않습니다)
+        // 투두리스트 로드
         function loadPopupTodoList() {
             fetch("/api/todo")
                 .then(res => res.json())
@@ -146,7 +142,6 @@
                     list.forEach(todo => {
                         const li = document.createElement('li');
 
-                        // 💡 [핵심 수정] 엔티티 필드명에 맞춰 todo.completed -> todo.isCompleted 로 수정합니다.
                         const hasCompleted = todo.isCompleted;
 
                         li.className = `todo-item ${hasCompleted ? 'completed' : ''}`;
@@ -158,7 +153,6 @@
 
                         li.innerHTML = `
                     <div class="todo-left" style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <!-- 💡 여기도 마찬가지로 todo.isCompleted 기준으로 checked 여부를 바인딩합니다. -->
                         <input type="checkbox" onchange="togglePopupTodo(this)" ${hasCompleted ? 'checked' : ''}>
                         <span class="todo-text" style="${hasCompleted ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${todo.content}</span>
                     </div>
@@ -170,7 +164,7 @@
                 .catch(err => console.error("투두 로드 실패:", err));
         }
 
-        // 투두 추가 (POST 요청 - CSRF 필수! ⭐️)
+        // 투두 추가
         function addPopupTodo() {
             const input = document.getElementById('popup-todo-input');
             const text = input.value.trim();
@@ -180,7 +174,6 @@
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    // 💡 여기에 CSRF 헤더와 토큰을 탑재합니다.
                     [csrfHeader]: csrfToken
                 },
                 body: JSON.stringify({ content: text })
@@ -196,16 +189,16 @@
                 .catch(err => console.error("투두 추가 에러:", err));
         }
 
-        // 투두 토글 (PATCH 요청 - CSRF 필수! ⭐️)
+        // 투두 토글
         function togglePopupTodo(checkbox) {
             const item = checkbox.closest('.todo-item');
             const todoId = item.getAttribute('data-id');
 
-            // CSRF 토큰 읽기 (disable 상태이면 null 또는 undefined가 될 수 있음)
+            // CSRF 토큰 읽기
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 
-            // 💡 CSRF 작동 여부에 따라 헤더 동적 생성 (disable 상태여도 오류 안 나게 방어)
+            // CSRF 작동 여부에 따라 헤더 동적 생성
             const requestHeaders = {};
             if (csrfHeader && csrfToken) {
                 requestHeaders[csrfHeader] = csrfToken;
@@ -213,7 +206,7 @@
 
             fetch(`/api/todo/${todoId}`, {
                 method: "PATCH",
-                headers: requestHeaders // 💡 안전하게 정제된 헤더 장착
+                headers: requestHeaders
             })
                 .then(res => {
                     if(res.ok) {
@@ -225,7 +218,7 @@
                         } else {
                             textSpan.style.textDecoration = 'none';
                             textSpan.style.color = 'inherit';
-                            item.classList.remove('completed'); // 💡 체크 풀 때도 클래스 확실히 제거
+                            item.classList.remove('completed');
                         }
                     } else {
                         alert("수정 실패");
@@ -238,7 +231,7 @@
                 });
         }
 
-        // 투두 삭제 (DELETE 요청 - CSRF 필수! ⭐️)
+        // 투두 삭제
         function deletePopupTodo(button) {
             if(!confirm('이 항목을 삭제하시겠습니까?')) return;
 
@@ -248,7 +241,6 @@
             fetch(`/api/todo/${todoId}`, {
                 method: "DELETE",
                 headers: {
-                    // 💡 삭제 요청(DELETE) 역시 CSRF 토큰을 동반해야 안전하게 허가됩니다.
                     [csrfHeader]: csrfToken
                 }
             })
