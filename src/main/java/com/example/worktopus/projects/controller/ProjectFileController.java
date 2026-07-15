@@ -1,7 +1,7 @@
-package com.example.worktopus.projects.controller;
+package com.example.WorkTopus.projects.controller;
 
-import com.example.worktopus.projects.dto.response.ProjectFileResponse;
-import com.example.worktopus.projects.service.ProjectFileService;
+import com.example.WorkTopus.projects.dto.response.ProjectFileResponse;
+import com.example.WorkTopus.projects.service.ProjectFileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

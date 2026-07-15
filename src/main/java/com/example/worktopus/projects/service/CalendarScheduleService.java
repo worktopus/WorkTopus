@@ -1,8 +1,8 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.request.CalendarScheduleCreateRequest;
-import com.example.worktopus.projects.dto.request.CalendarScheduleUpdateRequest;
-import com.example.worktopus.projects.dto.response.CalendarScheduleResponse;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleCreateRequest;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.CalendarScheduleResponse;
 
 import java.util.List;
 

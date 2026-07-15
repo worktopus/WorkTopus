@@ -1,4 +1,4 @@
-package com.example.worktopus.projects.mapper;
+package com.example.WorkTopus.projects.mapper;
 
 public class BoardMapper {
 }

@@ -1,8 +1,8 @@
-package com.example.worktopus.projects.dto.response;
+package com.example.WorkTopus.projects.dto.response;
 
-import com.example.worktopus.projects.entity.KanbanCard;
-import com.example.worktopus.projects.entity.KanbanPriority;
-import com.example.worktopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.entity.KanbanCard;
+import com.example.WorkTopus.projects.entity.KanbanPriority;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

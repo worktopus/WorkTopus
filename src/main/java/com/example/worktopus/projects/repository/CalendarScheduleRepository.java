@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.repository;
+package com.example.WorkTopus.projects.repository;
 
-import com.example.worktopus.projects.entity.CalendarSchedule;
+import com.example.WorkTopus.projects.entity.CalendarSchedule;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,4 +1,4 @@
-package com.example.worktopus.projects.exception;
+package com.example.WorkTopus.projects.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

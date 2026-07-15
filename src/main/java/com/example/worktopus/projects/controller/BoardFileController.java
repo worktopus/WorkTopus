@@ -1,10 +1,10 @@
-package com.example.worktopus.projects.controller;
+package com.example.WorkTopus.projects.controller;
 
-import com.example.worktopus.projects.entity.Board;
-import com.example.worktopus.projects.entity.BoardFile;
-import com.example.worktopus.projects.repository.BoardFileRepository;
-import com.example.worktopus.projects.repository.BoardRepository;
-import com.example.worktopus.projects.service.FileStorageService;
+import com.example.WorkTopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.BoardFile;
+import com.example.WorkTopus.projects.repository.BoardFileRepository;
+import com.example.WorkTopus.projects.repository.BoardRepository;
+import com.example.WorkTopus.projects.service.FileStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;

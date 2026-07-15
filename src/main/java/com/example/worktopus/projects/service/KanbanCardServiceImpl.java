@@ -1,12 +1,12 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.request.KanbanCardCreateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardStatusUpdateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardUpdateRequest;
-import com.example.worktopus.projects.dto.response.KanbanCardResponse;
-import com.example.worktopus.projects.entity.KanbanCard;
-import com.example.worktopus.projects.entity.KanbanStatus;
-import com.example.worktopus.projects.repository.KanbanCardRepository;
+import com.example.WorkTopus.projects.dto.request.KanbanCardCreateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardStatusUpdateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
+import com.example.WorkTopus.projects.entity.KanbanCard;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.repository.KanbanCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.dto.request;
+package com.example.WorkTopus.projects.dto.request;
 
-import com.example.worktopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
 import jakarta.validation.constraints.NotNull;
 
 public record KanbanCardStatusUpdateRequest(

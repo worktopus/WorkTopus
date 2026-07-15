@@ -1,4 +1,4 @@
-package com.example.worktopus.projects.dto.response;
+package com.example.WorkTopus.projects.dto.response;
 
 import java.text.DecimalFormat;
 import java.time.LocalDateTime;

@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.repository;
+package com.example.WorkTopus.projects.repository;
 
-import com.example.worktopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.Board;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,7 +1,7 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.response.ProjectFileResponse;
-import com.example.worktopus.projects.repository.BoardFileRepository;
+import com.example.WorkTopus.projects.dto.response.ProjectFileResponse;
+import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,4 +1,4 @@
-package com.example.worktopus.common.dto;
+package com.example.WorkTopus.common.dto;
 
 import org.springframework.data.domain.Page;
 

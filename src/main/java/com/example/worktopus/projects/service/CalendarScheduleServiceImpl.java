@@ -1,11 +1,11 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.request.CalendarScheduleCreateRequest;
-import com.example.worktopus.projects.dto.request.CalendarScheduleUpdateRequest;
-import com.example.worktopus.projects.dto.response.CalendarScheduleResponse;
-import com.example.worktopus.projects.entity.CalendarSchedule;
-import com.example.worktopus.projects.repository.CalendarScheduleRepository;
-import com.example.worktopus.projects.repository.KanbanCardRepository;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleCreateRequest;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.CalendarScheduleResponse;
+import com.example.WorkTopus.projects.entity.CalendarSchedule;
+import com.example.WorkTopus.projects.repository.CalendarScheduleRepository;
+import com.example.WorkTopus.projects.repository.KanbanCardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

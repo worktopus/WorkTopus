@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.dto.response;
+package com.example.WorkTopus.projects.dto.response;
 
-import com.example.worktopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.Board;
 
 import java.time.LocalDateTime;
 import java.util.List;

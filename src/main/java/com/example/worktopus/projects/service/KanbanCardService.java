@@ -1,10 +1,10 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.request.KanbanCardCreateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardStatusUpdateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardUpdateRequest;
-import com.example.worktopus.projects.dto.response.KanbanCardResponse;
-import com.example.worktopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.dto.request.KanbanCardCreateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardStatusUpdateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
 
 import java.util.List;
 

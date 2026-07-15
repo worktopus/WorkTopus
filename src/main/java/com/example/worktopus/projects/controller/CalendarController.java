@@ -1,9 +1,9 @@
-package com.example.worktopus.projects.controller;
+package com.example.WorkTopus.projects.controller;
 
-import com.example.worktopus.projects.dto.request.CalendarScheduleCreateRequest;
-import com.example.worktopus.projects.dto.request.CalendarScheduleUpdateRequest;
-import com.example.worktopus.projects.dto.response.CalendarScheduleResponse;
-import com.example.worktopus.projects.service.CalendarScheduleService;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleCreateRequest;
+import com.example.WorkTopus.projects.dto.request.CalendarScheduleUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.CalendarScheduleResponse;
+import com.example.WorkTopus.projects.service.CalendarScheduleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

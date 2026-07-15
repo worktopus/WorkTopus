@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.repository;
+package com.example.WorkTopus.projects.repository;
 
-import com.example.worktopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.Board;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

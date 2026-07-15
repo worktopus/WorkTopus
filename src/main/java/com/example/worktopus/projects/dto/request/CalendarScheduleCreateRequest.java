@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.dto.request;
+package com.example.WorkTopus.projects.dto.request;
 
-import com.example.worktopus.projects.entity.CalendarScheduleType;
+import com.example.WorkTopus.projects.entity.CalendarScheduleType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -19,6 +19,12 @@ repositories {
 }
 
 dependencies {
+    // 이메일 인증 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+
+    // 소셜 로그인 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -27,7 +33,8 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // oracle
-    runtimeOnly 'com.oracle.database.jdbc:ojdbc11:23.9.0.25.07'
+    runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
+
 
     // 지갑
     runtimeOnly 'com.oracle.database.security:oraclepki:21.19.0.0'
@@ -54,4 +61,5 @@ bootJar{
     archiveBaseName = "springedu2"
     archiveFileName = "springedu2.jar"
     archiveVersion = "0.0.1"
+
 }

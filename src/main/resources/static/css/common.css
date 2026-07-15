@@ -1,22 +1,45 @@
-/* ===========================
-   Worktopus Common
-=========================== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+
+  color: inherit;
+  text-decoration: none;
+  list-style: none;
+
+  font-family: "Pretendard", sans-serif;
+}
+
+body {
+  color: var(--text-main);
+  background: var(--bg-main);
+}
+
+a {
+  display: block;
+}
+
+img {
+  vertical-align: top;
+}
 
 :root {
   --primary: #7287F4;
   --primary-hover: #5D73EA;
   --primary-dark: #5F72D9;
   --primary-light: #EEF1FF;
-  --primary-soft: #F5F7FF;
 
-  --secondary: #72D2FF;
-
-  --bg: #FFFFFF;
-  --card: #FFFFFF;
-  --border: #E4ECF7;
+  --bg-main: #FFFFFF;
 
   --text-main: #222;
   --text-sub: #666;
+
+  /* projects */
+  --primary-soft: #F5F7FF;
+  --secondary: #72D2FF;
+  --card: #FFFFFF;
+  --border: #E4ECF7;
+
   --text-right: #FFFFFF;
 
   --success: #22C55E;
@@ -33,36 +56,6 @@
   --sidebar-collapsed-width: 82px;
 
   --transition: .25s ease;
-}
-
-* {
-  margin: 0;
-  padding: 0;
-
-  box-sizing: border-box;
-}
-
-html {
-  font-size: 16px;
-}
-
-body {
-  min-height: 100vh;
-  background: var(--bg);
-  color: var(--text-main);
-  font-family: "Pretendard", "Noto Sans KR", sans-serif;
-}
-
-img {
-  display: block;
-  max-width: 100%;
-}
-
-button,
-input,
-textarea,
-select {
-  font: inherit;
 }
 
 button {

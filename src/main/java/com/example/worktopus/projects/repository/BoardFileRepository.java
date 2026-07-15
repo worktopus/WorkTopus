@@ -1,7 +1,7 @@
-package com.example.worktopus.projects.repository;
+package com.example.WorkTopus.projects.repository;
 
-import com.example.worktopus.projects.entity.BoardFile;
-import com.example.worktopus.projects.dto.response.ProjectFileResponse;
+import com.example.WorkTopus.projects.entity.BoardFile;
+import com.example.WorkTopus.projects.dto.response.ProjectFileResponse;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,7 +16,7 @@ public interface BoardFileRepository extends JpaRepository<BoardFile, Long> {
     );
 
     @Query("""
-        SELECT new com.example.worktopus.projects.dto.response.ProjectFileResponse(
+        SELECT new com.example.WorkTopus.projects.dto.response.ProjectFileResponse(
             f.id,
             f.boardId,
             f.originalName,
@@ -38,7 +38,7 @@ public interface BoardFileRepository extends JpaRepository<BoardFile, Long> {
     );
 
     @Query("""
-        SELECT new com.example.worktopus.projects.dto.response.ProjectFileResponse(
+        SELECT new com.example.WorkTopus.projects.dto.response.ProjectFileResponse(
             f.id,
             f.boardId,
             f.originalName,

@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.response.DashboardResponse;
+import com.example.WorkTopus.projects.dto.response.DashboardResponse;
 
 public interface DashboardService {
 

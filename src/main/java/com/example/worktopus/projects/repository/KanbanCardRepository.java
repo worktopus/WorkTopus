@@ -1,7 +1,7 @@
-package com.example.worktopus.projects.repository;
+package com.example.WorkTopus.projects.repository;
 
-import com.example.worktopus.projects.entity.KanbanCard;
-import com.example.worktopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.entity.KanbanCard;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 

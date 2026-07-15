@@ -1,8 +1,8 @@
-package com.example.worktopus.projects.dto.response;
+package com.example.WorkTopus.projects.dto.response;
 
-import com.example.worktopus.projects.entity.CalendarSchedule;
-import com.example.worktopus.projects.entity.CalendarScheduleType;
-import com.example.worktopus.projects.entity.KanbanCard;
+import com.example.WorkTopus.projects.entity.CalendarSchedule;
+import com.example.WorkTopus.projects.entity.CalendarScheduleType;
+import com.example.WorkTopus.projects.entity.KanbanCard;
 
 import java.time.LocalDate;
 

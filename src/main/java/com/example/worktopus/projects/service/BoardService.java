@@ -1,10 +1,10 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.request.BoardCreateRequest;
-import com.example.worktopus.projects.dto.request.BoardUpdateRequest;
-import com.example.worktopus.projects.dto.response.BoardDetailModalResponse;
-import com.example.worktopus.projects.dto.response.BoardDetailResponse;
-import com.example.worktopus.projects.dto.response.BoardListResponse;
+import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
+import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
+import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
+import com.example.WorkTopus.projects.dto.response.BoardListResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

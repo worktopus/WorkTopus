@@ -1,4 +1,4 @@
-package com.example.worktopus.projects.entity;
+package com.example.WorkTopus.projects.entity;
 
 public enum CalendarScheduleType {
     MEETING,

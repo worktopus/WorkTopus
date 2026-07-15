@@ -1,11 +1,11 @@
-package com.example.worktopus.projects.controller;
+package com.example.WorkTopus.projects.controller;
 
-import com.example.worktopus.projects.dto.request.KanbanCardCreateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardStatusUpdateRequest;
-import com.example.worktopus.projects.dto.request.KanbanCardUpdateRequest;
-import com.example.worktopus.projects.dto.response.KanbanCardResponse;
-import com.example.worktopus.projects.entity.KanbanStatus;
-import com.example.worktopus.projects.service.KanbanCardService;
+import com.example.WorkTopus.projects.dto.request.KanbanCardCreateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardStatusUpdateRequest;
+import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.service.KanbanCardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;

@@ -1,6 +1,6 @@
-package com.example.worktopus.projects.service;
+package com.example.WorkTopus.projects.service;
 
-import com.example.worktopus.projects.dto.response.StoredFileResponse;
+import com.example.WorkTopus.projects.dto.response.StoredFileResponse;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 

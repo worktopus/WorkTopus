@@ -1,12 +1,12 @@
-package com.example.worktopus.projects.controller;
+package com.example.WorkTopus.projects.controller;
 
-import com.example.worktopus.common.dto.PageResponse;
-import com.example.worktopus.projects.dto.request.BoardCreateRequest;
-import com.example.worktopus.projects.dto.request.BoardUpdateRequest;
-import com.example.worktopus.projects.dto.response.BoardDetailModalResponse;
-import com.example.worktopus.projects.dto.response.BoardDetailResponse;
-import com.example.worktopus.projects.dto.response.BoardListResponse;
-import com.example.worktopus.projects.service.BoardService;
+import com.example.WorkTopus.common.dto.PageResponse;
+import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
+import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
+import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
+import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
+import com.example.WorkTopus.projects.dto.response.BoardListResponse;
+import com.example.WorkTopus.projects.service.BoardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;

@@ -1,4 +1,4 @@
-package com.example.worktopus.projects.dto.request;
+package com.example.WorkTopus.projects.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
