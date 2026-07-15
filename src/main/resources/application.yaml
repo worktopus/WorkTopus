@@ -1,46 +1,36 @@
 server:
   port: 8080
 
-
 spring:
   application:
     name: WorkTopus
+
+  profiles:
+    include: secret
+
   thymeleaf:
     cache: false
+
   devtools:
     restart:
       enabled: true
     livereload:
       enabled: true
 
-
-
-
-# oracle 설정
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
     username: ADMIN
     password: 'WorkTopus1234!'
-#    driver-class-name: oracle.jdbc.OracleDriver
-#    url: jdbc:oracle:thin:@localhost:1521:xe
-#    username: test
-#    password: 1234
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
-
     hibernate:
       ddl-auto: update
-      #ddl-auto: none
-
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-
-  profiles:
-    include: secret
 
   mail:
     host: smtp.gmail.com
@@ -48,7 +38,6 @@ spring:
     username: ${mail.username}
     password: ${mail.password}
     default-encoding: UTF-8
-
     properties:
       mail:
         smtp:
@@ -57,11 +46,11 @@ spring:
             enable: true
             required: true
 
-
   security:
     oauth2:
       client:
         registration:
+
           google:
             scope:
               - profile
@@ -87,4 +76,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
-
+# AI 회의요약 (신승민 채팅 기능)
+gemini:
+  api-key: ${GEMINI_API_KEY:}
+  model: gemini-3.5-flash
