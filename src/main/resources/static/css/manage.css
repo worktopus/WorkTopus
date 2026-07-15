@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Project Management System - Worktopus Layout Fixed CSS
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   🚨 거대 아이콘 버그 완벽 파괴 치트키 (어떤 구조든 무조건 24px 고정)
+   ────────────────────────────────────────────────────────────────────────── */
+.layout .sidebar .sidebar__icon svg,
+.layout .sidebar .sidebar__icon img,
+.layout .sidebar img,
+.layout .sidebar svg,
+.sidebar__icon svg,
+.sidebar__icon img,
+.sidebar__logo-icon,
+.sidebar__toggle img {
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   관리 내부 컨테이너 정렬 및 탭 디자인
+   ────────────────────────────────────────────────────────────────────────── */
+.manage-container {
+    padding: 40px;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.manage-title {
+    font-size: 1.6rem;
+    color: var(--text-main);
+    margin-bottom: 28px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.manage-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    border-bottom: 2px solid var(--border);
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 12px 24px;
+    font-size: 0.95rem;
+    color: var(--text-sub);
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+    transition: all var(--transition);
+}
+
+.tab-btn:hover {
+    color: var(--primary);
+    background-color: var(--primary-soft);
+}
+
+.tab-btn.active {
+    color: var(--primary);
+    font-weight: 700;
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: var(--primary);
+    border-radius: 3px;
+}
+
+/* 탭 전환 박스 가시성 통제 */
+.tab-content {
+    display: none;
+    padding: 32px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   독자적 폼 팩터 컴포넌트 안전 장치
+   ────────────────────────────────────────────────────────────────────────── */
+.content-header {
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 16px;
+}
+
+.content-header h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.manage-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    max-width: 600px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px;
+    font-size: 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background-color: var(--bg);
+}
+
+/* 위험 구역 트랙 */
+.danger-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    border: 1px solid var(--danger);
+    border-radius: var(--radius-sm);
+    background-color: rgba(239, 68, 68, 0.02);
+    margin-top: 20px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4-3. 게시판 관리 전용 모던 스위치(Switch) 스타일
+   ────────────────────────────────────────────────────────────────────────── */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--border);
+    transition: .3s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+}
+
+input:checked + .slider {
+    background-color: var(--primary);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+.slider.round {
+    border-radius: 22px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+/* ==========================================
+   🚨 상단 레이아웃 공백 파괴 및 화면 밀착
+   ========================================== */
+.layout {
+    display: flex !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+}
+
+.layout__content {
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+}
+
+.manage-container {
+    padding: 24px 40px !important;
+    margin: 0 !important;
+    width: 100% !important;
+}
+/* 슬라이드형 대시보드 드로어 활성화 클래스 */
+.board-drawer.open {
+    display: block !important;
+    right: 0 !important;
+}
+.board-item-row:hover {
+    background-color: #fafafa;
+}

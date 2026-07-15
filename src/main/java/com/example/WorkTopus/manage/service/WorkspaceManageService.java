@@ -1,98 +1,172 @@
 package com.example.WorkTopus.manage.service;
 
+import com.example.WorkTopus.manage.entity.Manage;
+import com.example.WorkTopus.manage.entity.ManageMember;
 import com.example.WorkTopus.manage.dto.WorkspaceGeneralUpdateDto;
 import com.example.WorkTopus.manage.dto.WorkspaceInviteRequestDto;
+import com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto;
+import com.example.WorkTopus.manage.repository.ManageRepository;
+import com.example.WorkTopus.manage.repository.ManageMemberRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class WorkspaceManageService {
 
+    private final JavaMailSender mailSender;
+    private final ManageRepository manageRepository;
+    private final ManageMemberRepository manageMemberRepository; // 팀원 리포지토리 의존성 추가
+
+    @PersistenceContext
+    private final EntityManager em;
+
     /**
-     * 4-1 워크스페이스 일반 관리 설정 업데이트 (기본 기능 + 고급 확장 기능)
+     * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회
+     */
+    public List<ManageMember> getWorkspaceMembers(Long workspaceId) {
+        return manageMemberRepository.findByWorkspaceId(workspaceId);
+    }
+
+    /**
+     * 팀원 직급 수정 비즈니스 로직
+     */
+    @Transactional
+    public void updateMemberRole(ManageMemberRoleUpdateDto dto) {
+        ManageMember member = manageMemberRepository.findById(dto.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + dto.getMemberId()));
+
+        if ("LEADER".equals(member.getProjectRole())) {
+            throw new IllegalStateException("팀장의 직급은 강제로 변경할 수 없습니다.");
+        }
+
+        member.updateProjectRole(dto.getProjectRole());
+    }
+
+    /**
+     * 팀원 제외 비즈니스 로직
+     */
+    @Transactional
+    public void kickMember(Long memberId) {
+        ManageMember member = manageMemberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
+
+        if ("LEADER".equals(member.getProjectRole())) {
+            throw new IllegalStateException("팀장은 워크스페이스에서 제외할 수 없습니다.");
+        }
+
+        manageMemberRepository.delete(member);
+    }
+
+    /**
+     * 4-1 워크스페이스 일반 관리 설정 업데이트
      */
     @Transactional
     public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
-
-        // [권한 검증] 현재 로그인한 유저가 해당 워크스페이스의 실제 팀장(마스터)인지 체크
         Long mockLeaderId = 1L;
         if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException("팀장 권한이 없습니다. 관리 페이지에 접근할 수 없습니다.");
+            throw new SecurityException("팀장 권한이 없습니다.");
         }
 
-        // 1. [기본] 명칭 및 공개범위 변경
-        System.out.println("수정 대상 워크스페이스 ID: " + workspaceId);
-        System.out.println("변경할 워크스페이스명: " + dto.getWorkspaceName());
-        System.out.println("설정할 공개범위 값: " + dto.getVisibility());
+        boolean isExist = manageRepository.existsById(workspaceId);
 
-        // 2. [기본] 로고 이미지 유효성 체크 및 스토리지 제어
-        if (Boolean.TRUE.equals(dto.getIsLogoDeleted())) {
-            System.out.println("기존 로고 이미지 파일 삭제 처리 완료");
+        if (!isExist) {
+            em.createNativeQuery(
+                            "INSERT INTO MANAGES (ID, CREATED_AT, DESCRIPTION, INVITE_CODE, NAME, OWNER_ID, VISIBILITY, ARCHIVE_STATUS) " +
+                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+                    .setParameter(1, workspaceId)
+                    .setParameter(2, LocalDateTime.now())
+                    .setParameter(3, "새로 생성된 협업 워크스페이스 룸")
+                    .setParameter(4, "INV-" + workspaceId)
+                    .setParameter(5, "Worktopus")
+                    .setParameter(6, mockLeaderId)
+                    .setParameter(7, "PUBLIC")
+                    .setParameter(8, "ACTIVE")
+                    .executeUpdate();
+
+            em.flush();
+            em.clear();
         }
 
-        if (dto.getLogoFile() != null && !dto.getLogoFile().isEmpty()) {
-            String contentType = dto.getLogoFile().getContentType();
-            if (contentType == null || !contentType.startsWith("image/")) {
-                throw new IllegalArgumentException("이미지 파일 양식만 업로드가 승인됩니다.");
-            }
-            if (dto.getLogoFile().getSize() > 5 * 1024 * 1024) {
-                throw new IllegalArgumentException("업로드 허용 용량(5MB)을 초과한 파일입니다.");
-            }
+        Manage manage = manageRepository.findById(workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("데이터 정합성 오류 발생. ID: " + workspaceId));
 
-            System.out.println("신규 로고 파일 정상 영속화: " + dto.getLogoFile().getOriginalFilename());
-        }
+        manage.updateGeneralSettings(dto.getWorkspaceName(), dto.getVisibility(), dto.getArchiveStatus());
 
-        // 3. [제안 기능 확장] 영구 동결/아카이빙 보관 상태 분기 처리
-        if (dto.getArchiveStatus() != null) {
-            System.out.println("워크스페이스 상태 코드 변경 적용: " + dto.getArchiveStatus());
-        }
-
-        // 4. [제안 기능 확장] 마스터 팀장 권한 위임 및 변경 인계 처리
         if (dto.getNewLeaderId() != null) {
-            System.out.println("새로운 팀장 이관 대상 유저 고유 ID: " + dto.getNewLeaderId());
+            manage.setOwnerId(dto.getNewLeaderId());
+        }
+
+        if (Boolean.TRUE.equals(dto.getIsLogoDeleted())) {
+            manage.updateLogoPath(null);
+        } else if (dto.getLogoFile() != null && !dto.getLogoFile().isEmpty()) {
+            String originalFileName = dto.getLogoFile().getOriginalFilename();
+            manage.updateLogoPath(originalFileName);
         }
     }
 
     /**
-     * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제 기능
+     * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제
      */
     @Transactional
     public void deleteWorkspace(Long workspaceId, Long currentUserId) {
         Long mockLeaderId = 1L;
         if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException("워크스페이스 완전 삭제 권한은 팀장 마스터에게만 부여됩니다.");
+            throw new SecurityException("워크스페이스 완전 삭제 권한은 팀장에게만 있습니다.");
         }
 
-        System.out.println("워크스페이스 및 연관 데이터 영구 제거 대상 ID: " + workspaceId);
+        Manage manage = manageRepository.findById(workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 워크스페이스 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
+
+        manageRepository.delete(manage);
     }
 
     /**
-     * 4-2-1 워크스페이스 팀원 초대 프로세스 실행 (새로 업데이트 통합된 전체 메서드)
+     * 4-2-1 워크스페이스 팀원 초대 프로세스
      */
     @Transactional
     public void inviteTeamMembers(WorkspaceInviteRequestDto dto, Long currentUserId) {
-        // [권한 검증] 요청자가 실제 관리 팀장 권한자인지 확인
         Long mockLeaderId = 1L;
         if (!mockLeaderId.equals(currentUserId)) {
             throw new SecurityException("팀장만 팀원을 초대할 수 있는 권한이 있습니다.");
         }
 
-        // 입력 데이터 누락 방지 예외 처리
         if (dto.getEmails() == null || dto.getEmails().isEmpty()) {
             throw new IllegalArgumentException("초대할 이메일 주소가 존재하지 않습니다.");
         }
 
-        System.out.println("초대 요청 수신 워크스페이스 ID: " + dto.getWorkspaceId());
-
-        // 폼에서 멀티 카운트로 날아온 이메일 리스트를 순회하며 순차 가공 처리
         for (String email : dto.getEmails()) {
-            System.out.println("▶ [초대 로그] 대상 이메일 스캐닝: " + email);
+            try {
+                SimpleMailMessage message = new SimpleMailMessage();
+                message.setFrom("worktopus7@gmail.com");
+                message.setTo(email);
+                message.setSubject("[WorkTopus] 프로젝트 워크스페이스 팀원 초대장입니다.");
 
-            // ① [확장 기능] 이미 가입되어 프로젝트 멤버 테이블에 등록된 계정인지 2차 확인
-            // ② [확장 기능] 가입 승인을 대기하는 PENDING 상태 레코드 적재
-            // ③ 메일 전송 컴포넌트 연동 알림 트리거 발송
+                String mailContent = new StringBuilder()
+                        .append("안녕하세요, WorkTopus 팀 협업 플랫폼입니다.\n\n")
+                        .append("팀장님으로부터 프로젝트 워크스페이스 초대장이 도착했습니다.\n")
+                        .append("아래 가상 링크를 클릭하거나 복사하여 브라우저에 붙여넣으면 가입 절차가 진행됩니다.\n\n")
+                        .append("🔗 프로젝트 참여하기 가상 링크: ")
+                        .append("http://localhost:8080/manage/").append(dto.getWorkspaceId()).append("/invite/accept\n\n")
+                        .append("감사합니다.\n")
+                        .append("- WorkTopus 시스템 관리자 배상 -")
+                        .toString();
+
+                message.setText(mailContent);
+                mailSender.send(message);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException("이메일 발송 실패: " + e.getMessage());
+            }
         }
-
-        System.out.println("총 " + dto.getEmails().size() + "명의 팀원 초대 메일 발송 및 관리 대기 데이터 동기화 완료.");
     }
 }
