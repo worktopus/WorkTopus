@@ -83,6 +83,10 @@ spring:
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
 
+gemini:
+  api-key: ${GEMINI_API_KEY}
+  model: gemini-3.5-flash
+
 logging:
   level:
     org.hibernate.SQL: debug

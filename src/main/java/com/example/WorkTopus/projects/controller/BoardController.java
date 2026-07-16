@@ -50,41 +50,6 @@ public class BoardController {
     }
 
 
-    @GetMapping("/modal-list")
-    public ModelAndView list1(
-            @PathVariable Long projectId,
-            @RequestParam(required = false) String keyword,
-            @PageableDefault(size = 10)
-            Pageable pageable
-    ) {
-        Page<BoardListResponse> boardPage;
-
-        if (keyword == null || keyword.isBlank()) {
-            boardPage = boardService.findBoards(projectId, pageable);
-        } else {
-            boardPage = boardService.searchBoards(projectId, keyword, pageable);
-        }
-
-        PageResponse<BoardListResponse> boards = PageResponse.from(boardPage);
-
-        ModelAndView mav = new ModelAndView("projects/board-list1");
-        mav.addObject("projectId", projectId);
-        mav.addObject("boards", boards);
-        mav.addObject("keyword", keyword);
-
-        return mav;
-    }
-
-    // 모달형 게시물 리스트
-    @GetMapping("/{boardId}/modal")
-    @ResponseBody
-    public BoardDetailModalResponse modal(
-            @PathVariable Long projectId,
-            @PathVariable Long boardId
-    ) {
-        return boardService.getModal(projectId, boardId);
-    }
-
     @GetMapping("/write")
     public ModelAndView writeForm(@PathVariable Long projectId) {
         ModelAndView mav = new ModelAndView("projects/board-write");

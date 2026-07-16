@@ -154,4 +154,11 @@ public class UserService implements UserDetailsService {
         Users user = findByUserId(userId);
         user.setPicture(picture);
     }
+
+    public Users findByUserName(String username) {
+        return userRepository.findByUserId(username)
+                .orElseThrow( () -> new IllegalArgumentException(
+                        "회원을 찾을 수 없습니다"
+                ));
+    }
 }
