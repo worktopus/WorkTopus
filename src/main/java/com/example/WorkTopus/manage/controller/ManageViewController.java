@@ -18,7 +18,7 @@ public class ManageViewController {
     private final ManageRepository manageRepository;
     private final WorkspaceManageService workspaceManageService;
 
-    @GetMapping("/manage/{workspaceId}")
+    @GetMapping("/projects/manage/{workspaceId}")
     public String showManagePage(@PathVariable("workspaceId") Long workspaceId, Model model) {
 
         Manage manageData = manageRepository.findById(workspaceId)
@@ -32,7 +32,10 @@ public class ManageViewController {
 
         model.addAttribute("project", manageData);
 
-        // [추가] 오라클 DB에서 이 워크스페이스에 참여 중인 팀원 목록을 실시간으로 가져와 넘깁니다.
+        // [핵심 추가] 사이드바의 다른 탭들(대시보드 등)이 {projectId} 값을 읽을 수 있도록 명시적으로 데이터를 넘겨줍니다.
+        model.addAttribute("projectId", workspaceId);
+
+        // 오라클 DB에서 이 워크스페이스에 참여 중인 팀원 목록을 실시간으로 가져와 넘깁니다.
         List<ManageMember> membersList = workspaceManageService.getWorkspaceMembers(workspaceId);
         model.addAttribute("members", membersList);
 

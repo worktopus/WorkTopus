@@ -64,6 +64,9 @@ spring:
           starttls:
             enable: true
             required: true
+          ssl:
+            trust: smtp.gmail.com  # <--- 팀원 추가
+
 
 
   security:

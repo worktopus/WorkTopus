@@ -1,7 +1,4 @@
-/**
- *  일반 관리 (프로젝트 이름 변경, 로고 이미지 관리, 공개범위 헤더 아이콘 실시간 연동)
- */
-
+/** * 일반 관리 (프로젝트 이름 변경, 로고 이미지 관리, 공개범위 헤더 아이콘 실시간 연동) */
 document.addEventListener('DOMContentLoaded', function () {
     // HTML 내부의 form.manage-form 요소를 정밀 탐색합니다.
     const generalForm = document.querySelector('form.manage-form') || document.querySelector('#general-tab form');
@@ -19,10 +16,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 alert('프로젝트 이름을 입력해주세요.');
                 return;
             }
-
-            // 현재 사용자가 체크한 공개 범위 설정을 감지합니다 (PUBLIC 또는 PRIVATE)
-            const selectedVisibilityInput = generalForm.querySelector('input[name="visibility"]:checked');
-            const visibilityValue = selectedVisibilityInput ? selectedVisibilityInput.value : 'PUBLIC';
 
             // 브라우저 현재 주소창에서 workspaceId 추출
             const pathSegments = window.location.pathname.split('/').filter(Boolean);
@@ -55,11 +48,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     // [핵심 기능] 상단 헤더 영역 요소를 탐색합니다.
                     const headerProjectNameSpan = document.querySelector('.header__project-name');
                     if (headerProjectNameSpan) {
-                        // 선택된 값에 따라 아이콘 이모지를 동적으로 세팅합니다.
-                        const icon = (visibilityValue === 'PUBLIC') ? ' 🌐' : ' 🔒';
-
-                        // 헤더 텍스트를 "입력한 이름 + 이모지" 조합으로 즉시 실시간 교체합니다.
-                        headerProjectNameSpan.textContent = updatedName + icon;
+                        // 이모지 아이콘을 제거하고 입력된 이름만 즉시 실시간 교체합니다.
+                        headerProjectNameSpan.textContent = updatedName;
                     }
                 })
                 .catch(error => {
