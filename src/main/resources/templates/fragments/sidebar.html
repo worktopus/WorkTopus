@@ -68,14 +68,6 @@
                     </a>
                 </li>
 
-                <li class="sidebar__item">
-                    <a th:href="@{/memo}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: memo}">
-                        </span>
-                        <span class="sidebar__text">메모</span>
-                    </a>
-                </li>
-
                 <li class="sidebar__item"  th:if="${isProjectOwner}">
                     <a th:href="@{/manage/{projectId}/manage(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
@@ -99,9 +91,10 @@
                 <button type="submit"
                         class="sidebar__link sidebar__logout"
                         aria-label="로그아웃">
-                <span class="sidebar__icon"
-                      th:insert="~{fragments/icons :: logout}">
-                </span>
+
+                    <span class="sidebar__icon"
+                          th:insert="~{fragments/icons :: logout}">
+                    </span>
                 </button>
             </form>
 
