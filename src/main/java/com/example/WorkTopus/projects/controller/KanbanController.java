@@ -52,7 +52,7 @@ public class KanbanController {
         return kanbanCardService.findProjectCards(projectId);
     }
 
-    @PostMapping("/cards/create")
+    @PostMapping("/cards")
     @ResponseBody
     public KanbanCardResponse create(
             @PathVariable Long projectId,

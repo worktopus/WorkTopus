@@ -20,8 +20,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const apiBase = kanban?.dataset.apiBase;
     const listsByStatus = new Map(
-        [...lists].map((list) => [list.dataset.status, list])
-    );
+        [...lists].map((list) => [list.dataset.status, list]));
+
+    const csrfToken =
+        document.querySelector('meta[name="_csrf"]')?.content;
+
+    const csrfHeader =
+        document.querySelector('meta[name="_csrf_header"]')?.content;
+
 
     let draggedCard = null;
     let dragSourceList = null;
@@ -386,26 +392,51 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     async function deleteTask(cardId) {
-        const response = await fetch(`${apiBase}/${encodeURIComponent(cardId)}`, {
-            method: "DELETE"
-        });
+        const headers = {};
+
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
+        const response = await fetch(
+            `${apiBase}/${encodeURIComponent(cardId)}`,
+            {
+                method: "DELETE",
+                headers
+            }
+        );
 
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
         }
     }
 
-    async function requestJson(url, options) {
+    async function requestJson(url, options = {}) {
+        const headers = {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+            ...(options.headers ?? {})
+        };
+
+        if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+        }
+
         const response = await fetch(url, {
             ...options,
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "application/json",
-                ...(options.headers ?? {})
-            }
+            headers
         });
 
         if (!response.ok) {
+            const responseText = await response.text();
+
+            console.error("칸반 API 요청 실패:", {
+                url,
+                method: options.method,
+                status: response.status,
+                responseText
+            });
+
             throw new Error(`HTTP ${response.status}`);
         }
 
@@ -424,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             return JSON.parse(text);
         } catch (error) {
-            console.warn("JSON 응답 파싱 실패:", error, error?.stack);
+            console.warn("JSON 응답 파싱 실패:", error);
             return null;
         }
     }
