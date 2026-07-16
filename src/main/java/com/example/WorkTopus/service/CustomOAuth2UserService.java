@@ -1,7 +1,7 @@
 package com.example.WorkTopus.service;
 
-import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>접근 거부 - WorkTopus</title>
+    <!-- 프리텐다드 폰트 적용 -->
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+
+        /* 중앙 정렬 카드 레이아웃 */
+        .error-container {
+            text-align: center;
+            background: #ffffff;
+            padding: 48px 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+            max-width: 420px;
+            width: 90%;
+            border: 1px solid #edf2f7;
+        }
+
+        /* 연보라 원형 아이콘 배경 */
+        .error-icon-box {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 80px;
+            height: 80px;
+            background-color: #eef2ff;
+            border-radius: 50%;
+            margin-bottom: 24px;
+            color: #637ae4;
+        }
+
+        .error-icon {
+            font-size: 36px;
+        }
+
+        /* 타이틀 */
+        h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+
+        /* 설명 문구 */
+        .error-desc {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        /* 단일 이동 버튼 (메인 테마 컬러 매칭) */
+        .btn-primary {
+            display: block;
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            background-color: #637ae4;
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #4f65ce;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 122, 228, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="error-container">
+    <!-- 보안/제한을 나타내는 자물쇠 이모지 -->
+    <div class="error-icon-box">
+        <span class="error-icon">🔒</span>
+    </div>
+
+    <h1>접근 권한이 없습니다.</h1>
+    <p class="error-desc">이 기능을 이용하시려면<br>관리자 권한이 필요합니다.</p>
+
+    <!-- 메인(/projects)으로 복귀하는 깔끔한 싱글 버튼 -->
+    <a th:href="@{/projects}" class="btn-primary">메인으로</a>
+</div>
+
+</body>
+</html>

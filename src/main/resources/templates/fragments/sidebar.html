@@ -8,9 +8,11 @@
 
         <div class="sidebar__header">
 
-            <a th:href="@{/dashboard}" class="sidebar__logo">
-                <span class="sidebar__logo-icon">🐙</span>
-                <span class="sidebar__logo-text">Worktopus</span>
+            <a th:href="@{/projects/dashboard}" class="sidebar__logo">
+                <img th:src="@{/images/logo.png}"
+                     alt="WorkTopus"
+                     class="sidebar__logo-img">
+                <span class="sidebar__logo-text">WorkTopus</span>
             </a>
 
             <button id="sidebarToggle"
@@ -26,7 +28,7 @@
             <ul class="sidebar__menu">
 
                 <li class="sidebar__item">
-                    <a th:href="@{/project/dashboard}"
+                    <a th:href="@{/projects/{projectId}/boards/dashboard(projectId=${projectId})}"
                        class="sidebar__link sidebar__link--active">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: dashboard}">
 
@@ -36,23 +38,25 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/project/board-list}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
-                        </span>
+                    <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                       class="sidebar__link">
+        <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
+        </span>
                         <span class="sidebar__text">프로젝트(일반)</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/project/board-list1}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: project1}">
-                        </span>
+                    <a th:href="@{/projects/{projectId}/boards/modal-list(projectId=${projectId})}"
+                       class="sidebar__link">
+        <span class="sidebar__icon" th:insert="~{fragments/icons :: project1}">
+        </span>
                         <span class="sidebar__text">프로젝트(팝업형)</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/kanban}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: kanban}">
                         </span>
                         <span class="sidebar__text">칸반보드</span>
@@ -60,7 +64,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/calendar}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: calender}">
                         </span>
                         <span class="sidebar__text">캘린더</span>
@@ -68,7 +72,7 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/file}" class="sidebar__link">
+                    <a th:href="@{/projects/{projectId}/files(projectId=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: file}">
                         </span>
                         <span class="sidebar__text">파일</span>
@@ -84,31 +88,36 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/chat}" class="sidebar__link">
+                    <!-- 주소 경로를 /manage/프로젝트ID 구조로 깔끔하게 변경합니다 -->
+                    <a th:href="@{/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
                         </span>
                         <span class="sidebar__text">설정</span>
                     </a>
                 </li>
 
+
             </ul>
         </nav>
 
         <div class="sidebar__footer">
 
-            <a th:href="@{/setting}" class="sidebar__link" aria-label="내 정보">
+            <a th:href="@{/info}" class="sidebar__link" aria-label="내 정보">
                 <span class="sidebar__icon" th:insert="~{fragments/icons :: info}">
                 </span>
             </a>
 
             <span class="sidebar__divider"></span>
 
-            <a th:href="@{/logout}"
-               class="sidebar__link sidebar__logout"
-               aria-label="로그아웃">
-                <span class="sidebar__icon" th:insert="~{fragments/icons :: logout}">
-                </span>
-            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit"
+                        class="sidebar__link sidebar__logout"
+                        aria-label="로그아웃">
+                    <span class="sidebar__icon"
+                          th:insert="~{fragments/icons :: logout}">
+                    </span>
+                </button>
+            </form>
 
         </div>
 

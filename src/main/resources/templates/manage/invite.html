@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>WorkTopus - 프로젝트 관리자(팀원 초대)</title>
+    <!-- 모든 스타일을 외부 css 파일로 깔끔하게 연결 -->
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+    <link rel="stylesheet" th:href="@{/css/manage.css}">
+</head>
+<body>
+
+<div class="layout">
+    <!-- 1. 좌측 사이드바 영역 -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="layout__content">
+        <!-- 2. 우측 상단 헤더 영역 -->
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <!-- 3. 본문 컨테이너 영역 -->
+        <main class="manage-container">
+            <h1 class="manage-title">팀원 초대 (팀장 전용)</h1>
+            <p class="manage-subtitle">함께 프로젝트를 진행할 팀원들의 이메일을 입력하여 초대장을 발송합니다.</p>
+
+            <!-- 빠른 초대 링크 공유 -->
+            <div class="link-copy-section">
+                <p class="link-copy-title">🔗 빠른 초대 링크 공유</p>
+                <div class="link-copy-flex">
+                    <input type="text" id="inviteLinkInput" class="link-copy-input" readonly value="https://worktopus.com">
+                    <button type="button" id="copyLinkBtn" class="link-copy-btn">링크 복사</button>
+                </div>
+            </div>
+
+            <hr class="manage-divider">
+
+            <!-- [🚨 405 에러 완전 분쇄 및 차단 조치] 브라우저의 기본 submit 동작을 원천 봉쇄합니다. -->
+            <form id="inviteForm" action="" method="POST" onsubmit="event.preventDefault(); return false;">
+                <div id="emailInputContainer">
+                    <!-- 첫 번째 기본 이메일 입력 그룹 -->
+                    <div class="email-input-group">
+                        <div class="email-input-flex">
+                            <input type="email" name="emails" class="email-main-input" placeholder="초대할 팀원의 이메일을 입력하세요" required>
+                        </div>
+                        <div class="error-msg">올바른 이메일 형식이 아닙니다.</div>
+                    </div>
+                </div>
+
+                <!-- 버튼 컨트롤 박스 (명시적인 type="button" 선언으로 안전성 보장) -->
+                <div class="button-group">
+                    <button type="button" id="addEmailBtn" class="btn-add-email">+ 이메일 추가</button>
+                    <button type="button" id="submitInviteBtn" class="btn-submit-invite">초대장 발송</button>
+                </div>
+            </form>
+        </main>
+    </div>
+</div>
+
+<script th:src="@{/js/manage/project-manage.js}"></script>  <!-- 공통/탭 전환 -->
+<script th:src="@{/js/manage/manage-general.js}"></script>  <!-- 일반 관리 전용 -->
+<script th:src="@{/js/manage/manage-member.js}"></script>   <!-- 팀원 관리 전용 -->
+<script th:src="@{/js/manage/manage-invite.js}"></script>   <!-- 팀원 초대 전용 -->
+<script th:src="@{/js/manage/manage-board.js}"></script>    <!-- 게시판 관리 전용 -->
+</body>
+</html>

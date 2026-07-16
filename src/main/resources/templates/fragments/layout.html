@@ -8,12 +8,13 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
 
-    <title>Worktopus</title>
+    <title>Worktopus | Kanban</title>
 
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/kanban.css}">
 </head>
 
 <body>
@@ -27,12 +28,228 @@
         <div th:replace="~{fragments/layout/header :: header}"></div>
 
         <main class="main">
-            <!-- 각 페이지가 들어갈 영역 -->
+
+            <section class="kanban">
+
+                <section class="kanban__header">
+                    <div>
+                        <p class="kanban__label">PROJECT BOARD</p>
+
+                        <h1 class="kanban__title">
+                            WorkTopus 칸반보드
+                        </h1>
+
+                        <p class="kanban__desc">
+                            업무 상태를 한눈에 확인하고 진행 상황을 관리하세요.
+                        </p>
+                    </div>
+
+                    <button type="button" class="kanban__add-button">
+                        + 업무 추가
+                    </button>
+                </section>
+
+                <section class="kanban__summary">
+                    <article class="kanban__summary-card">
+                        <span class="kanban__summary-label">전체 업무</span>
+                        <strong>12</strong>
+                    </article>
+
+                    <article class="kanban__summary-card">
+                        <span class="kanban__summary-label">진행 중</span>
+                        <strong>4</strong>
+                    </article>
+
+                    <article class="kanban__summary-card">
+                        <span class="kanban__summary-label">완료</span>
+                        <strong>3</strong>
+                    </article>
+                </section>
+
+                <section class="kanban__columns">
+
+                    <article class="kanban__column">
+                        <div class="kanban__column-header">
+                            <div>
+                                <h2>Todo</h2>
+                                <span>시작 전 업무</span>
+                            </div>
+                            <strong>3</strong>
+                        </div>
+
+                        <div class="kanban__list">
+
+                            <article class="kanban__card">
+                                <div class="kanban__card-top">
+                                    <span class="kanban__badge kanban__badge--high">High</span>
+                                    <button type="button" class="kanban__more">⋯</button>
+                                </div>
+
+                                <h3 class="kanban__card-title">
+                                    칸반보드 화면 구현
+                                </h3>
+
+                                <p class="kanban__card-desc">
+                                    기본 컬럼과 업무 카드 UI를 먼저 구성한다.
+                                </p>
+
+                                <div class="kanban__tags">
+                                    <span>Frontend</span>
+                                    <span>UI</span>
+                                </div>
+
+                                <div class="kanban__card-footer">
+                                    <span class="kanban__avatar">린</span>
+                                    <span class="kanban__date">7월 10일</span>
+                                </div>
+                            </article>
+
+                            <article class="kanban__card">
+                                <div class="kanban__card-top">
+                                    <span class="kanban__badge kanban__badge--medium">Medium</span>
+                                    <button type="button" class="kanban__more">⋯</button>
+                                </div>
+
+                                <h3 class="kanban__card-title">
+                                    업무 등록 모달 설계
+                                </h3>
+
+                                <p class="kanban__card-desc">
+                                    제목, 담당자, 우선순위, 마감일 입력 폼 구성.
+                                </p>
+
+                                <div class="kanban__tags">
+                                    <span>Modal</span>
+                                </div>
+
+                                <div class="kanban__card-footer">
+                                    <span class="kanban__avatar">린</span>
+                                    <span class="kanban__date">7월 11일</span>
+                                </div>
+                            </article>
+
+                        </div>
+                    </article>
+
+                    <article class="kanban__column">
+                        <div class="kanban__column-header">
+                            <div>
+                                <h2>In Progress</h2>
+                                <span>진행 중</span>
+                            </div>
+                            <strong>2</strong>
+                        </div>
+
+                        <div class="kanban__list">
+                            <article class="kanban__card">
+                                <div class="kanban__card-top">
+                                    <span class="kanban__badge kanban__badge--high">High</span>
+                                    <button type="button" class="kanban__more">⋯</button>
+                                </div>
+
+                                <h3 class="kanban__card-title">
+                                    Drag & Drop 기능
+                                </h3>
+
+                                <p class="kanban__card-desc">
+                                    카드 이동 시 상태값이 변경되도록 구현한다.
+                                </p>
+
+                                <div class="kanban__tags">
+                                    <span>JavaScript</span>
+                                </div>
+
+                                <div class="kanban__card-footer">
+                                    <span class="kanban__avatar">린</span>
+                                    <span class="kanban__date">7월 12일</span>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="kanban__column">
+                        <div class="kanban__column-header">
+                            <div>
+                                <h2>Review</h2>
+                                <span>검토 필요</span>
+                            </div>
+                            <strong>1</strong>
+                        </div>
+
+                        <div class="kanban__list">
+                            <article class="kanban__card">
+                                <div class="kanban__card-top">
+                                    <span class="kanban__badge kanban__badge--low">Low</span>
+                                    <button type="button" class="kanban__more">⋯</button>
+                                </div>
+
+                                <h3 class="kanban__card-title">
+                                    카드 디자인 점검
+                                </h3>
+
+                                <p class="kanban__card-desc">
+                                    여백, 그림자, hover 효과를 확인한다.
+                                </p>
+
+                                <div class="kanban__tags">
+                                    <span>Design</span>
+                                </div>
+
+                                <div class="kanban__card-footer">
+                                    <span class="kanban__avatar">린</span>
+                                    <span class="kanban__date">7월 13일</span>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="kanban__column">
+                        <div class="kanban__column-header">
+                            <div>
+                                <h2>Done</h2>
+                                <span>완료</span>
+                            </div>
+                            <strong>2</strong>
+                        </div>
+
+                        <div class="kanban__list">
+                            <article class="kanban__card">
+                                <div class="kanban__card-top">
+                                    <span class="kanban__badge kanban__badge--done">Done</span>
+                                    <button type="button" class="kanban__more">⋯</button>
+                                </div>
+
+                                <h3 class="kanban__card-title">
+                                    게시판 기본 레이아웃
+                                </h3>
+
+                                <p class="kanban__card-desc">
+                                    프로젝트 게시판 목록 화면 구현 완료.
+                                </p>
+
+                                <div class="kanban__tags">
+                                    <span>Board</span>
+                                </div>
+
+                                <div class="kanban__card-footer">
+                                    <span class="kanban__avatar">린</span>
+                                    <span class="kanban__date">완료</span>
+                                </div>
+                            </article>
+                        </div>
+                    </article>
+
+                </section>
+
+            </section>
+
         </main>
 
     </div>
 
 </div>
+
+<script th:src="@{/js/sidebar.js}"></script>
 
 </body>
 </html>

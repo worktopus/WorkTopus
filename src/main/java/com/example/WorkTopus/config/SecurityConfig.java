@@ -1,12 +1,12 @@
 package com.example.WorkTopus.config;
 
-import com.example.WorkTopus.service.CustomOAuth2UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import com.example.WorkTopus.service.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 
 // SpringSecurity
 @RequiredArgsConstructor
@@ -18,18 +18,19 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
+                // .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/","/index.html",
-                                "/css/**", "/images/**", "/js/**",
-                                "/login", "/members/register"
+                                "/css/**", "/images/**", "/js/**", "/error/**",
+                                "/login", "/home/**"
                         ).permitAll()       // 로그인 없이 사용가능
                         // .requestMatchers(
                         //        "/admin/**", "/vupdate", "/vdelete"
                         // ).hasRole("ADMIN")  // 추후 관리자페이지
-                        .requestMatchers("/projects/**")
-                        .authenticated()   // 로그인이 필요
+                        .requestMatchers(
+                                "/projects/**", "/user/**", "/api/**"
+                        ).authenticated()   // 로그인이 필요
                         .anyRequest().authenticated() // 설정하지 않은 다른 요청도 로그인 필요
                 )
                 .formLogin(form->form
@@ -57,7 +58,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/login?logout")
+                        .logoutSuccessUrl("/")
                         .invalidateHttpSession(true)
                         .deleteCookies("JSESSIONID"))
                 .exceptionHandling(

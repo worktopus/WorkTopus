@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.security.Principal;
 import java.util.List;
 
-@RestController
+@RestController("chatProjectController")
 @RequiredArgsConstructor
 public class ProjectController {
 
@@ -173,7 +173,7 @@ public class ProjectController {
         }
 
         try {
-            return userService.findByUserName(
+            return userService.findByUserId(
                     principal.getName()
             );
 

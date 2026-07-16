@@ -1,0 +1,483 @@
+.projects-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.projects-logo-img {
+    width: 46px;
+    height: 46px;
+}
+
+.projects-logo-text {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--text-main);
+}
+
+/* ============================= WorkTopus 마이페이지 전용 스타일 시트 ================================ */
+
+
+/* 기본 페이지 배경 및 레이아웃 */
+.mypage-page {
+    min-height: 100vh;
+    background: #f7f9ff;
+    font-family: 'Pretendard', sans-serif;
+    color: #1e293b;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 사이드바와 메인을 감싸는 부모 컨테이너 가로 정렬 배치 */
+.mypage-container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* 3. 사이드바 내비게이션 */
+.sidebar {
+    background: #ffffff;
+    padding: 24px;
+    border-radius: 24px;
+    border: 1px solid #edf0ff;
+    box-shadow: 0 16px 40px rgba(114, 135, 244, 0.06);
+    height: fit-content;
+    width: 260px;
+    flex-shrink: 0;
+}
+
+.sidebar-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+    padding-left: 8px;
+}
+
+.menu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.menu-item button {
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #64748b;
+    background: none;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.menu-item button:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+/* 활성화 상태 (선택된 메뉴 탭) */
+.menu-item.active button {
+    background: #eef2ff;
+    color: #4d7cff;
+}
+
+/* 4. 메인 콘텐츠 윈도우 */
+.main-content {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 28px;
+    border: 1px solid #edf0ff;
+    box-shadow: 0 16px 40px rgba(114, 135, 244, 0.08);
+    min-height: 500px;
+    flex-grow: 1; /* 남은 가로 공간을 전부 채우기 */
+    width: calc(100% - 290px);
+}
+
+/* 섹션 탭 전환 제어 */
+.content-section {
+    display: none;
+}
+
+.content-section.active {
+    display: block;
+}
+
+.content-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e293b;
+    margin-bottom: 28px;
+    letter-spacing: -0.5px;
+}
+
+/* ==========================================================================
+   5. 내 정보 (회원 정보 수정) 컴포넌트 스타일
+   ========================================================================== */
+
+/* 대분류 행 그룹 레이아웃 */
+.info-row-group {
+    padding: 24px 0;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+}
+
+.info-row-group:first-of-type {
+    padding-top: 8px;
+}
+
+/* 좌측 대분류 고정 레이블 너비 */
+.info-group-label {
+    width: 180px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    flex-shrink: 0;
+    padding-top: 10px;
+}
+
+/* 우측 콘텐츠 다중 열 컨테이너 */
+.info-rows-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* 세부 데이터 정렬 단일 행 */
+.info-data-row {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+}
+
+/* 내부 타이틀 (계정 ID, 이메일, 비밀번호 등) */
+.data-label {
+    width: 120px;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* 데이터 출력 텍스트 */
+.data-value {
+    font-size: 15px;
+    color: #334155;
+}
+
+.data-value.font-bold {
+    font-weight: 700;
+    color: #1e293b;
+}
+
+/* 가로 구분선 */
+.section-divider {
+    border: 0;
+    height: 1px;
+    background: #edf0ff;
+    margin: 12px 0;
+}
+
+/* 5-1. 프로필 이미지 / 기본 SVG 공통 스타일 */
+.profile-avatar-label {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-click-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #edf0ff;
+    box-shadow: 0 4px 12px rgba(114, 135, 244, 0.1);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 기본 SVG 공용 백그라운드 박스 */
+.default-avatar-svg {
+    background: #f1f5f9;
+}
+
+.avatar-svg-icon {
+    width: 60px;
+    height: 60px;
+}
+
+.profile-click-avatar:hover {
+    transform: scale(1.03);
+    filter: brightness(0.95);
+    border-color: #4d7cff;
+}
+
+/* 5-2. 인풋 스타일 최적화 (가득 채우기) */
+.inline-input-group.full-width-input {
+    width: 100%;
+    max-width: 360px;
+}
+
+.inline-input-group.full-width-input input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 12px;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s;
+}
+
+.inline-input-group.full-width-input input:focus {
+    border-color: #4d7cff;
+    box-shadow: 0 0 0 3px rgba(77, 124, 255, 0.12);
+}
+
+/* 5-3. 연결된 서비스 구역 및 엑스박스 방지 대체 처리 */
+.social-link-zone {
+    gap: 12px;
+}
+
+.social-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: #f8fafc;
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    max-width: 420px;
+}
+
+.social-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    min-width: 24px;
+    border-radius: 4px;
+}
+
+.social-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: #475569;
+}
+
+/* 5-4. 우측 하단 통합 수정 버튼 정렬 */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 32px;
+}
+
+.btn-submit-main {
+    padding: 0 24px;
+    height: 46px;
+    background: #eef2ff;
+    color: #4d7cff;
+    border: 1px solid #dfe4ff;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-submit-main:hover {
+    background: #4d7cff;
+    color: #ffffff;
+    border-color: #4d7cff;
+    box-shadow: 0 4px 12px rgba(77, 124, 255, 0.15);
+}
+
+/* ==========================================================================
+   6. 오늘의 할 일 리스트 (To-do)
+   ========================================================================== */
+.todo-input-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+#todo-input {
+    flex: 1;
+    height: 50px;
+    padding: 0 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    font-size: 15px;
+    outline: none;
+}
+
+#todo-input:focus {
+    border-color: #4d7cff;
+}
+
+.btn-todo-add {
+    padding: 0 24px;
+    background: #4d7cff;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.todo-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.todo-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    transition: all 0.2s;
+}
+
+.todo-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.todo-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.todo-text {
+    font-size: 15px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.todo-item.completed {
+    opacity: 0.6;
+}
+
+.todo-item.completed .todo-text {
+    text-decoration: line-through;
+    color: #94a3b8;
+}
+
+.btn-todo-delete {
+    background: none;
+    border: none;
+    color: #ef4444;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   7. 게시판 테이블 및 기타 탭 컴포넌트 디자인
+   ========================================================================== */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+}
+
+th {
+    background: #f8fafc;
+    color: #64748b;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 14px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th:first-child { border-top-left-radius: 10px; border-bottom-left-radius: 10px; }
+th:last-child { border-top-right-radius: 10px; border-bottom-right-radius: 10px; }
+
+td {
+    padding: 16px;
+    font-size: 15px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.status-badge {
+    display: inline-flex;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #e0e7ff;
+    color: #4d7cff;
+    border-radius: 999px;
+}
+
+/* ==========================================================================
+   [추가] 로그아웃 & 회원탈퇴 전용 위험/경고(Danger) 버튼 스타일 최적화
+   ========================================================================== */
+
+/* 로그아웃 & 회원탈퇴 폼 내부 버튼 공통 정의 */
+.menu-item .logout,
+.menu-item .delete {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;       /* 다른 메뉴보다 살짝 슬림하게 조절 */
+    font-size: 13.5px;        /* 일반 메뉴(15px)보다 살짝 작게 */
+    font-weight: 600;
+    background: none;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 1. 로그아웃 버튼 색상 설정 */
+.menu-item .logout {
+    color: #94a3b8;           /* 평소에는 기본 사이드바 서브 타이틀처럼 은은한 회색 */
+}
+
+.menu-item .logout:hover {
+    background: #f8fafc;
+    color: #475569;           /* 마우스 올렸을 때 진한 먹색으로 반전 */
+}
+
+/* 2. 회원탈퇴 버튼 색상 설정 (위험 구역) */
+.menu-item .delete {
+    color: #fda4af;           /* 평소에는 톤다운된 부드러운 핑크빛 빨강 (시선을 너무 빼앗지 않게) */
+}
+
+.menu-item .delete:hover {
+    background: #fff1f2;      /* 마우스 올렸을 때 부드러운 레드 계열 배경 */
+    color: #e11d48;           /* 텍스트는 선명하고 경고 의미가 강한 빨간색 */
+}

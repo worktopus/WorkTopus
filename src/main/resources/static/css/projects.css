@@ -208,7 +208,7 @@
 }
 
 .projects-empty {
-    display: none;
+    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 28px;
 }
@@ -308,3 +308,138 @@
 .join-submit:hover {
     background: var(--primary-hover);
 }
+
+/* ======================코드로 참가================================== */
+.join-modal {
+    display: none;
+}
+
+.join-modal.active {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: block;
+}
+
+.join-modal-bg {
+    position: absolute;
+    inset: 0;
+    background: rgba(34, 34, 34, 0.28);
+}
+
+.join-modal-card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 420px;
+    padding: 34px;
+    background: #fff;
+    border-radius: 26px;
+    box-shadow: 0 24px 70px rgba(34, 34, 34, 0.18);
+    transform: translate(-50%, -50%);
+}
+
+.join-modal-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 10px;
+}
+
+.join-modal-desc {
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-sub);
+    margin-bottom: 28px;
+}
+
+.join-modal-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.join-modal-input {
+    height: 52px;
+    padding: 0 16px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text-main);
+    background: #f8f9ff;
+    border: 1px solid #e1e6ff;
+    border-radius: 16px;
+    outline: none;
+    transition: .2s;
+}
+
+.join-modal-input:focus {
+    background: #fff;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(114, 135, 244, 0.16);
+}
+
+.join-modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.join-modal-cancel,
+.join-modal-submit {
+    height: 46px;
+    padding: 0 22px;
+    font-size: 15px;
+    font-weight: 500;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.join-modal-cancel {
+    color: var(--text-sub);
+    background: #fff;
+    border: 1px solid #dfe4ff;
+}
+
+.join-modal-cancel:hover {
+    color: var(--primary);
+    background: var(--primary-light);
+}
+
+.join-modal-submit {
+    color: #fff;
+    background: var(--primary);
+    border: none;
+}
+
+.join-modal-submit:hover {
+    background: var(--primary-hover);
+}
+
+.projects-message {
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    font-size: 15px;
+    font-weight: 400;
+    border-radius: 14px;
+}
+
+.success-message {
+    color: var(--primary-dark);
+    background: var(--primary-light);
+}
+
+.error-message {
+    color: #dc2626;
+    background: #fff1f2;
+}
+
+/* 확인용 */
+
+/*.projects-grid {
+    display: none;
+}
+
+.projects-empty {
+    display: flex;
+}*/

@@ -394,7 +394,7 @@ public class ChatController {
         }
 
         try {
-            return userService.findByUserName(
+            return userService.findByUserId(
                     principal.getName()
             );
 

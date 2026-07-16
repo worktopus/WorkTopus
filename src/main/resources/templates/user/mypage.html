@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>마이페이지 - WorkTopus</title>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
+    <link rel="stylesheet" href="/css/mypage.css">
+</head>
+<body>
+<div class="mypage-page">
+
+    <div th:replace="~{fragments/homeHeader :: homeHeader}"></div>
+
+    <!--wrapper-->
+    <div class="mypage-wrapper">
+
+        <!--사이드,메인이 들어있는 컨테이너-->
+        <div class="mypage-container">
+            <div class="sidebar">
+                <div class="sidebar-title">마이 페이지</div>
+                <ul class="menu-list">
+                    <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보</button></li>
+                    <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
+                    <li class="menu-item" id="menu-comments"><button onclick="switchTab('comments')">내가 쓴 댓글</button></li>
+                    <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">알림</button></li>
+                    <li class="menu-item">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="logout">로그아웃</button>
+                        </form>
+                    </li>
+                    <li class="menu-item">
+                        <form th:action="@{#}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 작성하신 정보가 모두 삭제되며 되돌릴 수 없습니다.');">
+                            <button type="submit" class="delete">회원탈퇴</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+
+            <!--메인-->
+            <div class="main-content">
+
+                <!--내 정보-->
+                <div id="section-info" class="content-section active">
+                    <h2 class="content-title">내 정보</h2>
+
+                    <form th:action="@{/user/mypage}" method="post" th:object="${userForm}" enctype="multipart/form-data" class="info-edit-form">
+
+                        <!-- 프로필 사진 변경 영역 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">프로필 사진</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <label for="profile-file-input" class="profile-avatar-label">
+                                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                                             title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
+                                    </label>
+                                    <input type="file" id="profile-file-input" name="profilePicture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--이름 수정 영역-->
+                        <div class="info-row-group">
+                            <div class="info-group-label">이름</div>
+                            <div class="info-rows-container">
+                                <div class="info-data-row">
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="text" id="name-field" th:field="*{name}" required placeholder="이름을 입력하세요">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 계정 정보 조회 -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">계정 정보</div>
+                            <div class="info-rows-container">
+
+                                <!-- 계정 ID -->
+                                <div class="info-data-row">
+                                    <span class="data-label">계정 ID</span>
+                                    <span class="data-value font-bold" th:text="${user.userId}">admin</span>
+                                </div>
+
+                                <!-- 이메일 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">이메일</span>
+                                    <span class="data-value" th:text="${user.email}">admin@example.com</span>
+                                </div>
+
+                                <!-- 비밀번호 -->
+                                <div class="info-data-row">
+                                    <span class="data-label">비밀번호</span>
+                                    <div class="inline-input-group full-width-input">
+                                        <input type="password" id="password-field" th:field="*{password}" placeholder="••••••••">
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <hr class="section-divider">
+
+                        <!-- 연결된 서비스 영역 (조회 전용) -->
+                        <div class="info-row-group">
+                            <div class="info-group-label">연결된 서비스</div>
+                            <div class="info-rows-container social-link-zone">
+
+                                <!-- 구글 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/google-icon.png" alt="Google" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'google'} ? '구글 계정으로 등록됨' : '구글 아이디 연결 없음'">구글 연동 상태</span>
+                                </div>
+
+                                <!-- 카카오 연동 -->
+                                <div class="social-row">
+                                    <img src="/images/kakao-icon.png" alt="Kakao" class="social-icon">
+                                    <span class="social-text" th:text="${user.provider == 'kakao'} ? '카카오 계정으로 등록됨' : '카카오 아이디 연결 없음'">카카오 연동 상태</span>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- [오른쪽 밑 배치] 통합 정보 수정 저장 버튼 -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit-main">수정</button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!--글 목록-->
+                <div id="section-posts" class="content-section">
+                    <h2 class="content-title">내가 쓴 글 목록</h2>
+                    <table>
+                        <thead>
+                        <tr><th>번호</th><th>제목</th><th>작성일</th></tr>
+                        </thead>
+                        <tbody id="posts-tbody">
+                        <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px 0;">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!--댓글 목록-->
+                <div id="section-comments" class="content-section">
+                    <h2 class="content-title">내가 쓴 댓글 목록</h2>
+                    <table>
+                        <thead>
+                        <tr><th>댓글 내용</th><th>원문 제목</th><th>작성일</th></tr>
+                        </thead>
+                        <tbody id="comments-tbody">
+                        <tr><td colspan="3" style="text-align: center; color: #94a3b8; padding: 30px 0;">데이터를 불러오는 중입니다...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!--알림-->
+                <div id="section-notif" class="content-section">
+                    <h2 class="content-title">프로젝트 알림</h2>
+                    <ul id="notif-list" style="padding: 0; list-style: none; margin: 0;">
+                        <li style="padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px; text-align: center; color: #64748b; font-size: 14px; background-color: #f8fafc;">
+                            새로운 시스템 및 프로젝트 알림이 존재하지 않습니다.
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+<script th:inline="javascript">
+
+    // 완료 메시지
+    var msg = /*[[${msg}]]*/ null;
+    if (msg) {
+        alert(msg);
+    }
+
+    // 💡 페이지 로드 시 탭 우선순위 제어 로직 수정 완료
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeTab = urlParams.get('tab'); // 1. URL 파라미터가 있는지 먼저 찾음
+
+        if (!activeTab) {
+            activeTab = 'info';
+        }
+
+        switchTab(activeTab);
+    });
+
+    // 탭 전환
+    function switchTab(tabName) {
+        // 존재하지 않는 탭 처리 방지 예외 코드
+        if (!document.getElementById('section-' + tabName)) {
+            tabName = 'info';
+        }
+
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
+        document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
+
+        document.getElementById('section-' + tabName).classList.add('active');
+        document.getElementById('menu-' + tabName).classList.add('active');
+
+        // 현재 선택한 유효 탭 정보를 브라우저에 저장
+        localStorage.setItem('mypageActiveTab', tabName);
+
+        if (tabName === 'posts') { loadMyPosts(); }
+        else if (tabName === 'comments') { loadMyComments(); }
+    }
+
+    // 프사 미리보기
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var label = document.querySelector('.profile-avatar-label');
+                label.innerHTML = `<img src="${e.target.result}" id="profile-preview" class="profile-click-avatar" title="사진을 클릭하여 변경">`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    // 내 글 목록 조회
+    function loadMyPosts() {
+        fetch("/api/user/posts")
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('posts-tbody');
+                tbody.innerHTML = '';
+                if(data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#94a3b8; padding:30px 0;">작성한 게시글이 없습니다.</td></tr>`;
+                    return;
+                }
+                data.forEach(post => {
+                    const row = `<tr>
+                        <td><span class="status-badge">${post.id}</span></td>
+                        <td><a href="/board/view/${post.id}" style="color:#4d7cff; text-decoration:none; font-weight:600;">${post.title}</a></td>
+                        <td style="color:#64748b;">${post.writeDate}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }).catch(err => console.error(err));
+    }
+
+    // 내 댓글
+    function loadMyComments() {
+        // 로직 작성
+    }
+
+</script>
+</body>
+</html>

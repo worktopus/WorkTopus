@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>게시글 수정 | WorkTopus</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/board-write.css}">
+    <link rel="stylesheet" th:href="@{/css/projects/write-editor.css}">
+
+
+</head>
+<body>
+<div class="layout">
+
+    <!-- Sidebar -->
+    <th:block th:replace="~{fragments/sidebar :: sidebar}"></th:block>
+
+    <main class="layout__content">
+        <!-- Header -->
+        <th:block th:replace="~{fragments/header :: header}"></th:block>
+
+        <section class="board_write">
+
+            <!-- 상단 제목 영역 -->
+            <div class="board_write_head">
+                <div>
+                    <p class="board_write_label">PROJECT BOARD</p>
+                    <h1 class="board_write_title">게시글 수정</h1>
+                    <p class="board_write_desc">
+                        게시글 내용을 수정합니다.
+                    </p>
+                </div>
+            </div>
+
+
+        <!-- 작성 폼 -->
+            <form class="board_write_form"
+                  th:action="@{/projects/{projectId}/boards/{boardId}/edit(
+                            projectId=${projectId},boardId=${board.id})}"
+              method="post"
+              enctype="multipart/form-data">
+            <input type="hidden" name="projectId" th:value="${projectId}">
+            <input type="hidden" name="notice" value="false">
+
+            <!-- 기본 정보 -->
+            <div class="board_write_card">
+
+                <div class="board_write_row">
+                    <div class="board_write_field">
+                        <label for="category" class="board_write_field_label">
+                            게시판 구분
+                        </label>
+
+                        <select id="category"
+                                name="category"
+                                class="board_write_select"
+                                required>
+                            <option value="">게시판을 선택하세요</option>
+                            <option value="NOTICE" th:selected="${board.category == 'NOTICE'}">공지사항</option>
+                            <option value="FREE" th:selected="${board.category == 'FREE'}">자유게시판</option>
+                            <option value="IDEA" th:selected="${board.category == 'IDEA'}">아이디어</option>
+                            <option value="QUESTION" th:selected="${board.category == 'QUESTION'}">질문</option>
+                        </select>
+                    </div>
+
+                    <div class="board_write_field">
+                        <label for="tag" class="board_write_field_label">
+                            태그
+                        </label>
+
+                        <input id="tag"
+                               name="tag"
+                               type="text"
+                               class="board_write_input"
+                               th:value="${board.tag}"
+                               placeholder="예: 기획, 프론트, 회의">
+                    </div>
+                </div>
+
+                <div class="board_write_field">
+                    <label for="title" class="board_write_field_label">
+                        제목
+                    </label>
+
+                    <input id="title"
+                           name="title"
+                           type="text"
+                           class="board_write_input"
+                           th:value="${board.title}"
+                           maxlength="100"
+                           required>
+                </div>
+
+                <div class="board_write_field">
+                    <label for="editorContent" class="board_write_field_label">
+                        내용
+                    </label>
+
+                    <div class="wt_editor" data-editor>
+                        <div class="wt_editor_content"
+                             id="editorContent"
+                             contenteditable="true"
+                             data-editor-content
+                             spellcheck="false"
+                            th:utext="${board.content}"></div>
+
+                        <input type="hidden"
+                               id="contentInput"
+                               name="content"
+                        th:value="${board.content}">
+
+                        <div class="wt_editor_inline" data-inline-toolbar>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="bold"
+                                    aria-label="굵게">
+                                <th:block th:replace="~{fragments/icons :: bold}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="italic"
+                                    aria-label="기울기">
+                                <th:block th:replace="~{fragments/icons :: italic}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="strike"
+                                    aria-label="취소선">
+                                <th:block th:replace="~{fragments/icons :: strike}"></th:block>
+                            </button>
+
+                            <div class="wt_editor_divider"></div>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="color"
+                                    aria-label="글자색">
+                                <th:block th:replace="~{fragments/icons :: textcolor}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="highlight"
+                                    aria-label="형광펜">
+                                <th:block th:replace="~{fragments/icons :: highlight}"></th:block>
+                            </button>
+
+                            <button type="button"
+                                    class="wt_editor_inline_btn"
+                                    data-inline="link"
+                                    aria-label="링크">
+                                <th:block th:replace="~{fragments/icons :: link}"></th:block>
+                            </button>
+
+                        </div>
+
+                        <div class="wt_editor_color_palette"
+                             data-color-palette>
+
+                            <button data-color="#ef4444"></button>
+
+                            <button data-color="#f97316"></button>
+
+                            <button data-color="#eab308"></button>
+
+                            <button data-color="#22c55e"></button>
+
+                            <button data-color="#3b82f6"></button>
+
+                            <button data-color="#8b5cf6"></button>
+
+                        </div>
+
+                        <div class="wt_editor_highlight_palette"
+                             data-highlight-palette>
+
+                            <button data-highlight="#fef08a"></button>
+                            <button data-highlight="#bbf7d0"></button>
+                            <button data-highlight="#bfdbfe"></button>
+                            <button data-highlight="#ddd6fe"></button>
+
+                        </div>
+
+                        <div class="wt_editor_command" data-command-menu>
+                            <button type="button" class="wt_editor_command_item" data-command="h1">
+                                <span>📝</span>
+                                제목 1
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="h2">
+                                <span>📄</span>
+                                제목 2
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="bullet">
+                                <span>•</span>
+                                글머리 목록
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="number">
+                                <span>1.</span>
+                                번호 목록
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="check">
+                                <span>☑</span>
+                                체크리스트
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="quote">
+                                <span>❝</span>
+                                인용문
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="code">
+                                <span>💻</span>
+                                코드 블록
+                            </button>
+
+                            <button type="button" class="wt_editor_command_item" data-command="line">
+                                <span>━</span>
+                                구분선
+                            </button>
+                        </div>
+                    </div>
+
+                    <p class="wt_editor_hint">
+                        Tip. 내용을 쓰다가 <strong>/</strong> 를 입력하면 블록 명령어가 열립니다.
+                    </p>
+                </div>
+            </div>
+
+
+
+            <!-- 첨부파일 -->
+            <div class="board_write_card">
+                <div class="board_write_file_head">
+                    <div>
+                        <h2 class="board_write_subtitle">첨부파일</h2>
+                        <p class="board_write_hint">
+                            회의 자료, 이미지, 문서 파일 등을 첨부할 수 있습니다.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="board_write_existing_files"
+                     th:if="${board.files != null and !board.files.isEmpty()}">
+                    <div class="board_write_existing_file"
+                         th:each="file : ${board.files}">
+                        <div class="board_write_existing_file_info">
+                            <span class="board_write_existing_file_icon">📎</span>
+                            <span class="board_write_existing_file_name"
+                                  th:text="${file.originalName}">기존 첨부파일명</span>
+                        </div>
+
+                        <label class="board_write_existing_file_delete">
+                            <input type="checkbox"
+                                   name="deleteFileIds"
+                                   th:value="${file.id}">
+                            <span>삭제</span>
+                        </label>
+                    </div>
+                </div>
+
+                <p class="board_write_hint"
+                   th:if="${board.files == null or board.files.isEmpty()}">
+                    기존 첨부파일이 없습니다.
+                </p>
+
+                <label for="files" class="board_write_file_box">
+                    <span class="board_write_file_icon">📎</span>
+                    <span class="board_write_file_text">
+                                    파일을 선택하거나 여기에 업로드하세요
+                                </span>
+                    <span class="board_write_file_sub">
+                                    최대 10MB까지 첨부 가능
+                                </span>
+                </label>
+
+                <input id="files"
+                       name="files"
+                       type="file"
+                       class="board_write_file_input"
+                       multiple>
+
+                <div id="selectedFileList"
+                     class="board_write_selected_files"
+                     aria-live="polite"
+                     hidden>
+                    <strong>새로 선택된 파일</strong>
+                    <ul id="selectedFileItems"></ul>
+                </div>
+            </div>
+
+            <!-- 버튼 -->
+            <div class="board_write_actions">
+                <a th:href="@{/projects/{projectId}/boards/{boardId}(projectId=${projectId},
+                boardId=${board.id})}" class="board_write_btn board_write_btn_cancel">
+                    취소
+                </a>
+
+                <button type="submit" class="board_write_btn board_write_btn_submit">
+                    수정하기
+                </button>
+            </div>
+
+        </form>
+
+        </section>
+
+
+    </main>
+
+</div>
+
+
+<script th:src="@{/js/projects/write-editor.js}"></script>
+<script th:src="@{/js/projects/board-write.js}"></script>
+<script th:src="@{/js/sidebar.js}"></script>
+</body>
+</html>
