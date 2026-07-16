@@ -155,10 +155,14 @@ public class UserService implements UserDetailsService {
         user.setPicture(picture);
     }
 
-    public Users findByUserName(String username) {
-        return userRepository.findByUserId(username)
-                .orElseThrow( () -> new IllegalArgumentException(
-                        "회원을 찾을 수 없습니다"
-                ));
+    // 회원 탈퇴
+    @Transactional
+    public void deleteUser(String userId) {
+
+        Users user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다. ID: " + userId));
+
+        userRepository.delete(user);
     }
+
 }

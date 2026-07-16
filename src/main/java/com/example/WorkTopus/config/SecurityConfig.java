@@ -22,15 +22,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/","/index.html",
-                                "/css/**", "/images/**", "/js/**",
-                                "/login", "/home/register", "/home/check-id", "/home/email/send",
-                                "/home/email/verify"
+                                "/css/**", "/images/**", "/js/**", "/error/**",
+                                "/login", "/home/**"
                         ).permitAll()       // 로그인 없이 사용가능
                         // .requestMatchers(
                         //        "/admin/**", "/vupdate", "/vdelete"
                         // ).hasRole("ADMIN")  // 추후 관리자페이지
                         .requestMatchers(
-                                "/projects/**"
+                                "/projects/**", "/user/**", "/api/**"
                         ).authenticated()   // 로그인이 필요
                         .anyRequest().authenticated() // 설정하지 않은 다른 요청도 로그인 필요
                 )

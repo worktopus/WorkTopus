@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<th:block th:fragment="homeHeader">
+    <header class="header">
+
+        <!-- 왼쪽 -->
+        <div class="header__left">
+            <a href="/projects" class="projects-logo">
+                <img src="/images/logo.png" alt="WorkTopus logo" class="projects-logo-img">
+                <span class="projects-logo-text">WorkTopus</span>
+            </a>
+        </div>
+
+        <!-- 오른쪽 -->
+        <div class="header__right">
+
+            <!-- 알림 -->
+            <button class="header__icon" type="button" aria-label="알림">
+                <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}"></span>
+                <span class="header__badge">3</span>
+            </button>
+
+            <!-- 채팅 -->
+            <button class="header__icon" th:insert="~{fragments/icons :: chat}"></button>
+
+            <!-- 메모 -->
+            <button class="header__icon" id="header-memo-btn" onclick="toggleTodoModal(event)">
+                <span th:replace="~{fragments/icons :: memo}"></span>
+            </button>
+
+            <!-- 프로필 -->
+            <div class="header__profile-container">
+                <div class="header__profile" id="header-profile-trigger" onclick="toggleProfileDropdown(event)">
+                    <img th:src="${user?.picture} ?: '/images/logo.png'" alt="프로필" onerror="this.src='/images/logo.png';">
+
+                    <div class="header__info">
+                        <p class="header__name" th:text="${user?.name} ?: '게스트'"></p>
+                    </div>
+                </div>
+
+                <!-- 프로필 클릭 시 나타날 드롭다운 메뉴 -->
+                <div class="profile-dropdown" id="profile-dropdown-menu">
+                    <!-- 마이페이지 사이드 항목들 -->
+                    <a href="/user/mypage?tab=info" class="dropdown-item">내 정보</a>
+                    <a href="/user/mypage?tab=posts" class="dropdown-item">내가 쓴 글</a>
+                    <a href="/user/mypage?tab=comments" class="dropdown-item">내가 쓴 댓글</a>
+                    <a href="/user/mypage?tab=notif" class="dropdown-item">알림</a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <!-- 로그아웃 -->
+                    <form th:action="@{/logout}" method="post" style="margin: 0;">
+                        <button type="submit" class="dropdown-item logout">로그아웃</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </header>
+
+    <!-- 팝업 형태의 독립된 투두리스트 -->
+    <div class="todo-modal" id="todo-popup-modal">
+        <div class="todo-modal-header">
+            <span class="todo-modal-title">TODO</span>
+            <button class="todo-modal-close" onclick="toggleTodoModal(event)">×</button>
+        </div>
+        <div class="todo-modal-body">
+            <div class="todo-input-group" style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <input type="text" id="popup-todo-input" placeholder="할 일을 입력하세요."
+                       style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;"
+                       onkeypress="if(event.keyCode==13) addPopupTodo()">
+                <button onclick="addPopupTodo()" style="padding: 8px 14px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer;">추가</button>
+            </div>
+
+            <ul class="todo-list" id="popup-todo-list-container" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
+                <!-- 비동기로 리스트 바인딩 -->
+            </ul>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+
+        //  공통 CSRF 토큰 설정
+        const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+        // 프로필 드롭다운 제어
+        function toggleProfileDropdown(event) {
+            event.stopPropagation();
+            const dropdown = document.getElementById('profile-dropdown-menu');
+            dropdown.classList.toggle('active');
+
+            // 프로필 켜면 메모 모달은 닫기
+            document.getElementById('todo-popup-modal').classList.remove('active');
+        }
+
+        // 투두리스트 모달 제어, API 비동기 처리
+        function toggleTodoModal(event) {
+            event.stopPropagation();
+            const modal = document.getElementById('todo-popup-modal');
+            modal.classList.toggle('active');
+
+            // 메모 켜면 프로필 드롭다운은 닫기
+            document.getElementById('profile-dropdown-menu').classList.remove('active');
+
+            if (modal.classList.contains('active')) {
+                loadPopupTodoList();
+            }
+        }
+
+        // 바깥 영역 클릭 시 드롭다운과 모달 모두 닫기
+        document.addEventListener('click', function() {
+            document.getElementById('profile-dropdown-menu').classList.remove('active');
+            document.getElementById('todo-popup-modal').classList.remove('active');
+        });
+
+        // 팝업 내부 클릭 시 바깥 클릭 이벤트 전파 차단
+        document.getElementById('todo-popup-modal').addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+
+        // 투두리스트 로드
+        function loadPopupTodoList() {
+            fetch("/api/todo")
+                .then(res => res.json())
+                .then(list => {
+                    const container = document.getElementById('popup-todo-list-container');
+                    container.innerHTML = '';
+
+                    if (list.length === 0) {
+                        container.innerHTML = `<li style="color: #94a3b8; text-align: center; padding: 20px 0; font-size: 13px;">등록된 할 일이 없습니다.</li>`;
+                        return;
+                    }
+
+                    list.forEach(todo => {
+                        const li = document.createElement('li');
+
+                        const hasCompleted = todo.isCompleted;
+
+                        li.className = `todo-item ${hasCompleted ? 'completed' : ''}`;
+                        li.setAttribute('data-id', todo.todoId);
+
+                        li.style.display = 'flex';
+                        li.style.justifyContent = 'between';
+                        li.style.alignItems = 'center';
+
+                        li.innerHTML = `
+                    <div class="todo-left" style="display: flex; align-items: center; gap: 8px; flex: 1;">
+                        <input type="checkbox" onchange="togglePopupTodo(this)" ${hasCompleted ? 'checked' : ''}>
+                        <span class="todo-text" style="${hasCompleted ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${todo.content}</span>
+                    </div>
+                    <button class="btn-todo-delete" onclick="deletePopupTodo(this)" style="background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer;">삭제</button>
+                `;
+                        container.appendChild(li);
+                    });
+                })
+                .catch(err => console.error("투두 로드 실패:", err));
+        }
+
+        // 투두 추가
+        function addPopupTodo() {
+            const input = document.getElementById('popup-todo-input');
+            const text = input.value.trim();
+            if(!text) return;
+
+            fetch("/api/todo", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    [csrfHeader]: csrfToken
+                },
+                body: JSON.stringify({ content: text })
+            })
+                .then(res => {
+                    if(res.ok) {
+                        input.value = '';
+                        loadPopupTodoList();
+                    } else {
+                        alert("추가 실패");
+                    }
+                })
+                .catch(err => console.error("투두 추가 에러:", err));
+        }
+
+        // 투두 토글
+        function togglePopupTodo(checkbox) {
+            const item = checkbox.closest('.todo-item');
+            const todoId = item.getAttribute('data-id');
+
+            // CSRF 토큰 읽기
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
+            // CSRF 작동 여부에 따라 헤더 동적 생성
+            const requestHeaders = {};
+            if (csrfHeader && csrfToken) {
+                requestHeaders[csrfHeader] = csrfToken;
+            }
+
+            fetch(`/api/todo/${todoId}`, {
+                method: "PATCH",
+                headers: requestHeaders
+            })
+                .then(res => {
+                    if(res.ok) {
+                        const textSpan = item.querySelector('.todo-text');
+                        if(checkbox.checked) {
+                            textSpan.style.textDecoration = 'line-through';
+                            textSpan.style.color = '#94a3b8';
+                            item.classList.add('completed');
+                        } else {
+                            textSpan.style.textDecoration = 'none';
+                            textSpan.style.color = 'inherit';
+                            item.classList.remove('completed');
+                        }
+                    } else {
+                        alert("수정 실패");
+                        checkbox.checked = !checkbox.checked;
+                    }
+                })
+                .catch(err => {
+                    console.error("투두 수정 에러:", err);
+                    checkbox.checked = !checkbox.checked;
+                });
+        }
+
+        // 투두 삭제
+        function deletePopupTodo(button) {
+            if(!confirm('이 항목을 삭제하시겠습니까?')) return;
+
+            const item = button.closest('.todo-item');
+            const todoId = item.getAttribute('data-id');
+
+            fetch(`/api/todo/${todoId}`, {
+                method: "DELETE",
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+                .then(res => {
+                    if(res.ok) {
+                        item.remove();
+                    } else {
+                        alert("삭제 실패");
+                    }
+                })
+                .catch(err => console.error("투두 삭제 에러:", err));
+        }
+    </script>
+</th:block>
+
+</body>
+</html>

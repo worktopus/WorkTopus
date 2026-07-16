@@ -17,9 +17,4 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByEmailIgnoreCase(String email);
 
-    boolean existsByEmailAndUserNumNot(@NotBlank(message = "이메일은 필수입니다")
-                                       @Email(message = "이메일 형식으로 입력하세요")
-                                       @Size(max = 320, message = "이메일은 320자 이내로 입력하세요")
-                                       String email,
-                                       Long id);
 }

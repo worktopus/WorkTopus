@@ -1,11 +1,28 @@
-/* ==========================================================================
-   WorkTopus 마이페이지 전용 스타일 시트
-   ========================================================================== */
+.projects-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.projects-logo-img {
+    width: 46px;
+    height: 46px;
+}
+
+.projects-logo-text {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--text-main);
+}
+
+/* ============================= WorkTopus 마이페이지 전용 스타일 시트 ================================ */
+
 
 /* 기본 페이지 배경 및 레이아웃 */
 .mypage-page {
     min-height: 100vh;
-    background: #f7f9ff; /* 대시보드 연푸른색 배경 */
+    background: #f7f9ff;
     font-family: 'Pretendard', sans-serif;
     color: #1e293b;
     margin: 0;
@@ -13,70 +30,17 @@
     box-sizing: border-box;
 }
 
-/* 1. 헤더 영역 */
-.mypage-header {
-    max-width: 1440px;
-    height: 82px;
-    margin: 0 auto;
-    padding: 0 32px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-sizing: border-box;
-}
-
-.mypage-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-decoration: none;
-}
-
-.mypage-logo-img {
-    width: 46px;
-    height: 46px;
-}
-
-.mypage-logo-text {
-    font-size: 25px;
-    font-weight: 700;
-    letter-spacing: -0.4px;
-    color: #1e293b;
-}
-
-.mypage-logout {
-    width: 104px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #4d7cff;
-    font-size: 15px;
-    font-weight: 600;
-    background: #fff;
-    border: 1px solid #dfe4ff;
-    border-radius: 999px;
-    text-decoration: none;
-    transition: 0.2s;
-}
-
-.mypage-logout:hover {
-    background: #f0f4ff;
-}
-
-/* 2. 메인 컨테이너 구조 */
-.mypage-wrapper {
-    max-width: 1440px;
-    margin: 0 auto;
-    padding: 40px 32px 90px;
-    box-sizing: border-box;
-}
-
+/* 사이드바와 메인을 감싸는 부모 컨테이너 가로 정렬 배치 */
 .mypage-container {
-    display: grid;
-    grid-template-columns: 280px 1fr; /* 왼쪽 고정 사이드바, 오른쪽 콘텐츠 */
-    gap: 32px;
-    align-items: start;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 30px;
+    width: 100%;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
 /* 3. 사이드바 내비게이션 */
@@ -86,6 +50,9 @@
     border-radius: 24px;
     border: 1px solid #edf0ff;
     box-shadow: 0 16px 40px rgba(114, 135, 244, 0.06);
+    height: fit-content;
+    width: 260px;
+    flex-shrink: 0;
 }
 
 .sidebar-title {
@@ -94,7 +61,7 @@
     text-transform: uppercase;
     color: #94a3b8;
     letter-spacing: 1px;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     padding-left: 8px;
 }
 
@@ -140,6 +107,8 @@
     border: 1px solid #edf0ff;
     box-shadow: 0 16px 40px rgba(114, 135, 244, 0.08);
     min-height: 500px;
+    flex-grow: 1; /* 남은 가로 공간을 전부 채우기 */
+    width: calc(100% - 290px);
 }
 
 /* 섹션 탭 전환 제어 */
@@ -309,7 +278,6 @@
     width: 24px;
     height: 24px;
     object-fit: contain;
-    /* 만약 아이콘 이미지가 유실되어 엑스박스가 떴을 때 글자가 뭉개지거나 튀어나가는 현상 방지 */
     min-width: 24px;
     border-radius: 4px;
 }
@@ -346,7 +314,6 @@
     border-color: #4d7cff;
     box-shadow: 0 4px 12px rgba(77, 124, 255, 0.15);
 }
-
 
 /* ==========================================================================
    6. 오늘의 할 일 리스트 (To-do)
@@ -437,7 +404,6 @@
     cursor: pointer;
 }
 
-
 /* ==========================================================================
    7. 게시판 테이블 및 기타 탭 컴포넌트 디자인
    ========================================================================== */
@@ -475,4 +441,43 @@ td {
     background: #e0e7ff;
     color: #4d7cff;
     border-radius: 999px;
+}
+
+/* ==========================================================================
+   [추가] 로그아웃 & 회원탈퇴 전용 위험/경고(Danger) 버튼 스타일 최적화
+   ========================================================================== */
+
+/* 로그아웃 & 회원탈퇴 폼 내부 버튼 공통 정의 */
+.menu-item .logout,
+.menu-item .delete {
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;       /* 다른 메뉴보다 살짝 슬림하게 조절 */
+    font-size: 13.5px;        /* 일반 메뉴(15px)보다 살짝 작게 */
+    font-weight: 600;
+    background: none;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* 1. 로그아웃 버튼 색상 설정 */
+.menu-item .logout {
+    color: #94a3b8;           /* 평소에는 기본 사이드바 서브 타이틀처럼 은은한 회색 */
+}
+
+.menu-item .logout:hover {
+    background: #f8fafc;
+    color: #475569;           /* 마우스 올렸을 때 진한 먹색으로 반전 */
+}
+
+/* 2. 회원탈퇴 버튼 색상 설정 (위험 구역) */
+.menu-item .delete {
+    color: #fda4af;           /* 평소에는 톤다운된 부드러운 핑크빛 빨강 (시선을 너무 빼앗지 않게) */
+}
+
+.menu-item .delete:hover {
+    background: #fff1f2;      /* 마우스 올렸을 때 부드러운 레드 계열 배경 */
+    color: #e11d48;           /* 텍스트는 선명하고 경고 의미가 강한 빨간색 */
 }

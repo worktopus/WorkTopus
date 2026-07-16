@@ -80,10 +80,34 @@ public class UserController {
             // 프사 변경
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 String originalFilename = profilePicture.getOriginalFilename();
-                String savedPath = "/images/" + System.currentTimeMillis() + "_" + originalFilename;
+                String saveFileName = System.currentTimeMillis() + "_" + originalFilename;
+
+                // DB에 웹 접근
+                String savedPath = "/images/" + saveFileName;
+
+                String rootPath = System.getProperty("user.dir");
+
+                // 경로를 각각 정의
+                String srcPath = rootPath + "/src/main/resources/static/images/";
+                String buildPath = rootPath + "/build/resources/main/static/images/";
+
+                // 폴더 자동 생성
+                java.io.File srcFolder = new java.io.File(srcPath);
+                if (!srcFolder.exists()) srcFolder.mkdirs();
+
+                java.io.File buildFolder = new java.io.File(buildPath);
+                if (!buildFolder.exists()) buildFolder.mkdirs();
+
+                // 3. 파일 저장
+                profilePicture.transferTo(new java.io.File(srcPath + saveFileName));
+
+                java.io.File srcFile = new java.io.File(srcPath + saveFileName);
+                java.io.File buildFile = new java.io.File(buildPath + saveFileName);
+                java.nio.file.Files.copy(srcFile.toPath(), buildFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+
                 userService.updatePicture(userId, savedPath);
             }
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             bindingResult.reject("updateFail", e.getMessage());
             Users user = userService.findByUserId(userId);
             mv.addObject("user", user);
@@ -96,7 +120,34 @@ public class UserController {
 
         mv.setViewName("redirect:/user/mypage");
         return mv;
+    }
 
+    // 회원탈퇴 처리
+    @PostMapping("/delete")
+    public String deleteUser(
+            Authentication authentication,
+            jakarta.servlet.http.HttpServletRequest request,
+            jakarta.servlet.http.HttpServletResponse response,
+            RedirectAttributes redirectAttributes) {
+
+        if (authentication != null) {
+            String userId = authentication.getName();
+
+            try {
+                userService.deleteUser(userId);
+
+                new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
+                        .logout(request, response, authentication);
+
+                redirectAttributes.addFlashAttribute("msg", "회원탈퇴가 성공적으로 처리되었습니다.");
+                return "redirect:/";
+
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("msg", "회원탈퇴 중 오류가 발생했습니다: " + e.getMessage());
+                return "redirect:/user/mypage";
+            }
+        }
+        return "redirect:/";
     }
 
 }

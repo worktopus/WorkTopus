@@ -2,29 +2,45 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>마이페이지 - WorkTopus</title>
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/mypage.css">
-    <style>
 
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>마이페이지 - WorkTopus</title>
+
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
+    <link rel="stylesheet" href="/css/mypage.css">
 </head>
 <body>
 <div class="mypage-page">
 
+    <div th:replace="~{fragments/homeHeader :: homeHeader}"></div>
+
     <!--wrapper-->
     <div class="mypage-wrapper">
 
-        <!--사이드-->
+        <!--사이드,메인이 들어있는 컨테이너-->
         <div class="mypage-container">
             <div class="sidebar">
-                <div class="sidebar-title">내 정보</div>
+                <div class="sidebar-title">마이 페이지</div>
                 <ul class="menu-list">
                     <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보</button></li>
-                    <li class="menu-item" id="menu-todo"><button onclick="switchTab('todo')">오늘의 할 일 (To-do)</button></li>
                     <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
                     <li class="menu-item" id="menu-comments"><button onclick="switchTab('comments')">내가 쓴 댓글</button></li>
-                    <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">프로젝트 알림창</button></li>
+                    <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">알림</button></li>
+                    <li class="menu-item">
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="logout">로그아웃</button>
+                        </form>
+                    </li>
+                    <li class="menu-item">
+                        <form th:action="@{#}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 작성하신 정보가 모두 삭제되며 되돌릴 수 없습니다.');">
+                            <button type="submit" class="delete">회원탈퇴</button>
+                        </form>
+                    </li>
                 </ul>
             </div>
 
@@ -42,7 +58,6 @@
                             <div class="info-group-label">프로필 사진</div>
                             <div class="info-rows-container">
                                 <div class="info-data-row">
-                                    <!-- 프로필 -->
                                     <label for="profile-file-input" class="profile-avatar-label">
                                         <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
                                              title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
@@ -124,23 +139,7 @@
                     </form>
                 </div>
 
-                <div id="section-todo" class="content-section">
-                    <h2 class="content-title">오늘의 할 일</h2>
-                    <div class="todo-input-group">
-                        <input type="text" id="todo-input" placeholder="오늘 해야 할 업무나 일정을 입력하세요." onkeypress="if(event.keyCode==13) addTodo()">
-                        <button class="btn-todo-add" onclick="addTodo()">추가</button>
-                    </div>
-                    <ul class="todo-list" id="todo-list-container">
-                        <li class="todo-item">
-                            <div class="todo-left">
-                                <input type="checkbox" class="todo-checkbox" onchange="toggleTodo(this)">
-                                <span class="todo-text">SAMPLE</span>
-                            </div>
-                            <button class="btn-todo-delete" onclick="deleteTodo(this)">삭제</button>
-                        </li>
-                    </ul>
-                </div>
-
+                <!--글 목록-->
                 <div id="section-posts" class="content-section">
                     <h2 class="content-title">내가 쓴 글 목록</h2>
                     <table>
@@ -153,6 +152,7 @@
                     </table>
                 </div>
 
+                <!--댓글 목록-->
                 <div id="section-comments" class="content-section">
                     <h2 class="content-title">내가 쓴 댓글 목록</h2>
                     <table>
@@ -165,6 +165,7 @@
                     </table>
                 </div>
 
+                <!--알림-->
                 <div id="section-notif" class="content-section">
                     <h2 class="content-title">프로젝트 알림</h2>
                     <ul id="notif-list" style="padding: 0; list-style: none; margin: 0;">
@@ -181,53 +182,57 @@
 </div>
 <script th:inline="javascript">
 
-    // 값이 있으면 문자열로 대입되고, 없으면 null이 대입됩니다.
+    // 완료 메시지
     var msg = /*[[${msg}]]*/ null;
-
     if (msg) {
         alert(msg);
     }
 
+    // 💡 페이지 로드 시 탭 우선순위 제어 로직 수정 완료
+    document.addEventListener("DOMContentLoaded", function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        let activeTab = urlParams.get('tab'); // 1. URL 파라미터가 있는지 먼저 찾음
+
+        if (!activeTab) {
+            activeTab = 'info';
+        }
+
+        switchTab(activeTab);
+    });
+
+    // 탭 전환
     function switchTab(tabName) {
+        // 존재하지 않는 탭 처리 방지 예외 코드
+        if (!document.getElementById('section-' + tabName)) {
+            tabName = 'info';
+        }
+
         document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active'));
         document.querySelectorAll('.menu-item').forEach(item => item.classList.remove('active'));
 
         document.getElementById('section-' + tabName).classList.add('active');
         document.getElementById('menu-' + tabName).classList.add('active');
 
+        // 현재 선택한 유효 탭 정보를 브라우저에 저장
+        localStorage.setItem('mypageActiveTab', tabName);
+
         if (tabName === 'posts') { loadMyPosts(); }
         else if (tabName === 'comments') { loadMyComments(); }
     }
 
-    function addTodo() {
-        const input = document.getElementById('todo-input');
-        const text = input.value.trim();
-        if(!text) return;
-
-        const container = document.getElementById('todo-list-container');
-        const li = document.createElement('li');
-        li.className = 'todo-item';
-        li.innerHTML = `
-            <div class="todo-left">
-                <input type="checkbox" class="todo-checkbox" onchange="toggleTodo(this)">
-                <span class="todo-text">${text}</span>
-            </div>
-            <button class="btn-todo-delete" onclick="deleteTodo(this)">삭제</button>
-        `;
-        container.prepend(li);
-        input.value = '';
+    // 프사 미리보기
+    function previewImage(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                var label = document.querySelector('.profile-avatar-label');
+                label.innerHTML = `<img src="${e.target.result}" id="profile-preview" class="profile-click-avatar" title="사진을 클릭하여 변경">`;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
-    function toggleTodo(checkbox) {
-        const item = checkbox.closest('.todo-item');
-        if(checkbox.checked) { item.classList.add('completed'); }
-        else { item.classList.remove('completed'); }
-    }
-
-    function deleteTodo(button) {
-        if(confirm('이 항목을 삭제하시겠습니까?')) { button.closest('.todo-item').remove(); }
-    }
-
+    // 내 글 목록 조회
     function loadMyPosts() {
         fetch("/api/user/posts")
             .then(res => res.json())
@@ -249,21 +254,9 @@
             }).catch(err => console.error(err));
     }
 
+    // 내 댓글
     function loadMyComments() {
-        // 필요시 로직 작성
-    }
-
-    // 프사 미리보기
-    function previewImage(input) {
-        if (input.files && input.files[0]) {
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var label = document.querySelector('.profile-avatar-label');
-                // 내부를 깨끗이 비우고 새로운 img 태그를 생성해서 주입
-                label.innerHTML = `<img src="${e.target.result}" id="profile-preview" class="profile-click-avatar" title="사진을 클릭하여 변경">`;
-            }
-            reader.readAsDataURL(input.files[0]);
-        }
+        // 로직 작성
     }
 
 </script>
