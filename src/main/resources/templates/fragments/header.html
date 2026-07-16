@@ -7,7 +7,7 @@
 <th:block th:fragment="header">
     <header class="header">
 
-    <!-- 왼쪽 -->
+        <!-- 왼쪽 -->
         <div class="header__left">
 
             <button class="header__project-switcher">
@@ -18,15 +18,14 @@
                 </div>
 
                 <div class="header__project-info">
-<!--
-            <span class="header__project-label">
-                현재 프로젝트
+                    <!--
+                                <span class="header__project-label">
+                                    현재 프로젝트
+                                </span>
+                    -->
+                    <span class="header__project-name">
+                Worktopus
             </span>
--->
-                    <span class="header__project-name"
-                          th:text="${project != null} ? ${project.name} : 'Worktopus'">
-                        Worktopus
-                    </span>
 
                 </div>
 
@@ -39,49 +38,244 @@
         </div>
 
 
-    <!-- 오른쪽 -->
-    <div class="header__right">
+        <!-- 오른쪽 -->
+        <div class="header__right">
 
-        <!-- 알림 -->
-        <button class="header__icon" type="button" aria-label="알림">
+            <!-- 알림 -->
+            <button class="header__icon" type="button" aria-label="알림">
 
             <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}">
             </span>
 
-            <span class="header__badge">
+                <span class="header__badge">
                 3
             </span>
 
-        </button>
+            </button>
 
-        <!-- 채팅 -->
-        <button class="header__icon"
-                th:insert="~{fragments/icons :: chat}">
+            <!-- 채팅 -->
+            <button id="chatButton"
+                    class="header__icon"
+                    type="button"
+                    onclick="openChat()"
+                    aria-label="채팅 열기">
+                <span th:insert="~{fragments/icons :: chat}"></span>
+            </button>
+
+            <!-- 메모 -->
+            <button class="header__icon"
+                    th:insert="~{fragments/icons :: memo}">
 
 
-        </button>
+            </button>
 
-        <!-- 메모 -->
-        <button class="header__icon"
-                th:insert="~{fragments/icons :: memo}">
+            <!-- 프로필 -->
+            <div class="header__profile">
 
+                <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
 
-        </button>
+                <div class="header__info">
 
-        <!-- 프로필 -->
-        <div class="header__profile">
+                    <p class="header__name">
+                        김여린
+                    </p>
 
-            <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
-
-            <div class="header__info">
-
-                <p class="header__name">
-                    김여린
-                </p>
-
-                <span class="header__role">
+                    <span class="header__role">
             Backend Developer
         </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- 신승민: 실시간 채팅 팝업 -->
+    <link rel="stylesheet" th:href="@{/css/chat.css}">
+
+    <!-- 채팅 팝업 -->
+    <div id="chatModal">
+
+        <!-- =========================================
+             1. 채팅방 목록 화면
+        ========================================== -->
+        <div id="chatListView">
+
+            <div class="chat-header">
+                <strong>채팅</strong>
+
+                <button
+                        type="button"
+                        onclick="closeChat()"
+                        aria-label="채팅 닫기">
+                    ✖
+                </button>
+            </div>
+
+            <!-- 전체 / 프로젝트 / 개인 -->
+            <div class="chat-list-tabs">
+
+                <button
+                        id="allRoomTab"
+                        class="active"
+                        type="button"
+                        onclick="filterRoomList('all')">
+                    전체
+                </button>
+
+                <button
+                        id="groupRoomTab"
+                        type="button"
+                        onclick="filterRoomList('group')">
+                    프로젝트
+                </button>
+
+                <button
+                        id="privateRoomTab"
+                        type="button"
+                        onclick="filterRoomList('private')">
+                    개인
+                </button>
+
+            </div>
+
+            <!-- 채팅방 검색 -->
+            <div class="chat-search-area">
+
+                <input
+                        id="chatRoomSearchInput"
+                        type="text"
+                        placeholder="프로젝트 / 사용자 검색"
+                        oninput="searchChatRooms()">
+
+            </div>
+
+            <!-- 채팅방 목록 -->
+            <div class="chat-room-list-wrap">
+
+                <div id="chatRoomList">
+                    <!-- chatList.js에서 생성 -->
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================================
+             2. 실제 대화 화면
+        ========================================== -->
+        <div id="chatRoomView" style="display:none;">
+
+            <div class="chat-header">
+
+                <div class="chat-room-header-left">
+
+                    <button
+                            type="button"
+                            class="chat-back-btn"
+                            onclick="backToChatList()"
+                            aria-label="채팅방 목록으로 돌아가기">
+                        ←
+                    </button>
+
+                    <div class="chat-room-header-text">
+
+                        <strong id="chatRoomTitle">
+                            채팅방
+                        </strong>
+
+                        <span id="chatRoomSubTitle"></span>
+
+                    </div>
+
+                </div>
+
+                <button
+                        type="button"
+                        onclick="closeChat()"
+                        aria-label="채팅 닫기">
+                    ✖
+                </button>
+
+            </div>
+
+
+            <!-- 메시지 영역 -->
+            <div class="chat-body">
+
+                <div class="chat-content">
+
+                    <!-- 프로젝트 단체 채팅 -->
+                    <div id="groupChat">
+
+                        <div id="messageArea">
+                            <!-- groupChat.js에서 메시지 생성 -->
+                        </div>
+
+                    </div>
+
+
+                    <!-- 개인 채팅 -->
+                    <div
+                            id="privateChat"
+                            style="display:none;">
+
+                        <div id="privateMessageArea">
+
+                            <div id="dmArea">
+                                <!-- privateChat.js에서 메시지 생성 -->
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- 메시지 입력 -->
+            <div class="chat-input">
+
+                <input
+                        id="message"
+                        type="text"
+                        placeholder="메시지를 입력하세요">
+
+                <button
+                        id="sendBtn"
+                        type="button">
+                    전송
+                </button>
+
+            </div>
+
+
+            <!-- 프로젝트 단체 채팅에서만 표시 -->
+            <div class="chat-footer">
+
+                <button
+                        id="aiMeetingSummaryButton"
+                        type="button">
+                    🤖 AI 회의요약
+                </button>
+
+                <button
+                        id="aiMeetingHistoryButton"
+                        type="button">
+                    📋 회의록 기록
+                </button>
+
+                <button
+                        id="boardBtn"
+                        type="button">
+                    📌 게시판 등록
+                </button>
 
             </div>
 
@@ -89,7 +283,27 @@
 
     </div>
 
-</header>
+    <!-- =========================================
+         신승민: 실시간 채팅 / AI 회의요약 스크립트
+    ========================================== -->
+
+    <!-- WebSocket 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+    <!-- 프로젝트 및 채팅 스크립트 -->
+    <script th:src="@{/js/chat/project.js}"></script>
+    <script th:src="@{/js/chat/websocket.js}"></script>
+    <script th:src="@{/js/chat/member.js}"></script>
+    <script th:src="@{/js/chat/groupChat.js}"></script>
+    <script th:src="@{/js/chat/privateChat.js}"></script>
+    <script th:src="@{/js/chat/history.js}"></script>
+    <script th:src="@{/js/chat/chatList.js}"></script>
+    <script th:src="@{/js/chat/chat.js}"></script>
+    <script th:src="@{/js/chat/meetingSummary.js}"></script>
+    <script th:src="@{/js/chat/meetingHistory.js}"></script>
+
+
 </th:block>
 
 </body>
