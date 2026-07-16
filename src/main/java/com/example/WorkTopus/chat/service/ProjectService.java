@@ -19,11 +19,9 @@ public class ProjectService {
      */
     private static final Long TEMP_PROJECT_ID = 2L;
 
-    private static final String TEMP_PROJECT_NAME =
-            "WorkTopus";
+    private static final String TEMP_PROJECT_NAME = "WorkTopus";
 
-    private static final String TEMP_PROJECT_DESCRIPTION =
-            "WorkTopus 협업 프로젝트";
+    private static final String TEMP_PROJECT_DESCRIPTION = "WorkTopus 협업 프로젝트";
 
 
     private final ChatRoomService chatRoomService;
@@ -143,18 +141,10 @@ public class ProjectService {
                 );
 
         return ProjectDto.builder()
-                .projectId(
-                        projectId
-                )
-                .projectName(
-                        TEMP_PROJECT_NAME
-                )
-                .description(
-                        TEMP_PROJECT_DESCRIPTION
-                )
-                .groupRoomId(
-                        groupRoomId
-                )
+                .projectId( projectId )
+                .projectName( TEMP_PROJECT_NAME )
+                .description( TEMP_PROJECT_DESCRIPTION )
+                .groupRoomId( groupRoomId )
                 .unreadCount(
                         unreadCount
                 )
