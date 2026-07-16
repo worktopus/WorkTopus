@@ -105,12 +105,15 @@
 
             <span class="sidebar__divider"></span>
 
-            <a th:href="@{/logout}"
-               class="sidebar__link sidebar__logout"
-               aria-label="로그아웃">
-                <span class="sidebar__icon" th:insert="~{fragments/icons :: logout}">
-                </span>
-            </a>
+            <form th:action="@{/logout}" method="post">
+                <button type="submit"
+                        class="sidebar__link sidebar__logout"
+                        aria-label="로그아웃">
+                    <span class="sidebar__icon"
+                          th:insert="~{fragments/icons :: logout}">
+                    </span>
+                </button>
+            </form>
 
         </div>
 
