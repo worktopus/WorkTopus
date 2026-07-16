@@ -19,7 +19,11 @@
         </a>
 
         <a href="/user/mypage" class="projects-logout">내 정보</a>
-        <a href="/logout" class="projects-logout">로그아웃</a>
+        <form th:action="@{/logout}" method="post" class="projects-logout-form">
+            <button type="submit" class="projects-logout">
+                로그아웃
+            </button>
+        </form>
     </header>
 
     <main class="projects-main">
