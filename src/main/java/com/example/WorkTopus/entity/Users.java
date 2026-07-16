@@ -64,14 +64,4 @@ public class Users {
     @Column(length = 500, nullable = false)
     private String picture = "/images/logo.png";
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Todo> todoList;
-
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Projects> ownedProjects;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ProjectMember> projectMembers;
-
 }

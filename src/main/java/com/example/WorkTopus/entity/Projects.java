@@ -38,8 +38,4 @@ public class Projects {
     @Column(name = "CREATED_AT", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    ///////////////////////////////////////////////////////////////////////////////
-    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<ProjectMember> members;
-
 }

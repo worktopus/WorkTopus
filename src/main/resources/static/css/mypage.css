@@ -1,6 +1,23 @@
-/* ==========================================================================
-   WorkTopus 마이페이지 전용 스타일 시트
-   ========================================================================== */
+.projects-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.projects-logo-img {
+    width: 46px;
+    height: 46px;
+}
+
+.projects-logo-text {
+    font-size: 25px;
+    font-weight: 700;
+    letter-spacing: -0.4px;
+    color: var(--text-main);
+}
+
+/* ============================= WorkTopus 마이페이지 전용 스타일 시트 ================================ */
+
 
 /* 기본 페이지 배경 및 레이아웃 */
 .mypage-page {

@@ -2,20 +2,15 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<th:block th:fragment="header">
+<th:block th:fragment="homeHeader">
     <header class="header">
 
         <!-- 왼쪽 -->
         <div class="header__left">
-            <button class="header__project-switcher">
-                <div class="header__project-bg" >
-                    <span class="header__project-icon" th:block th:insert="~{fragments/icons :: prjopen}"></span>
-                </div>
-                <div class="header__project-info">
-                    <span class="header__project-name">Worktopus</span>
-                </div>
-                <img th:src="@{/img/caret-down.svg}" class="header__project-arrow" alt="">
-            </button>
+            <a href="/projects" class="projects-logo">
+                <img src="/images/logo.png" alt="WorkTopus logo" class="projects-logo-img">
+                <span class="projects-logo-text">WorkTopus</span>
+            </a>
         </div>
 
         <!-- 오른쪽 -->

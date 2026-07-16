@@ -15,16 +15,14 @@
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
     <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" th:href="@{/css/layout.css}">
-    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
-    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
     <link rel="stylesheet" href="/css/projects.css">
 
 </head>
 <body>
 <div class="projects-page">
 
-    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/homeHeader :: homeHeader}"></div>
 
     <main class="projects-main">
         <p class="projects-message success-message"
