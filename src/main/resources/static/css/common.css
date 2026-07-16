@@ -26,10 +26,39 @@ img {
 :root {
   --primary: #7287F4;
   --primary-hover: #5D73EA;
-  --primary-light: #EEF1FF;
   --primary-dark: #5F72D9;
+  --primary-light: #EEF1FF;
+
+  --bg-main: #FFFFFF;
 
   --text-main: #222;
   --text-sub: #666;
-  --bg-main: #ffffff;
+
+  /* projects */
+  --primary-soft: #F5F7FF;
+  --secondary: #72D2FF;
+  --card: #FFFFFF;
+  --border: #E4ECF7;
+
+  --text-right: #FFFFFF;
+
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+
+  --radius-sm: 10px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  --shadow: 0 10px 30px rgba(79, 142, 247, .08);
+
+  --sidebar-width: 260px;
+  --sidebar-collapsed-width: 82px;
+
+  --transition: .25s ease;
+}
+
+button {
+  cursor: pointer;
+  border: none;
 }

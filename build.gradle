@@ -28,7 +28,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
@@ -36,15 +35,18 @@ dependencies {
     // oracle
     runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 
+
     // 지갑
     runtimeOnly 'com.oracle.database.security:oraclepki:21.19.0.0'
     runtimeOnly 'com.oracle.database.security:osdt_core:21.19.0.0'
     runtimeOnly 'com.oracle.database.security:osdt_cert:21.19.0.0'
 
     annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-jpa-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-validation-test'
+    //    implementation 'org.springframework.boot:spring-boot-starter-security'
     testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -59,5 +61,5 @@ bootJar{
     archiveBaseName = "springedu2"
     archiveFileName = "springedu2.jar"
     archiveVersion = "0.0.1"
-}
 
+}

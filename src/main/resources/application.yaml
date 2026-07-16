@@ -13,16 +13,20 @@ spring:
     livereload:
       enabled: true
 
-
+# oracle 설정
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
     username: ADMIN
     password: 'WorkTopus1234!'
-#    driver-class-name: oracle.jdbc.OracleDriver
-#    url: jdbc:oracle:thin:@localhost:1521:xe
-#    username: test
-#    password: 1234
+
+    hikari:
+      maximum-pool-size: 2
+      minimum-idle: 1
+      connection-timeout: 30000
+      idle-timeout: 300000
+      max-lifetime: 600000
+
 
   hikari:
     maximum-pool-size: 2
@@ -91,3 +95,4 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
