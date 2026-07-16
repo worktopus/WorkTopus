@@ -8,9 +8,11 @@
 
         <div class="sidebar__header">
 
-            <a th:href="@{/projects}" class="sidebar__logo">
-                <span class="sidebar__logo-icon">🐙</span>
-                <span class="sidebar__logo-text">Worktopus</span>
+            <a th:href="@{/projects/dashboard}" class="sidebar__logo">
+                <img th:src="@{/images/logo.png}"
+                     alt="WorkTopus"
+                     class="sidebar__logo-img">
+                <span class="sidebar__logo-text">WorkTopus</span>
             </a>
 
             <button id="sidebarToggle"
@@ -40,7 +42,7 @@
                        class="sidebar__link">
         <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
         </span>
-                        <span class="sidebar__text">프로젝트(일반)</span>
+                        <span class="sidebar__text">프로젝트</span>
                     </a>
                 </li>
 
@@ -68,13 +70,15 @@
                     </a>
                 </li>
 
-                <li class="sidebar__item"  th:if="${isProjectOwner}">
-                    <a th:href="@{/manage/{projectId}/manage(projectId=${projectId})}" class="sidebar__link">
+                <li class="sidebar__item">
+                    <!-- 주소 경로를 /manage/프로젝트ID 구조로 깔끔하게 변경합니다 -->
+                    <a th:href="@{/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
                         </span>
                         <span class="sidebar__text">설정</span>
                     </a>
                 </li>
+
 
             </ul>
         </nav>

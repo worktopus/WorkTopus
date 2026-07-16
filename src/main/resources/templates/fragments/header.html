@@ -18,10 +18,10 @@
                 </div>
 
                 <div class="header__project-info">
-
-                    <span class="header__project-name">
-                Worktopus
-            </span>
+                    <span class="header__project-name"
+                          th:text="${project != null} ? ${project.name} : 'Worktopus'">
+                        Worktopus
+                    </span>
 
                 </div>
 
