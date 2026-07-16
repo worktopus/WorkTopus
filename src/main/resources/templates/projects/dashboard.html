@@ -39,13 +39,16 @@
                         <div>
 
                             <p class="assignment-overlay__user">
-                                이름 <br>
-                                담당
+                                <strong th:text="${dashboard.userName}">이름</strong>
+                                <br>
+                                <!-- <span th:text="${dashboard.userPosition ?: '담당 미설정'}">
+                                    담당
+                                </span> -->
                             </p>
                         </div>
 
                         <span class="assignment-overlay__badge">
-                완료 <span th:text="${dashboard.completionRate}">0</span>%
+                완료 <span th:text="${dashboard.myCompletionRate}">0</span>%
             </span>
                     </div>
 
@@ -54,9 +57,9 @@
                         <div class="assignment-progress__top">
                             <span> 과제 진행도</span>
                             <strong>
-                                <span th:text="${dashboard.doneCount}">0</span>
+                                <span th:text="${dashboard.myDoneCount}">0</span>
                                 /
-                                <span th:text="${dashboard.kanbanCardCount}">0</span>
+                                <span th:text="${dashboard.myKanbanCardCount}">0</span>
                             </strong>
                         </div>
 

@@ -12,6 +12,8 @@ import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
 import com.example.WorkTopus.projects.repository.CalendarScheduleRepository;
 import com.example.WorkTopus.projects.repository.KanbanCardRepository;
+import com.example.WorkTopus.service.UserService;
+import com.example.WorkTopus.entity.Users;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -32,21 +34,83 @@ public class DashboardServiceImpl implements DashboardService {
     private final BoardFileRepository boardFileRepository;
     private final KanbanCardRepository kanbanCardRepository;
     private final CalendarScheduleRepository calendarScheduleRepository;
+    private final UserService userService;
 
     @Override
-    public DashboardResponse getDashboard(Long projectId) {
-        long boardCount = boardRepository.countByProjectIdAndDeletedYn(projectId, "N");
-        long fileCount = boardFileRepository.countProjectFiles(projectId);
-        long kanbanCardCount = kanbanCardRepository.countByProjectIdAndDeletedYn(projectId, "N");
-        long todoCount = kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(projectId, KanbanStatus.TODO, "N");
-        long inProgressCount = kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(projectId, KanbanStatus.IN_PROGRESS, "N");
-        long reviewCount = kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(projectId, KanbanStatus.REVIEW, "N");
-        long doneCount = kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(projectId, KanbanStatus.DONE, "N");
+    public DashboardResponse getDashboard(Long projectId, String userId) {
+        long boardCount =
+                boardRepository.countByProjectIdAndDeletedYn(projectId, "N");
 
-        int completionRate = calculateCompletionRate(doneCount, kanbanCardCount);
+        long fileCount =
+                boardFileRepository.countProjectFiles(projectId);
+
+        long kanbanCardCount =
+                kanbanCardRepository.countByProjectIdAndDeletedYn(projectId, "N");
+
+        long todoCount =
+                kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(
+                        projectId,
+                        KanbanStatus.TODO,
+                        "N"
+                );
+
+        long inProgressCount =
+                kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(
+                        projectId,
+                        KanbanStatus.IN_PROGRESS,
+                        "N"
+                );
+
+        long reviewCount =
+                kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(
+                        projectId,
+                        KanbanStatus.REVIEW,
+                        "N"
+                );
+
+        long doneCount =
+                kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(
+                        projectId,
+                        KanbanStatus.DONE,
+                        "N"
+                );
+
+        int completionRate =
+                calculateCompletionRate(doneCount, kanbanCardCount);
+
         LocalDate today = LocalDate.now();
-        List<KanbanCard> kanbanCards = kanbanCardRepository.findByProjectIdAndDeletedYnOrderByCreatedAtAsc(projectId, "N");
-        List<DashboardScheduleResponse> upcomingSchedules = findUpcomingSchedules(projectId, today);
+
+        List<KanbanCard> kanbanCards =
+                kanbanCardRepository
+                        .findByProjectIdAndDeletedYnOrderByCreatedAtAsc(
+                                projectId,
+                                "N"
+                        );
+
+        List<DashboardScheduleResponse> upcomingSchedules =
+                findUpcomingSchedules(projectId, today);
+
+        // 개인 데이터는 로그인 사용자 연동 전 임시 값
+        Users user = userService.findByUserId(userId);
+        String userName = user.getName();
+
+        long myKanbanCardCount =
+                kanbanCardRepository.countByProjectIdAndAssigneeAndDeletedYn(
+                        projectId,
+                        userName,
+                        "N"
+                );
+
+        long myDoneCount =
+                kanbanCardRepository.countByProjectIdAndAssigneeAndStatusAndDeletedYn(
+                        projectId,
+                        userName,
+                        KanbanStatus.DONE,
+                        "N"
+                );
+
+        int myCompletionRate =
+                calculateRate(myDoneCount, myKanbanCardCount);
 
         return new DashboardResponse(
                 boardCount,
@@ -61,6 +125,12 @@ public class DashboardServiceImpl implements DashboardService {
                 calculateRate(inProgressCount, kanbanCardCount),
                 calculateRate(reviewCount, kanbanCardCount),
                 calculateRate(doneCount, kanbanCardCount),
+
+                userName,
+                myDoneCount,
+                myKanbanCardCount,
+                myCompletionRate,
+
                 filterKanbanCards(kanbanCards, KanbanStatus.TODO),
                 filterKanbanCards(kanbanCards, KanbanStatus.IN_PROGRESS),
                 filterKanbanCards(kanbanCards, KanbanStatus.REVIEW),

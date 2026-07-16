@@ -109,7 +109,7 @@
         <p class="join-modal-desc">팀원에게 받은 초대 코드를 입력하세요.</p>
 
         <!--초대코드 입력 화면-->
-        <form action="/projects/join" method="post" class="join-modal-form">
+        <form th:action="@{/projects/join}" method="post" class="join-modal-form">
             <input type="text" name="inviteCode" class="join-modal-input" placeholder="초대 코드 입력" required>
 
             <div class="join-modal-buttons">

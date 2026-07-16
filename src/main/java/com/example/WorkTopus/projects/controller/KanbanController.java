@@ -52,12 +52,13 @@ public class KanbanController {
         return kanbanCardService.findProjectCards(projectId);
     }
 
-    @PostMapping("/cards")
+    @PostMapping("/cards/create")
     @ResponseBody
     public KanbanCardResponse create(
             @PathVariable Long projectId,
             @Valid @RequestBody KanbanCardCreateRequest request
     ) {
+        System.out.println("칸반 POST 실행됨");
         return kanbanCardService.create(projectId, request);
     }
 
