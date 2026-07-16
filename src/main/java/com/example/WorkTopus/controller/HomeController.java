@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,7 +32,17 @@ public class HomeController {
 
     // 메인 페이지
     @GetMapping("/")
-    public String index() {
+    public String index(Authentication authentication) {
+
+        boolean loggedIn =
+                authentication != null
+                        && authentication.isAuthenticated()
+                        && !(authentication instanceof AnonymousAuthenticationToken);
+
+        if (loggedIn) {
+            return "redirect:/projects";
+        }
+
         return "home/index";
     }
 
