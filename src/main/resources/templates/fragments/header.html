@@ -23,9 +23,10 @@
                 현재 프로젝트
             </span>
 -->
-                    <span class="header__project-name">
-                Worktopus
-            </span>
+                    <span class="header__project-name"
+                          th:text="${project != null} ? ${project.name} : 'Worktopus'">
+                        Worktopus
+                    </span>
 
                 </div>
 

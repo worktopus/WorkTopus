@@ -88,12 +88,14 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/prj-setting}" class="sidebar__link">
+                    <!-- 주소 경로를 /manage/프로젝트ID 구조로 깔끔하게 변경합니다 -->
+                    <a th:href="@{/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
                         </span>
                         <span class="sidebar__text">설정</span>
                     </a>
                 </li>
+
 
             </ul>
         </nav>
