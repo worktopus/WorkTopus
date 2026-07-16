@@ -63,20 +63,19 @@
     <!-- 팝업 형태의 독립된 투두리스트 -->
     <div class="todo-modal" id="todo-popup-modal">
         <div class="todo-modal-header">
-            <span class="todo-modal-title">TODO</span>
+            <span class="todo-modal-title">MEMO</span>
             <button class="todo-modal-close" onclick="toggleTodoModal(event)">×</button>
         </div>
         <div class="todo-modal-body">
-            <div class="todo-input-group" style="display: flex; gap: 8px; margin-bottom: 8px;">
-                <input type="text" id="popup-todo-input" placeholder="할 일을 입력하세요."
-                       style="flex: 1; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 13px;"
-                       onkeypress="if(event.keyCode==13) addPopupTodo()">
-                <button onclick="addPopupTodo()" style="padding: 8px 14px; background-color: #4f46e5; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer;">추가</button>
-            </div>
+            <!-- 자유로운 메모 입력을 위한 Textarea -->
+            <textarea id="popup-memo-textarea"
+                      placeholder="여기에 자유롭게 메모를 작성하세요..."
+                      oninput="triggerAutoSave()"></textarea>
 
-            <ul class="todo-list" id="popup-todo-list-container" style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px;">
-                <!-- 비동기로 리스트 바인딩 -->
-            </ul>
+            <div class="memo-status-container">
+                <!-- 수동 저장 버튼을 없애고 자동 저장 상태만 표시 -->
+                <span id="memo-save-status">저장됨</span>
+            </div>
         </div>
     </div>
 
@@ -122,131 +121,104 @@
         });
 
         // 투두리스트 로드
-        function loadPopupTodoList() {
-            fetch("/api/todo")
+        let autoSaveTimeout = null;
+
+        // 1. 메모 불러오기
+        function loadMemo() {
+            const statusText = document.getElementById('memo-save-status');
+            statusText.innerText = "불러오는 중...";
+
+            fetch("/api/todo") // 👈 기존 투두 API를 그대로 활용합니다.
                 .then(res => res.json())
                 .then(list => {
-                    const container = document.getElementById('popup-todo-list-container');
-                    container.innerHTML = '';
+                    const textarea = document.getElementById('popup-memo-textarea');
 
-                    if (list.length === 0) {
-                        container.innerHTML = `<li style="color: #94a3b8; text-align: center; padding: 20px 0; font-size: 13px;">등록된 할 일이 없습니다.</li>`;
-                        return;
-                    }
-
-                    list.forEach(todo => {
-                        const li = document.createElement('li');
-
-                        const hasCompleted = todo.isCompleted;
-
-                        li.className = `todo-item ${hasCompleted ? 'completed' : ''}`;
-                        li.setAttribute('data-id', todo.todoId);
-
-                        li.style.display = 'flex';
-                        li.style.justifyContent = 'between';
-                        li.style.alignItems = 'center';
-
-                        li.innerHTML = `
-                    <div class="todo-left" style="display: flex; align-items: center; gap: 8px; flex: 1;">
-                        <input type="checkbox" onchange="togglePopupTodo(this)" ${hasCompleted ? 'checked' : ''}>
-                        <span class="todo-text" style="${hasCompleted ? 'text-decoration: line-through; color: #94a3b8;' : ''}">${todo.content}</span>
-                    </div>
-                    <button class="btn-todo-delete" onclick="deletePopupTodo(this)" style="background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer;">삭제</button>
-                `;
-                        container.appendChild(li);
-                    });
-                })
-                .catch(err => console.error("투두 로드 실패:", err));
-        }
-
-        // 투두 추가
-        function addPopupTodo() {
-            const input = document.getElementById('popup-todo-input');
-            const text = input.value.trim();
-            if(!text) return;
-
-            fetch("/api/todo", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    [csrfHeader]: csrfToken
-                },
-                body: JSON.stringify({ content: text })
-            })
-                .then(res => {
-                    if(res.ok) {
-                        input.value = '';
-                        loadPopupTodoList();
+                    // 기존 투두 목록 중 가장 첫 번째 항목(혹은 통합 메모용 하나)을 가져와 통째로 뿌려줍니다.
+                    if (list && list.length > 0) {
+                        textarea.value = list[0].content; // 첫 번째 데이터의 내용을 메모장 전체 글로 매핑
+                        textarea.setAttribute('data-id', list[0].todoId); // 수정용 id 저장
                     } else {
-                        alert("추가 실패");
+                        textarea.value = '';
+                        textarea.removeAttribute('data-id');
                     }
+                    statusText.innerText = "저장됨";
                 })
-                .catch(err => console.error("투두 추가 에러:", err));
+                .catch(err => {
+                    console.error("메모 로드 실패:", err);
+                    statusText.innerText = "불러오기 실패";
+                });
         }
 
-        // 투두 토글
-        function togglePopupTodo(checkbox) {
-            const item = checkbox.closest('.todo-item');
-            const todoId = item.getAttribute('data-id');
+        // 2. 메모 저장하기 (추가 혹은 수정)
+        function saveMemo() {
+            const textarea = document.getElementById('popup-memo-textarea');
+            const text = textarea.value;
+            const todoId = textarea.getAttribute('data-id');
+            const statusText = document.getElementById('memo-save-status');
 
-            // CSRF 토큰 읽기
-            const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
-            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+            statusText.innerText = "저장 중...";
 
-            // CSRF 작동 여부에 따라 헤더 동적 생성
-            const requestHeaders = {};
+            const requestHeaders = {
+                "Content-Type": "application/json"
+            };
             if (csrfHeader && csrfToken) {
                 requestHeaders[csrfHeader] = csrfToken;
             }
 
-            fetch(`/api/todo/${todoId}`, {
-                method: "PATCH",
-                headers: requestHeaders
-            })
-                .then(res => {
-                    if(res.ok) {
-                        const textSpan = item.querySelector('.todo-text');
-                        if(checkbox.checked) {
-                            textSpan.style.textDecoration = 'line-through';
-                            textSpan.style.color = '#94a3b8';
-                            item.classList.add('completed');
-                        } else {
-                            textSpan.style.textDecoration = 'none';
-                            textSpan.style.color = 'inherit';
-                            item.classList.remove('completed');
-                        }
-                    } else {
-                        alert("수정 실패");
-                        checkbox.checked = !checkbox.checked;
-                    }
+            // 이미 등록된 메모(todoId가 있는 경우)가 있다면 수정을 요청(PUT/PATCH)하고, 없으면 새로 등록(POST)합니다.
+            if (todoId) {
+                // 기존 데이터 수정 API 호출
+                fetch(`/api/todo/${todoId}`, {
+                    method: "PATCH",
+                    headers: requestHeaders,
+                    body: JSON.stringify({ content: text })
                 })
-                .catch(err => {
-                    console.error("투두 수정 에러:", err);
-                    checkbox.checked = !checkbox.checked;
-                });
+                    .then(res => {
+                        if (res.ok) {
+                            statusText.innerText = "저장됨";
+                        } else {
+                            statusText.innerText = "저장 실패";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("메모 수정 실패:", err);
+                        statusText.innerText = "저장 오류";
+                    });
+            } else {
+                // 데이터가 아예 없을 때 신규 메모 생성 (최초 1회 실행)
+                fetch("/api/todo", {
+                    method: "POST",
+                    headers: requestHeaders,
+                    body: JSON.stringify({ content: text })
+                })
+                    .then(res => {
+                        if (res.ok) {
+                            loadMemo(); // ID를 새로 받아오기 위해 다시 로드
+                        } else {
+                            statusText.innerText = "저장 실패";
+                        }
+                    })
+                    .catch(err => {
+                        console.error("메모 추가 실패:", err);
+                        statusText.innerText = "저장 오류";
+                    });
+            }
         }
 
-        // 투두 삭제
-        function deletePopupTodo(button) {
-            if(!confirm('이 항목을 삭제하시겠습니까?')) return;
+        // 3. 타이핑을 멈추고 1초 뒤에 자동으로 저장되는 '자동 저장' 기능 (디바운싱 기술 적용)
+        function triggerAutoSave() {
+            const statusText = document.getElementById('memo-save-status');
+            statusText.innerText = "입력 중...";
 
-            const item = button.closest('.todo-item');
-            const todoId = item.getAttribute('data-id');
+            // 이전 대기 중이던 타이머가 있다면 취소하여 API 중복 호출 방지
+            if (autoSaveTimeout) {
+                clearTimeout(autoSaveTimeout);
+            }
 
-            fetch(`/api/todo/${todoId}`, {
-                method: "DELETE",
-                headers: {
-                    [csrfHeader]: csrfToken
-                }
-            })
-                .then(res => {
-                    if(res.ok) {
-                        item.remove();
-                    } else {
-                        alert("삭제 실패");
-                    }
-                })
-                .catch(err => console.error("투두 삭제 에러:", err));
+            // 키보드 입력을 멈추고 1초(1000ms) 동안 대기하면 자동으로 saveMemo()가 작동합니다.
+            autoSaveTimeout = setTimeout(() => {
+                saveMemo();
+            }, 1000);
         }
     </script>
 </th:block>
