@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  postgres-container:
+    image: postgres:15-alpine
+    container_name: postgres-container
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: worktopus_db
+      POSTGRES_USER: ADMIN
+      POSTGRES_PASSWORD: 'WorkTopus1234!'
+      TZ: Asia/Seoul
+    volumes:
+      - worktopus-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ADMIN -d worktopus_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - springboot-postgres-net
+
+volumes:
+  worktopus-db-data:
+    name: worktopus-db-data
+
+networks:
+  springboot-postgres-net:
+    name: springboot-postgres-net
+    driver: bridge

@@ -22,7 +22,10 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     Optional<Users> findByEmailIgnoreCase(String email);
 
-    @Query("SELECT b FROM Board b WHERE b.writerName = :writerName AND b.deletedYn = 'N' ORDER BY b.id DESC")
-    List<Board> findActiveBoardsByWriterName(@Param("writerName") String writerName);
+    @Query("SELECT b, p.name, b.projectId FROM Board b " +
+            "JOIN Projects p ON b.projectId = p.id " +
+            "WHERE b.writerName = :writerName AND b.deletedYn = 'N' " +
+            "ORDER BY b.id DESC")
+    List<Object[]> findActiveBoardsWithProjectNameByWriterName(@Param("writerName") String writerName);
 
 }

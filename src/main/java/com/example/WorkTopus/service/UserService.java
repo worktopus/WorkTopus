@@ -171,17 +171,22 @@ public class UserService implements UserDetailsService {
 
     // 마이페이지에서 글 조회 //
     public List<Post> findPostsByWriterName(String writerName) {
-        // 1. UserRepository에 작성한 @Query 메서드 이름으로 정확히 호출합니다.
-        List<com.example.WorkTopus.projects.entity.Board> boards =
-                userRepository.findActiveBoardsByWriterName(writerName);
 
-        // 2. Stream API를 이용해 Post 리스트로 변환하여 리턴
-        return boards.stream().map(board -> {
+        // 1. Board 엔티티와 프로젝트 이름이 함께 묶인 Object 배열 리스트를 조회합니다.
+        List<Object[]> results = userRepository.findActiveBoardsWithProjectNameByWriterName(writerName);
+
+        // 2. Stream API를 이용해 데이터 매핑
+        return results.stream().map(result -> {
+            // 배열에서 데이터 분할 추출
+            com.example.WorkTopus.projects.entity.Board board = (com.example.WorkTopus.projects.entity.Board) result[0];
+            String projectName = (String) result[1]; //  조인해서 가져온 프로젝트 Name 값
+            Long projectId = (Long) result[2];
+
             com.example.WorkTopus.dto.Post dto = new com.example.WorkTopus.dto.Post();
             dto.setId(board.getId());
+            dto.setProjectId(projectId);
             dto.setTitle(board.getTitle());
-
-            // 💡 DTO에 만들어 두신 날짜 변환 메서드를 여기서 정확히 호출해 줍니다!
+            dto.setProjectName(projectName); //  DTO에 프로젝트 명칭
             dto.setWriteDateFromLocalDateTime(board.getCreatedAt());
 
             return dto;

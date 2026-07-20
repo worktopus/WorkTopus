@@ -15,13 +15,16 @@ import java.time.format.DateTimeFormatter;
 public class Post {
 
     private Long id;
+    private Long projectId;
     private String title;
     private String writeDate;
+    private String projectName;
 
     // 생성자
-    public Post(Long id, String title, LocalDateTime createdAt) {
+    public Post(Long id, String title, LocalDateTime createdAt, String projectName) {
         this.id = id;
         this.title = title;
+        this.projectName = projectName;
         setWriteDateFromLocalDateTime(createdAt);
     }
 
