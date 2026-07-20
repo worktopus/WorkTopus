@@ -1,11 +1,6 @@
 package com.example.WorkTopus.projects.service;
 
-import com.example.WorkTopus.projects.dto.response.DashboardBoardResponse;
-import com.example.WorkTopus.projects.dto.response.DashboardDayResponse;
-import com.example.WorkTopus.projects.dto.response.DashboardResponse;
-import com.example.WorkTopus.projects.dto.response.DashboardScheduleResponse;
-import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
-import com.example.WorkTopus.projects.dto.response.ProjectFileResponse;
+import com.example.WorkTopus.projects.dto.response.*;
 import com.example.WorkTopus.projects.entity.KanbanCard;
 import com.example.WorkTopus.projects.entity.KanbanStatus;
 import com.example.WorkTopus.projects.repository.BoardFileRepository;
@@ -135,6 +130,7 @@ public class DashboardServiceImpl implements DashboardService {
                 filterKanbanCards(kanbanCards, KanbanStatus.IN_PROGRESS),
                 filterKanbanCards(kanbanCards, KanbanStatus.REVIEW),
                 findRecentBoards(projectId),
+                findLatestNotice(projectId),
                 findRecentFiles(projectId),
                 upcomingSchedules,
                 createCalendarDays(today, upcomingSchedules)
@@ -147,6 +143,17 @@ public class DashboardServiceImpl implements DashboardService {
                 .stream()
                 .map(DashboardBoardResponse::from)
                 .toList();
+    }
+
+    private NoticeResponse findLatestNotice(Long projectId) {
+        return boardRepository
+                .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
+                        projectId,
+                        "Y",
+                        "N"
+                )
+                .map(NoticeResponse::from)
+                .orElse(null);
     }
 
     private List<ProjectFileResponse> findRecentFiles(Long projectId) {

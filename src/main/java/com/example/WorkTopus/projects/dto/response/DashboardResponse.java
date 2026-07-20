@@ -25,8 +25,11 @@ public record DashboardResponse(
         List<KanbanCardResponse> inProgressCards,
         List<KanbanCardResponse> reviewCards,
         List<DashboardBoardResponse> recentBoards,
+        NoticeResponse latestNotice,
         List<ProjectFileResponse> recentFiles,
         List<DashboardScheduleResponse> upcomingSchedules,
         List<DashboardDayResponse> calendarDays
+
+
 ) {
 }

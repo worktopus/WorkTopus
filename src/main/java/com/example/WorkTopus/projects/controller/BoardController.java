@@ -51,6 +51,8 @@ public class BoardController {
         mav.addObject("projectId", projectId);
         mav.addObject("boards", boards);
         mav.addObject("keyword", keyword);
+        mav.addObject("latestNotice",
+                boardService.getLatestNotice(projectId).orElse(null));
 
         return mav;
     }

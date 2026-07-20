@@ -2,11 +2,7 @@ package com.example.WorkTopus.projects.service;
 
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
-import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
-import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
-import com.example.WorkTopus.projects.dto.response.BoardListResponse;
-import com.example.WorkTopus.projects.dto.response.FileResponse;
-import com.example.WorkTopus.projects.dto.response.StoredFileResponse;
+import com.example.WorkTopus.projects.dto.response.*;
 import com.example.WorkTopus.projects.entity.Board;
 import com.example.WorkTopus.projects.entity.BoardFile;
 import com.example.WorkTopus.projects.exception.BoardNotFoundException;
@@ -24,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -234,5 +231,15 @@ public class BoardServiceImpl implements BoardService {
                 .files(files)
                 .comments(List.of())
                 .build();
+    }
+
+    public Optional<NoticeResponse> getLatestNotice(Long projectId) {
+        return boardRepository
+                .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
+                        projectId,
+                        "Y",
+                        "N"
+                )
+                .map(NoticeResponse::from);
     }
 }

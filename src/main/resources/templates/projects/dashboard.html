@@ -85,18 +85,28 @@
 
 
             <!-- 공지사항 -->
-            <section class="dashboard__notice">
+            <section class="dashboard__notice"
+                     th:if="${dashboard.latestNotice != null}">
                 <div class="dashboard__notice-left">
                     <span class="dashboard__notice-icon"><img th:src="@{/img/megaphone.svg}"></span>
                     <strong>공지사항</strong>
-                    <span class="dashboard__notice-badge">NEW</span>
-                    <p th:text="${dashboard.recentBoards.isEmpty() ? '최근 게시글이 없습니다.' : dashboard.recentBoards[0].title}">
-                        최근 게시글
-                    </p>
+                    <span th:if="${dashboard.latestNotice != null}"
+                          class="dashboard__notice-badge">
+                        NEW
+                    </span>
+                    <a th:if="${dashboard.latestNotice != null}"
+                       th:href="@{/projects/{projectId}/boards/{boardId}(
+                       projectId=${projectId},
+                       boardId=${dashboard.latestNotice.boardId})}"
+                       th:text="${dashboard.latestNotice.title}">
+                        최근 공지사항
+                    </a>
                 </div>
 
                 <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
-                   class="dashboard__notice-more">더보기 ›</a>
+                   class="dashboard__notice-more">
+                    더보기 ›
+                </a>
             </section>
 
             <!-- 작업 카드 + 차트 -->

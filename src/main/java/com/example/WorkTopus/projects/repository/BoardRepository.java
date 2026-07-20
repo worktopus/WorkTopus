@@ -11,7 +11,6 @@ import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long> {
 
-    // 목록 조회 + 페이징
     Page<Board> findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
             Long projectId,
             String deletedYn,
@@ -24,16 +23,28 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             Pageable pageable
     );
 
-    long countByProjectIdAndDeletedYn(Long projectId, String deletedYn);
+    long countByProjectIdAndDeletedYn(
+            Long projectId,
+            String deletedYn
+    );
 
-    // 상세/수정/삭제용 단건 조회
     Optional<Board> findByIdAndProjectIdAndDeletedYn(
             Long boardId,
             Long projectId,
             String deletedYn
     );
 
-    // 검색
+    Optional<Board> findByIdAndProjectId(
+            Long boardId,
+            Long projectId
+    );
+
+    Optional<Board> findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
+            Long projectId,
+            String noticeYn,
+            String deletedYn
+    );
+
     @Query("""
         SELECT b
         FROM Board b
@@ -51,6 +62,4 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
-
-    Optional<Board> findByIdAndProjectId(Long boardId, Long projectId);
 }

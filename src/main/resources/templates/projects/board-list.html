@@ -52,7 +52,8 @@
             </section>
 
             <!-- 공지 -->
-            <section class="board_notice">
+            <section class="board_notice"
+                     th:if="${latestNotice != null}">
 
                 <div class="board_notice-icon">
                     📢
@@ -61,15 +62,22 @@
                 <div class="board_notice-content">
                     <span class="board_notice-label">중요 공지</span>
 
-                    <a th:href="@{/projects/board-detail}"
+                    <a th:href="@{/projects/{projectId}/boards/{boardId}(
+               projectId=${projectId},
+               boardId=${latestNotice.boardId})}"
+                       th:text="${latestNotice.title}"
                        class="board_notice-title">
-                        Sprint 2 일정 및 역할 분담 변경 안내
+                        공지 제목
                     </a>
                 </div>
 
-                <span class="board_notice-date">
-                    2026.07.07
-                </span>
+                <span class="board_notice-date"
+                      th:text="${#temporals.format(
+                      latestNotice.createdAt,
+                      'yyyy.MM.dd'
+                  )}">
+                2026.07.07
+            </span>
 
             </section>
 
