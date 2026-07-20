@@ -117,7 +117,7 @@
                     <p>함께 협업할 팀원들의 구글 이메일 계정을 입력하여 초대장을 발송합니다.</p>
                 </div>
 
-                <form action="/project/manage/invite/send" method="post" style="margin-top: 24px; max-width: 600px;">
+                <form action="/projects/manage/invite/send" method="post" style="margin-top: 24px; max-width: 600px;">
                     <input type="hidden" name="_csrf" th:value="${_csrf != null} ? ${_csrf.token} : ''"/>
                     <div class="form-group">
                         <label class="form-label" style="font-weight: 600;">초대 이메일 주소</label>

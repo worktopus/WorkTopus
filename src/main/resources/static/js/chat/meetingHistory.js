@@ -144,7 +144,7 @@
              */
             const response =
                 await fetch(
-                    `${MEETING_SUMMARY_API}/project/${encodeURIComponent(projectId)}`,
+                    `${MEETING_SUMMARY_API}/projects/${encodeURIComponent(projectId)}`,
                     {
                         method:
                             "GET",
@@ -779,7 +779,8 @@
 
             app.meetingSummary
                 .showStoredSummary(
-                    summary
+                    summary,
+                    id
                 );
 
 

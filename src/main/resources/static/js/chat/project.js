@@ -9,9 +9,9 @@
     ===================================================== */
 
     window.loginUser = window.loginUser || {
-        userNum: 1,
-        userId: "testuser",
-        name: "신승민"
+        userNum: null,
+        userId: "",
+        name: ""
     };
 
 

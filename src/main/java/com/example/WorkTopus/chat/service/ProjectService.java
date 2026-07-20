@@ -2,10 +2,14 @@ package com.example.WorkTopus.chat.service;
 
 import com.example.WorkTopus.chat.dto.ChatMessage;
 import com.example.WorkTopus.chat.dto.ProjectDto;
-import com.example.WorkTopus.chat.dto.ProjectMember;
+import com.example.WorkTopus.entity.ProjectMember;
+import com.example.WorkTopus.entity.ProjectRole;
+import com.example.WorkTopus.entity.Projects;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -13,31 +17,27 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ProjectService {
 
-    /*
-     * 실제 프로젝트 DB 연결 전까지 사용하는
-     * 임시 프로젝트 정보입니다.
-     */
-    private static final Long TEMP_PROJECT_ID = 2L;
-
-    private static final String TEMP_PROJECT_NAME = "WorkTopus";
-
-    private static final String TEMP_PROJECT_DESCRIPTION = "WorkTopus 협업 프로젝트";
-
-
+    /* 프로젝트 채팅방 관리 */
     private final ChatRoomService chatRoomService;
 
-    private final ProjectMemberService projectMemberService;
-
+    /* 채팅 메시지 조회 */
     private final ChatService chatService;
 
-    /*
-     * 채팅 읽음 정보 및 안 읽은 메시지 수 계산
-     */
+    /* 채팅 읽음 정보와 안 읽은 메시지 수 계산 */
     private final ChatReadService chatReadService;
 
+    /* 실제 PROJECT_MEMBER 테이블 조회 */
+    private final ProjectMemberRepository projectMemberRepository;
+
+    /* 실제 프로젝트 참여자 조회  */
+    private final ProjectMemberService
+            projectMemberService;
 
     /*
-     * 프로젝트 생성 시 기본 단체 채팅방 생성
+     * 프로젝트 생성 시 기본 단체채팅방 생성
+     *
+     * 실제 프로젝트 생성 기능과의 자동 연결은
+     * 이후 단계에서 처리합니다.
      */
     public void createProject(
             Long projectId,
@@ -56,52 +56,66 @@ public class ProjectService {
 
 
     /*
-     * 로그인 사용자가 참여하는 프로젝트 목록 조회
+     * 로그인 사용자가 참여 중인 실제 프로젝트 목록 조회
      *
-     * 현재는 WorkTopus 임시 프로젝트 하나를 반환합니다.
+     * USERS
+     * → PROJECT_MEMBER
+     * → PROJECTS
      */
+    @Transactional(readOnly = true)
     public List<ProjectDto> getProjects(
             Users loginUser
     ) {
-        validateLoginUser(
-                loginUser
-        );
+        validateLoginUser(loginUser);
 
-        /*
-         * 로그인 사용자를 임시 프로젝트 팀원으로 등록하거나
-         * 기존 팀원 정보를 갱신합니다.
-         */
-        registerLoginUser(
-                TEMP_PROJECT_ID,
-                loginUser
-        );
+        List<ProjectMember> projectMembers =
+                projectMemberRepository
+                        .findByUserOrderByJoinedAtDesc(
+                                loginUser
+                        );
 
-        ProjectDto project =
-                createTemporaryProject(
-                        TEMP_PROJECT_ID,
-                        loginUser.getUserNum()
-                );
-
-        return List.of(
-                project
-        );
+        return projectMembers
+                .stream()
+                .map(projectMember ->
+                        createProjectDto(
+                                projectMember.getProject(),
+                                loginUser.getUserNum()
+                        )
+                )
+                .toList();
     }
 
 
     /*
-     * 임시 프로젝트 DTO 생성
+     * 실제 Projects Entity를
+     * 채팅 화면용 ProjectDto로 변환
      */
-    private ProjectDto createTemporaryProject(
-            Long projectId,
+    private ProjectDto createProjectDto(
+            Projects project,
             Long loginUserNum
     ) {
+        if (
+                project == null ||
+                        project.getId() == null
+        ) {
+            throw new IllegalArgumentException(
+                    "프로젝트 정보가 올바르지 않습니다."
+            );
+        }
+
+        Long projectId =
+                project.getId();
+
         String groupRoomId =
                 createGroupRoomId(
                         projectId
                 );
 
         /*
-         * 프로젝트 단체 채팅방이 없으면 생성합니다.
+         * 메모리 채팅방 목록에 단체방이 없으면 생성합니다.
+         *
+         * 채팅방 ID 예:
+         * project_15_group
          */
         if (
                 chatRoomService.getRoom(
@@ -110,18 +124,12 @@ public class ProjectService {
         ) {
             chatRoomService.createProjectGroupRoom(
                     projectId,
-                    TEMP_PROJECT_NAME
+                    project.getName()
             );
         }
 
-        List<ProjectMember> members =
-                projectMemberService.getMembers(
-                        projectId
-                );
-
         /*
-         * 프로젝트 단체 채팅의 마지막 메시지입니다.
-         * 목록에 작성자, 내용, 시간이 출력됩니다.
+         * 해당 프로젝트 단체채팅의 마지막 메시지
          */
         ChatMessage lastMessage =
                 chatService.getLastMessage(
@@ -129,10 +137,7 @@ public class ProjectService {
                 );
 
         /*
-         * 현재 로그인 사용자가 읽지 않은
-         * 프로젝트 단체 채팅 메시지 수입니다.
-         *
-         * 본인이 보낸 메시지는 제외됩니다.
+         * 현재 로그인 사용자가 읽지 않은 메시지 수
          */
         int unreadCount =
                 chatReadService.getUnreadCount(
@@ -141,54 +146,40 @@ public class ProjectService {
                 );
 
         return ProjectDto.builder()
-                .projectId( projectId )
-                .projectName( TEMP_PROJECT_NAME )
-                .description( TEMP_PROJECT_DESCRIPTION )
-                .groupRoomId( groupRoomId )
+                .projectId(
+                        projectId
+                )
+                .projectName(
+                        project.getName()
+                )
+                .description(
+                        project.getDescription()
+                )
+                .groupRoomId(
+                        groupRoomId
+                )
                 .unreadCount(
                         unreadCount
                 )
                 .lastMessage(
                         lastMessage
                 )
+
+                /* 실제 PROJECT_MEMBER와 USERS에서
+                   프로젝트 참여자 목록을 조회합니다.
+                 */
                 .members(
-                        members
+                        projectMemberService.getMembers(
+                                projectId
+                        )
                 )
                 .build();
     }
 
 
     /*
-     * 로그인 사용자 등록 또는 갱신
-     *
-     * 기존 팀원이 owner이면 owner 상태를 유지합니다.
-     */
-    private void registerLoginUser(
-            Long projectId,
-            Users loginUser
-    ) {
-        ProjectMember existingMember =
-                projectMemberService.getMember(
-                        projectId,
-                        loginUser.getUserNum()
-                );
-
-        boolean owner =
-                existingMember != null &&
-                        existingMember.isOwner();
-
-        projectMemberService.registerLoginMember(
-                projectId,
-                loginUser.getUserNum(),
-                loginUser.getUserId(),
-                loginUser.getName(),
-                owner
-        );
-    }
-
-
-    /*
-     * 프로젝트 owner 여부 확인
+     * 실제 PROJECT_MEMBER 테이블 기준
+     * 프로젝트 OWNER 여부 확인
      */
     public boolean isProjectOwner(
             Long projectId,
@@ -201,15 +192,17 @@ public class ProjectService {
             return false;
         }
 
-        return projectMemberService
-                .isProjectOwner(
+        return projectMemberRepository
+                .existsByProject_IdAndUser_UserNumAndRole(
                         projectId,
-                        userNum
+                        userNum,
+                        ProjectRole.OWNER
                 );
     }
 
 
     /*
+     * 실제 PROJECT_MEMBER 테이블 기준
      * 프로젝트 참여 여부 확인
      */
     public boolean isProjectMember(
@@ -223,8 +216,8 @@ public class ProjectService {
             return false;
         }
 
-        return projectMemberService
-                .isProjectMember(
+        return projectMemberRepository
+                .existsByProject_IdAndUser_UserNum(
                         projectId,
                         userNum
                 );
@@ -232,7 +225,7 @@ public class ProjectService {
 
 
     /*
-     * 프로젝트 단체 채팅방 ID 생성
+     * 프로젝트 단체채팅방 ID 생성
      */
     private String createGroupRoomId(
             Long projectId

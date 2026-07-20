@@ -37,11 +37,12 @@
             </div>
 
 
-        <!-- 작성 폼 -->
-        <form class="board_write_form"
-              th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
-              method="post"
-              enctype="multipart/form-data">
+        <!-- 작성 폼 (2026.07.20 승민 수정)-->
+            <form class="board_write_form"
+                  th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                  th:attr="data-project-id=${projectId}"
+                  method="post"
+                  enctype="multipart/form-data">
             <input type="hidden" name="notice" value="false">
 
             <!-- 기본 정보 -->

@@ -74,7 +74,7 @@ public class WorkspaceManageApiController {
     /**
      * 일반 HTML 폼 전송 방식 초대 기능
      */
-    @PostMapping("/project/manage/invite/send")
+    @PostMapping("/projects/manage/invite/send")
     public ResponseEntity<?> handleFormSubmitInvite(
             @RequestParam(value = "emails", required = false) List<String> emails) {
         try {

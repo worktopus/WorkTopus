@@ -274,7 +274,7 @@
                 <button
                         id="boardBtn"
                         type="button">
-                    📌 게시판 등록
+                    📌 게시글 작성
                 </button>
 
             </div>
@@ -283,9 +283,21 @@
 
     </div>
 
-    <!-- =========================================
-         신승민: 실시간 채팅 / AI 회의요약 스크립트
-    ========================================== -->
+    <!-- 신승민: 실시간 채팅 / AI 회의요약 스크립트 -->
+
+    <!-- 실제 로그인 사용자 → 채팅 JavaScript 전달 -->
+    <script th:inline="javascript">
+        window.loginUser = {
+            userNum: /*[[${user != null ? user.userNum : null}]]*/ null,
+            userId: /*[[${user != null ? user.userId : ''}]]*/ "",
+            name: /*[[${user != null ? user.name : ''}]]*/ ""
+        };
+
+        console.log(
+            "채팅 로그인 사용자:",
+            window.loginUser
+        );
+    </script>
 
     <!-- WebSocket 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -300,6 +312,8 @@
     <script th:src="@{/js/chat/history.js}"></script>
     <script th:src="@{/js/chat/chatList.js}"></script>
     <script th:src="@{/js/chat/chat.js}"></script>
+
+    <!-- AI 회의요약 -->
     <script th:src="@{/js/chat/meetingSummary.js}"></script>
     <script th:src="@{/js/chat/meetingHistory.js}"></script>
 

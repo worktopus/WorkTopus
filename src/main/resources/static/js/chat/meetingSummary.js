@@ -15,6 +15,12 @@
      */
     let latestSummary = null;
 
+    /*
+     * 회의록 기록에서 열어 본
+     * 저장된 회의록 PK
+     */
+    let currentStoredSummaryId = null;
+
 
     /* =====================================================
        초기화
@@ -23,14 +29,29 @@
     function initializeMeetingSummary() {
 
         createSummaryModal();
+
         bindSummaryButton();
+
         bindSummaryModalEvents();
+
         bindSummarySaveButton();
+
+        /*
+         * 저장된 회의록을
+         * 게시글 작성 화면으로 보내는 버튼
+         */
+        bindSummaryBoardButton();
+
+        /*
+         * 채팅창 하단의 일반 게시글 작성 버튼
+         */
+        bindBoardWriteButton();
     }
 
+
     /* =====================================================
-   회의록 저장 버튼 연결
-===================================================== */
+       회의록 저장 버튼 연결
+    ===================================================== */
 
     function bindSummarySaveButton() {
 
@@ -46,17 +67,14 @@
 
 
         if (
-            button.dataset
-                .eventBound ===
+            button.dataset.eventBound ===
             "true"
         ) {
-
             return;
         }
 
 
-        button.dataset
-            .eventBound =
+        button.dataset.eventBound =
             "true";
 
 
@@ -64,6 +82,164 @@
             "click",
             saveMeetingSummary
         );
+    }
+
+
+    /* =====================================================
+       저장된 회의록 게시판 등록 버튼 연결
+    ===================================================== */
+
+    function bindSummaryBoardButton() {
+
+        const button =
+            document.getElementById(
+                "aiSummaryBoardButton"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        if (
+            button.dataset.eventBound ===
+            "true"
+        ) {
+            return;
+        }
+
+
+        button.dataset.eventBound =
+            "true";
+
+
+        button.addEventListener(
+            "click",
+            openBoardWriteFromStoredSummary
+        );
+    }
+
+
+    /* =====================================================
+       채팅창 하단 일반 게시글 작성 버튼 연결
+    ===================================================== */
+
+    function bindBoardWriteButton() {
+
+        const button =
+            document.getElementById(
+                "boardBtn"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        if (
+            button.dataset.eventBound ===
+            "true"
+        ) {
+            return;
+        }
+
+
+        button.dataset.eventBound =
+            "true";
+
+
+        button.addEventListener(
+            "click",
+            openBlankBoardWrite
+        );
+    }
+
+
+    /* =====================================================
+       저장된 회의록을 게시글 작성 화면으로 전달
+    ===================================================== */
+
+    function openBoardWriteFromStoredSummary() {
+
+        const projectId =
+            Number(
+                latestSummary?.projectId
+            );
+
+
+        const summaryId =
+            Number(
+                currentStoredSummaryId
+            );
+
+
+        if (
+            !Number.isFinite(projectId) ||
+            projectId <= 0
+        ) {
+
+            alert(
+                "회의록의 프로젝트 정보를 확인할 수 없습니다."
+            );
+
+            return;
+        }
+
+
+        if (
+            !Number.isFinite(summaryId) ||
+            summaryId <= 0
+        ) {
+
+            alert(
+                "저장된 회의록 정보를 확인할 수 없습니다."
+            );
+
+            return;
+        }
+
+
+        /*
+         * 예:
+         * /projects/5/boards/write?summaryId=12
+         */
+        window.location.href =
+            `/projects/${encodeURIComponent(projectId)}` +
+            `/boards/write` +
+            `?summaryId=${encodeURIComponent(summaryId)}`;
+    }
+
+
+    /* =====================================================
+       현재 프로젝트의 빈 게시글 작성 화면으로 이동
+    ===================================================== */
+
+    function openBlankBoardWrite() {
+
+        const projectId =
+            Number(
+                app.state?.currentProjectId
+            );
+
+
+        if (
+            !Number.isFinite(projectId) ||
+            projectId <= 0
+        ) {
+
+            alert(
+                "현재 프로젝트를 확인할 수 없습니다."
+            );
+
+            return;
+        }
+
+
+        window.location.href =
+            `/projects/${encodeURIComponent(projectId)}` +
+            `/boards/write`;
     }
 
 
@@ -93,17 +269,14 @@
          * 중복 이벤트 등록 방지
          */
         if (
-            button.dataset
-                .meetingSummaryBound ===
+            button.dataset.meetingSummaryBound ===
             "true"
         ) {
-
             return;
         }
 
 
-        button.dataset
-            .meetingSummaryBound =
+        button.dataset.meetingSummaryBound =
             "true";
 
 
@@ -122,14 +295,10 @@
 
         /*
          * 현재 선택된 프로젝트 ID
-         *
-         * chatList.js에서 단체방을 열 때
-         * app.state.currentProjectId에 저장됩니다.
          */
         const projectId =
             Number(
-                app.state
-                    ?.currentProjectId
+                app.state?.currentProjectId
             );
 
 
@@ -138,19 +307,13 @@
          */
         const roomId =
             String(
-                app.state
-                    ?.currentRoomId ??
+                app.state?.currentRoomId ??
                 ""
             );
 
 
-        /*
-         * 프로젝트 확인
-         */
         if (
-            !Number.isFinite(
-                projectId
-            ) ||
+            !Number.isFinite(projectId) ||
             projectId <= 0
         ) {
 
@@ -164,7 +327,7 @@
 
         /*
          * AI 회의요약은
-         * 프로젝트 단체채팅에서만 실행합니다.
+         * 프로젝트 단체채팅에서만 실행
          */
         if (
             app.state?.chatMode !==
@@ -182,9 +345,6 @@
         }
 
 
-        /*
-         * 로딩 상태 표시
-         */
         setSummaryButtonLoading(
             true
         );
@@ -195,14 +355,6 @@
 
         try {
 
-            /*
-             * 실제 Gemini 회의요약 API 호출
-             *
-             * 예:
-             *
-             * POST
-             * /api/ai/meeting-summary/2
-             */
             const response =
                 await fetch(
                     `${MEETING_SUMMARY_API}/${encodeURIComponent(projectId)}`,
@@ -218,18 +370,11 @@
                 );
 
 
-            /*
-             * 서버 응답을 우선 문자열로 받습니다.
-             *
-             * 오류 응답도 확인하기 위해서입니다.
-             */
             const responseText =
                 await response.text();
 
 
-            if (
-                !response.ok
-            ) {
+            if (!response.ok) {
 
                 throw new Error(
                     getErrorMessage(
@@ -240,18 +385,12 @@
             }
 
 
-            /*
-             * 정상 JSON 변환
-             */
             const summary =
                 JSON.parse(
                     responseText
                 );
 
 
-            /*
-             * AI 결과 화면 표시
-             */
             showSummaryResult(
                 summary
             );
@@ -270,11 +409,9 @@
                 "AI 회의요약을 생성하지 못했습니다."
             );
 
+
         } finally {
 
-            /*
-             * 버튼 로딩 해제
-             */
             setSummaryButtonLoading(
                 false
             );
@@ -289,14 +426,13 @@
     function createSummaryModal() {
 
         /*
-         * 이미 만들어졌으면 다시 만들지 않습니다.
+         * 이미 만들어졌으면 다시 만들지 않음
          */
         if (
             document.getElementById(
                 "aiSummaryOverlay"
             )
         ) {
-
             return;
         }
 
@@ -333,6 +469,7 @@
                 >
 
                     <div>
+
                         <p
                             class="ai-summary-modal__eyebrow"
                         >
@@ -345,6 +482,7 @@
                         >
                             AI 회의요약
                         </h2>
+
                     </div>
 
 
@@ -479,14 +617,32 @@
                         id="aiSummaryMeta"
                         class="ai-summary-meta"
                     ></footer>
-                    
-                    <div class="ai-summary-actions">
-                        <button type="button"
-                                id="aiSummarySaveButton"
-                                class="ai-summary-save-button"
-                                disabled>
-                                회의록 저장
+
+
+                    <div
+                        class="ai-summary-actions"
+                    >
+
+                        <button
+                            type="button"
+                            id="aiSummarySaveButton"
+                            class="ai-summary-save-button"
+                            disabled
+                        >
+                            회의록 저장
                         </button>
+
+
+                        <!-- 저장된 회의록에서만 표시 -->
+                        <button
+                            type="button"
+                            id="aiSummaryBoardButton"
+                            class="ai-summary-save-button"
+                            style="display: none;"
+                        >
+                            게시판 등록
+                        </button>
+
                     </div>
 
                 </div>
@@ -521,13 +677,11 @@
 
         if (
             closeButton &&
-            closeButton.dataset
-                .eventBound !==
+            closeButton.dataset.eventBound !==
             "true"
         ) {
 
-            closeButton.dataset
-                .eventBound =
+            closeButton.dataset.eventBound =
                 "true";
 
 
@@ -539,17 +693,15 @@
 
 
         /*
-         * 팝업 바깥쪽 클릭 시 닫기
+         * 팝업 바깥 클릭 시 닫기
          */
         if (
             overlay &&
-            overlay.dataset
-                .eventBound !==
+            overlay.dataset.eventBound !==
             "true"
         ) {
 
-            overlay.dataset
-                .eventBound =
+            overlay.dataset.eventBound =
                 "true";
 
 
@@ -561,7 +713,6 @@
                         event.target ===
                         overlay
                     ) {
-
                         closeSummaryModal();
                     }
                 }
@@ -573,13 +724,11 @@
          * ESC 키로 닫기
          */
         if (
-            document.body.dataset
-                .aiSummaryEscapeBound !==
+            document.body.dataset.aiSummaryEscapeBound !==
             "true"
         ) {
 
-            document.body.dataset
-                .aiSummaryEscapeBound =
+            document.body.dataset.aiSummaryEscapeBound =
                 "true";
 
 
@@ -591,7 +740,6 @@
                         event.key ===
                         "Escape"
                     ) {
-
                         closeSummaryModal();
                     }
                 }
@@ -606,9 +754,26 @@
 
     function showSummaryLoading() {
 
+        /*
+         * 새 AI 요약이므로
+         * 이전 저장 회의록 정보 제거
+         */
         latestSummary = null;
 
+        currentStoredSummaryId = null;
+
+
+        /*
+         * 새 요약 결과에서는
+         * 게시판 등록 버튼 숨김
+         */
+        setSummaryBoardButtonVisible(
+            false
+        );
+
+
         openSummaryModal();
+
 
         const saveButton =
             document.getElementById(
@@ -670,8 +835,10 @@
     function showSummaryResult(
         summary
     ) {
+
         latestSummary =
             summary;
+
 
         const saveButton =
             document.getElementById(
@@ -687,6 +854,7 @@
             saveButton.textContent =
                 "회의록 저장";
         }
+
 
         const loading =
             document.getElementById(
@@ -726,9 +894,6 @@
 
         /*
          * 전체 요약
-         *
-         * Gemini 응답을 innerHTML로 직접 넣지 않고
-         * textContent를 사용합니다.
          */
         setText(
             "aiSummaryText",
@@ -773,18 +938,28 @@
         );
     }
 
+
     /* =====================================================
-   저장된 회의록 상세 표시
-===================================================== */
+       저장된 회의록 상세 표시
+    ===================================================== */
 
     function showStoredSummary(
-        summary
+        summary,
+        summaryId
     ) {
 
         /*
-         * 기존 AI 결과 팝업 재사용
+         * 회의록 기록에서 선택한
+         * 저장된 회의록 PK 보관
          */
+        currentStoredSummaryId =
+            Number(
+                summaryId
+            );
+
+
         openSummaryModal();
+
 
         showSummaryResult(
             summary
@@ -792,8 +967,8 @@
 
 
         /*
-         * DB에서 이미 저장된 회의록이므로
-         * 다시 저장하지 못하도록 버튼을 잠급니다.
+         * 이미 DB에 저장된 회의록이므로
+         * 다시 저장하지 못하게 함
          */
         const saveButton =
             document.getElementById(
@@ -809,6 +984,41 @@
             saveButton.textContent =
                 "저장된 회의록";
         }
+
+
+        /*
+         * 저장된 회의록 상세에서만
+         * 게시판 등록 버튼 표시
+         */
+        setSummaryBoardButtonVisible(
+            true
+        );
+    }
+
+
+    /* =====================================================
+       게시판 등록 버튼 표시 여부
+    ===================================================== */
+
+    function setSummaryBoardButtonVisible(
+        visible
+    ) {
+
+        const button =
+            document.getElementById(
+                "aiSummaryBoardButton"
+            );
+
+
+        if (!button) {
+            return;
+        }
+
+
+        button.style.display =
+            visible
+                ? "inline-flex"
+                : "none";
     }
 
 
@@ -833,23 +1043,15 @@
         }
 
 
-        /*
-         * 기존 내용 제거
-         */
         list.replaceChildren();
 
 
         const values =
-            Array.isArray(
-                items
-            )
+            Array.isArray(items)
                 ? items
                 : [];
 
 
-        /*
-         * 목록이 없는 경우
-         */
         if (
             values.length ===
             0
@@ -872,7 +1074,6 @@
             list.appendChild(
                 item
             );
-
 
             return;
         }
@@ -924,9 +1125,7 @@
 
 
         const values =
-            Array.isArray(
-                keywords
-            )
+            Array.isArray(keywords)
                 ? keywords
                 : [];
 
@@ -953,7 +1152,6 @@
             container.appendChild(
                 empty
             );
-
 
             return;
         }
@@ -985,150 +1183,142 @@
         );
     }
 
+
     /* =====================================================
        AI 회의록 DB 저장
     ===================================================== */
 
-        async function saveMeetingSummary() {
+    async function saveMeetingSummary() {
 
-            /*
-             * 현재 AI 결과 확인
-             */
-            if (
-                !latestSummary
-            ) {
+        if (!latestSummary) {
 
-                alert(
-                    "저장할 AI 회의요약이 없습니다."
+            alert(
+                "저장할 AI 회의요약이 없습니다."
+            );
+
+            return;
+        }
+
+
+        const button =
+            document.getElementById(
+                "aiSummarySaveButton"
+            );
+
+
+        /*
+         * 중복 클릭 방지
+         */
+        if (button) {
+
+            button.disabled =
+                true;
+
+            button.textContent =
+                "저장 중...";
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${MEETING_SUMMARY_API}/save`,
+                    {
+                        method:
+                            "POST",
+
+                        headers: {
+
+                            "Content-Type":
+                                "application/json",
+
+                            "Accept":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify(
+                                latestSummary
+                            )
+                    }
                 );
 
-                return;
+
+            const responseText =
+                await response.text();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    getErrorMessage(
+                        responseText,
+                        response.status
+                    )
+                );
             }
 
 
-            const button =
-                document.getElementById(
-                    "aiSummarySaveButton"
+            const savedResult =
+                JSON.parse(
+                    responseText
                 );
 
 
+            console.log(
+                "AI 회의록 저장 완료:",
+                savedResult
+            );
+
+
+            if (button) {
+
+                button.textContent =
+                    "저장 완료";
+
+                /*
+                 * 같은 AI 결과 중복 저장 방지
+                 */
+                button.disabled =
+                    true;
+            }
+
+
+            alert(
+                savedResult.message ||
+                "AI 회의록이 저장되었습니다."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "AI 회의록 저장 오류",
+                error
+            );
+
+
+            alert(
+                error.message ||
+                "AI 회의록을 저장하지 못했습니다."
+            );
+
+
             /*
-             * 중복 클릭 방지
+             * 저장 실패 시 재시도 가능
              */
             if (button) {
 
                 button.disabled =
-                    true;
+                    false;
 
                 button.textContent =
-                    "저장 중...";
-            }
-
-
-            try {
-
-                const response =
-                    await fetch(
-                        `${MEETING_SUMMARY_API}/save`,
-                        {
-                            method:
-                                "POST",
-
-                            headers: {
-
-                                "Content-Type":
-                                    "application/json",
-
-                                "Accept":
-                                    "application/json"
-                            },
-
-                            body:
-                                JSON.stringify(
-                                    latestSummary
-                                )
-                        }
-                    );
-
-
-                const responseText =
-                    await response.text();
-
-
-                if (
-                    !response.ok
-                ) {
-
-                    throw new Error(
-                        getErrorMessage(
-                            responseText,
-                            response.status
-                        )
-                    );
-                }
-
-
-                const savedResult =
-                    JSON.parse(
-                        responseText
-                    );
-
-
-                console.log(
-                    "AI 회의록 저장 완료:",
-                    savedResult
-                );
-
-
-                if (button) {
-
-                    button.textContent =
-                        "저장 완료";
-
-                    /*
-                     * 같은 AI 결과를
-                     * 중복 저장하지 못하도록 유지
-                     */
-                    button.disabled =
-                        true;
-                }
-
-
-                alert(
-                    savedResult.message
-                    ||
-                    "AI 회의록이 저장되었습니다."
-                );
-
-
-            } catch (error) {
-
-                console.error(
-                    "AI 회의록 저장 오류",
-                    error
-                );
-
-
-                alert(
-                    error.message
-                    ||
-                    "AI 회의록을 저장하지 못했습니다."
-                );
-
-
-                /*
-                 * 저장 실패 시 다시 시도 가능
-                 */
-                if (button) {
-
-                    button.disabled =
-                        false;
-
-                    button.textContent =
-                        "회의록 저장";
-                }
+                    "회의록 저장";
             }
         }
+    }
+
 
     /* =====================================================
        요약 정보 출력
@@ -1228,7 +1418,7 @@
 
 
     /* =====================================================
-       팝업 열기 / 닫기
+       팝업 열기
     ===================================================== */
 
     function openSummaryModal() {
@@ -1248,6 +1438,10 @@
             "flex";
     }
 
+
+    /* =====================================================
+       팝업 닫기
+    ===================================================== */
 
     function closeSummaryModal() {
 
@@ -1287,14 +1481,11 @@
 
 
         if (
-            !button.dataset
-                .originalText
+            !button.dataset.originalText
         ) {
 
-            button.dataset
-                .originalText =
-                button.textContent
-                    .trim();
+            button.dataset.originalText =
+                button.textContent.trim();
         }
 
 
@@ -1305,8 +1496,7 @@
         button.textContent =
             loading
                 ? "AI 분석 중..."
-                : button.dataset
-                    .originalText;
+                : button.dataset.originalText;
     }
 
 
@@ -1319,21 +1509,15 @@
         status
     ) {
 
-        if (
-            !responseText
-        ) {
+        if (!responseText) {
 
             return (
-                `AI 회의요약 요청에 실패했습니다.`
-                +
+                "AI 회의요약 요청에 실패했습니다." +
                 ` HTTP ${status}`
             );
         }
 
 
-        /*
-         * JSON 오류 응답인 경우
-         */
         try {
 
             const data =
@@ -1407,15 +1591,13 @@
                 date.getTime()
             )
         ) {
-
             return "";
         }
 
 
-        return date
-            .toLocaleString(
-                "ko-KR"
-            );
+        return date.toLocaleString(
+            "ko-KR"
+        );
     }
 
 
@@ -1456,6 +1638,7 @@
             "DOMContentLoaded",
             initializeMeetingSummary
         );
+
 
     } else {
 
