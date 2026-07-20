@@ -1,6 +1,7 @@
 package com.example.WorkTopus.projects.dto.response;
 
 import com.example.WorkTopus.projects.entity.Board;
+import org.jsoup.Jsoup;
 
 import java.time.LocalDateTime;
 public record BoardListResponse(
@@ -12,10 +13,14 @@ public record BoardListResponse(
         Long viewCount,
         boolean notice,
         String category,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        long commentCount
 ) {
 
-    public static BoardListResponse from(Board board) {
+    public static BoardListResponse from(
+            Board board,
+            Long commentCount
+    ) {
         return new BoardListResponse(
                 board.getId(),
                 board.getProjectId(),
@@ -25,7 +30,16 @@ public record BoardListResponse(
                 board.getViewCount(),
                 "Y".equals(board.getNoticeYn()),
                 board.getCategory(),
-                board.getCreatedAt()
+                board.getCreatedAt(),
+                commentCount
         );
+    }
+
+    public String contentPreview() {
+        if (content == null || content.isBlank()) {
+            return "";
+        }
+
+        return Jsoup.parse(content).text();
     }
 }

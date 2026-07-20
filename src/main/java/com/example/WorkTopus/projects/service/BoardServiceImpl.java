@@ -2,14 +2,11 @@ package com.example.WorkTopus.projects.service;
 
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
-import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
-import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
-import com.example.WorkTopus.projects.dto.response.BoardListResponse;
-import com.example.WorkTopus.projects.dto.response.FileResponse;
-import com.example.WorkTopus.projects.dto.response.StoredFileResponse;
+import com.example.WorkTopus.projects.dto.response.*;
 import com.example.WorkTopus.projects.entity.Board;
 import com.example.WorkTopus.projects.entity.BoardFile;
 import com.example.WorkTopus.projects.exception.BoardNotFoundException;
+import com.example.WorkTopus.projects.repository.BoardCommentRepository;
 import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +17,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class BoardServiceImpl implements BoardService {
 
     private final BoardRepository boardRepository;
     private final BoardFileRepository boardFileRepository;
+    private final BoardCommentRepository boardCommentRepository;
     private final FileStorageService fileStorageService;
 
     @Override
@@ -78,13 +80,23 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
-        return boardRepository
+
+        Page<Board> boards = boardRepository
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
                         "N",
                         pageable
+                );
+
+        Map<Long, Long> commentCountMap =
+                getCommentCountMap(boards.getContent());
+
+        return boards.map(board ->
+                BoardListResponse.from(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0L)
                 )
-                .map(BoardListResponse::from);
+        );
     }
 
     @Override
@@ -146,6 +158,25 @@ public class BoardServiceImpl implements BoardService {
                 .orElseThrow(() -> new BoardNotFoundException("게시글을 찾을 수 없습니다."));
     }
 
+    private Map<Long, Long> getCommentCountMap(List<Board> boards) {
+
+        if (boards == null || boards.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        List<Long> boardIds = boards.stream()
+                .map(Board::getId)
+                .toList();
+
+        return boardCommentRepository
+                .countCommentsByBoardIds(boardIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).longValue()
+                ));
+    }
+
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> searchBoards(
@@ -153,8 +184,19 @@ public class BoardServiceImpl implements BoardService {
             String keyword,
             Pageable pageable
     ) {
-        return boardRepository.searchBoards(projectId, keyword, pageable)
-                .map(BoardListResponse::from);
+
+        Page<Board> boards =
+                boardRepository.searchBoards(projectId, keyword, pageable);
+
+        Map<Long, Long> commentCountMap =
+                getCommentCountMap(boards.getContent());
+
+        return boards.map(board ->
+                BoardListResponse.from(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0L)
+                )
+        );
     }
 
     @Override
@@ -189,5 +231,15 @@ public class BoardServiceImpl implements BoardService {
                 .files(files)
                 .comments(List.of())
                 .build();
+    }
+
+    public Optional<NoticeResponse> getLatestNotice(Long projectId) {
+        return boardRepository
+                .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
+                        projectId,
+                        "Y",
+                        "N"
+                )
+                .map(NoticeResponse::from);
     }
 }

@@ -20,7 +20,10 @@ public record BoardDetailResponse(
         List<FileResponse> files
 ) {
 
-    public static BoardDetailResponse from(Board board, List<FileResponse> files) {
+    public static BoardDetailResponse from(
+            Board board,
+            List<FileResponse> files
+    ) {
         return new BoardDetailResponse(
                 board.getId(),
                 board.getProjectId(),

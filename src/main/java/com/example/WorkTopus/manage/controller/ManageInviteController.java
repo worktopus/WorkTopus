@@ -14,16 +14,14 @@ public class ManageInviteController {
     private JavaMailSender mailSender;
 
     /**
-     * 팀원 초대 이메일 발송 API (임시 데이터 및 고정 코드 처리)
+     * 팀원 초대 이메일 발송 API (화면에서 수집된 실제 프로젝트명 및 코드 결합)
      */
     @PostMapping("/send-email")
     public String sendInviteEmail(@RequestBody Map<String, String> payload) {
-        // 프론트엔드 JS(project-manage.js)에서 보낸 데이터 추출
         String targetEmail = payload.get("email");
         String messageText = payload.get("message");
         String inviteCode = payload.get("code");
 
-        // 이메일 유효성 간단 검증
         if (targetEmail == null || targetEmail.trim().isEmpty()) {
             return "EMAIL_EMPTY";
         }
@@ -31,18 +29,18 @@ public class ManageInviteController {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
             message.setTo(targetEmail);
-            message.setSubject("[WorkTopus] 프로젝트 초대 코드 안내");
 
-            // 메일 본문 구성 (임시 문구 + CWEXN8)
-            String fullContent = messageText + "\n\n인증 코드 : " + inviteCode;
+            // [변경] 제목에도 전송된 문구를 기반으로 자동화 타겟팅 매핑
+            message.setSubject("[WorkTopus] 프로젝트 워크스페이스 초대 안내");
+
+            // [변경] 유저가 입력창에서 확인한 동적 본문 텍스트와 진짜 코드를 정밀 조립
+            String fullContent = messageText + "\n\n인증 초대 코드 : " + inviteCode + "\n\n시스템에 접속하여 위 코드를 입력해 주세요.";
             message.setText(fullContent);
 
-            // 실제 Gmail 서버를 통해 발송
             mailSender.send(message);
             return "SUCCESS";
 
         } catch (Exception e) {
-            // 콘솔창에 구체적인 에러 확인용
             e.printStackTrace();
             return "FAIL";
         }

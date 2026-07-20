@@ -7,15 +7,15 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "MANAGES")
+@Table(name = "PROJECTS")
 @Getter
 @Setter
 @NoArgsConstructor
 public class Manage {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "manage_seq")
-    @SequenceGenerator(name = "manage_seq", sequenceName = "MANAGES_SEQ", allocationSize = 1)
+    // [교정] 자동 생성 시퀀스 충돌을 차단하기 위해 수동 매핑 구조 또는 기본 테이블 매핑 컬럼 정의로 명확화
+    @Column(name = "ID")
     private Long id;
 
     @Column(name = "CREATED_AT")
@@ -42,7 +42,6 @@ public class Manage {
     @Column(name = "ARCHIVE_STATUS")
     private String archiveStatus;
 
-    // 비즈니스 로직: 설정값 업데이트
     public void updateGeneralSettings(String name, String visibility, String archiveStatus) {
         if (name != null && !name.trim().isEmpty()) {
             this.name = name.trim();
@@ -55,7 +54,6 @@ public class Manage {
         }
     }
 
-    // 비즈니스 로직: 로고 이미지 경로 변경
     public void updateLogoPath(String logoPath) {
         this.logoPath = logoPath;
     }

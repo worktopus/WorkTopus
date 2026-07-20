@@ -5,8 +5,12 @@ import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
 import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
 import com.example.WorkTopus.projects.dto.response.BoardListResponse;
+import com.example.WorkTopus.projects.dto.response.NoticeResponse;
+import com.example.WorkTopus.projects.entity.Board;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.Optional;
 
 public interface BoardService {
 
@@ -23,4 +27,6 @@ public interface BoardService {
     Page<BoardListResponse> searchBoards(Long projectId, String keyword, Pageable pageable);
 
     BoardDetailModalResponse getModal(Long projectId, Long boardId);
+
+    Optional<NoticeResponse> getLatestNotice(Long projectId);
 }

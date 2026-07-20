@@ -32,6 +32,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // 게시판 목록 미리보기
+    implementation 'org.jsoup:jsoup:1.18.1'
+
     // 실제 이메일 발송을 담당하는 스프링 메일 스타터 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
@@ -39,6 +42,8 @@ dependencies {
     // oracle
     runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 
+    // postgresql
+    // runtimeOnly 'org.postgresql:postgresql'
 
     // 지갑
     runtimeOnly 'com.oracle.database.security:oraclepki:21.19.0.0'
@@ -55,6 +60,21 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+/* 웹 소켓 추가 WebSocket */
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    compileOnly 'org.projectlombok:lombok'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-thymeleaf-test'
+    testImplementation 'org.springframework.boot:spring-boot-starter-webmvc-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {

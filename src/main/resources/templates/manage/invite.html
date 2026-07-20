@@ -2,67 +2,73 @@
 <html lang="ko" xmlns:th="http://thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>WorkTopus - 프로젝트 관리자(팀원 초대)</title>
-    <!-- 모든 스타일을 외부 css 파일로 깔끔하게 연결 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Worktopus - 팀원 초대</title>
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
-    <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/manage.css}">
 </head>
 <body>
-
 <div class="layout">
-    <!-- 1. 좌측 사이드바 영역 -->
+    <!-- [공통 레이아웃 - 좌측 사이드바 조립] -->
     <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
     <div class="layout__content">
-        <!-- 2. 우측 상단 헤더 영역 -->
+        <!-- [공통 레이아웃 - 상단 헤더 바 조립] -->
         <div th:replace="~{fragments/header :: header}"></div>
 
-        <!-- 3. 본문 컨테이너 영역 -->
-        <main class="manage-container">
-            <h1 class="manage-title">팀원 초대 (팀장 전용)</h1>
-            <p class="manage-subtitle">함께 프로젝트를 진행할 팀원들의 이메일을 입력하여 초대장을 발송합니다.</p>
+        <main class="manage-container" style="padding: 40px; width: 100%;">
+            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
+                프로젝트 관리 (팀장 전용)
+            </h1>
 
-            <!-- 빠른 초대 링크 공유 -->
-            <div class="link-copy-section">
-                <p class="link-copy-title">🔗 빠른 초대 링크 공유</p>
-                <div class="link-copy-flex">
-                    <input type="text" id="inviteLinkInput" class="link-copy-input" readonly value="https://worktopus.com">
-                    <button type="button" id="copyLinkBtn" class="link-copy-btn">링크 복사</button>
-                </div>
+            <!-- [일반관리 HTML - 상단 탭 바 동적 ID 파이프라인 전면 적용] -->
+            <div class="manage-tabs">
+                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
             </div>
 
-            <hr class="manage-divider">
 
-            <!-- [🚨 405 에러 완전 분쇄 및 차단 조치] 브라우저의 기본 submit 동작을 원천 봉쇄합니다. -->
-            <form id="inviteForm" action="" method="POST" onsubmit="event.preventDefault(); return false;">
-                <div id="emailInputContainer">
-                    <!-- 첫 번째 기본 이메일 입력 그룹 -->
-                    <div class="email-input-group">
-                        <div class="email-input-flex">
-                            <input type="email" name="emails" class="email-main-input" placeholder="초대할 팀원의 이메일을 입력하세요" required>
-                        </div>
-                        <div class="error-msg">올바른 이메일 형식이 아닙니다.</div>
+            <!-- [팀원초대 - 입력 폼 마크업 구역] -->
+            <div id="invite-tab" class="tab-content active" style="display: block;">
+                <div class="email-invite-container">
+                    <h3>✉️ 프로젝트 팀원 초대</h3>
+                    <p>함께 협업할 팀원들의 구글 이메일 계정을 입력하여 초대장을 발송합니다.</p>
+                </div>
+                <form style="margin-top: 24px; max-width: 600px;" onsubmit="return false;">
+                    <div class="email-invite-container">
+                        <label for="emailInput">초대 이메일 주소</label>
+                        <input type="email" id="emailInput" placeholder="example@gmail.com" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;">
+
+                        <label for="messageInput">초대 메시지 문구</label>
+                        <!-- [교정] 오라클 DB 프로젝트 명칭 필드인 name 속성을 유연하게 결합하여 출력 -->
+                        <textarea id="messageInput" th:text="|WorkTopuss [${project != null ? project.name : 'Worktopusss'}] 프로젝트에 초대합니다. 아래 코드를 입력해 팀에 합류하세요!|" rows="3" style="width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; resize: none;"></textarea>
+
+                        <label for="codeInput">초대 코드</label>
+                        <!-- [교정] DB 프로젝트 테이블의 진짜 일련코드인 inviteCode 카멜케이스 필드 매핑 완료 -->
+                        <!-- [변경] 기존 문법을 걷어내고 원래 정상 연동되던 th:value 속성 명세로 완전 고정 -->
+                        <!-- [교정] projects.html과 동일하게 전원 소문자 형태인 project.invitecode 구조로 완전 동기화 -->
+                        <!-- [최종 교정] 진짜 엔티티 필드명인 project.inviteCode 대소문자 규격으로 완전 일치 완료 -->
+                        <input type="text" id="codeInput" th:value="${project != null ? project.inviteCode : 'CWEXN8'}" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px;" readonly>
+
+                        <button type="button" id="sendEmailBtn" onclick="sendInviteEmail()" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">
+                            초대장 발송 트리거
+                        </button>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                <!-- 버튼 컨트롤 박스 (명시적인 type="button" 선언으로 안전성 보장) -->
-                <div class="button-group">
-                    <button type="button" id="addEmailBtn" class="btn-add-email">+ 이메일 추가</button>
-                    <button type="button" id="submitInviteBtn" class="btn-submit-invite">초대장 발송</button>
-                </div>
-            </form>
         </main>
     </div>
 </div>
 
-<script th:src="@{/js/manage/project-manage.js}"></script>  <!-- 공통/탭 전환 -->
-<script th:src="@{/js/manage/manage-general.js}"></script>  <!-- 일반 관리 전용 -->
-<script th:src="@{/js/manage/manage-member.js}"></script>   <!-- 팀원 관리 전용 -->
-<script th:src="@{/js/manage/manage-invite.js}"></script>   <!-- 팀원 초대 전용 -->
-<script th:src="@{/js/manage/manage-board.js}"></script>    <!-- 게시판 관리 전용 -->
+<!-- [스크립트 - 상단 공통 탭 제어 및 초대 API 엔진 결합] -->
+<script th:src="@{/js/manage/project-manage.js}"></script>
+<script th:src="@{/js/manage/manage-invite.js}"></script>
 </body>
 </html>
