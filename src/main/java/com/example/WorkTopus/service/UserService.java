@@ -1,5 +1,6 @@
 package com.example.WorkTopus.service;
 
+import com.example.WorkTopus.dto.Post;
 import com.example.WorkTopus.dto.UserCreateForm;
 import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.entity.Users;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -124,7 +127,8 @@ public class UserService implements UserDetailsService {
     }
 
     // -------------------------------------------------------------------------------------
-    // 마이페이지에서 정보 수정
+    // 마이페이지에서 정보 수정 //
+    // 이름 변경
     @Transactional
     public void updateName(String userId, String newName) {
         if (newName == null || newName.isBlank()) {
@@ -163,6 +167,25 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다. ID: " + userId));
 
         userRepository.delete(user);
+    }
+
+    // 마이페이지에서 글 조회 //
+    public List<Post> findPostsByWriterName(String writerName) {
+        // 1. UserRepository에 작성한 @Query 메서드 이름으로 정확히 호출합니다.
+        List<com.example.WorkTopus.projects.entity.Board> boards =
+                userRepository.findActiveBoardsByWriterName(writerName);
+
+        // 2. Stream API를 이용해 Post 리스트로 변환하여 리턴
+        return boards.stream().map(board -> {
+            com.example.WorkTopus.dto.Post dto = new com.example.WorkTopus.dto.Post();
+            dto.setId(board.getId());
+            dto.setTitle(board.getTitle());
+
+            // 💡 DTO에 만들어 두신 날짜 변환 메서드를 여기서 정확히 호출해 줍니다!
+            dto.setWriteDateFromLocalDateTime(board.getCreatedAt());
+
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
 }

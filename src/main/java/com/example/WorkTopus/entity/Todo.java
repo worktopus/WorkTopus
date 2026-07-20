@@ -1,7 +1,6 @@
 package com.example.WorkTopus.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -31,13 +30,8 @@ public class Todo {
     @Column(nullable = false, length = 500)
     private String content;
 
-    // 완료 체크
-    @Column(name = "is_completed", nullable = false)
-    @JsonProperty("isCompleted")
-    private boolean isCompleted = false;
-
-    public void changeUpdate(boolean isCompleted) {
-        this.isCompleted = isCompleted;
+    // 갱신을 위한 비즈니스 메서드 (Setter 대용)
+    public void changeContent(String content) {
+        this.content = content;
     }
-
 }

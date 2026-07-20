@@ -232,9 +232,9 @@
         }
     }
 
-    // 내 글 목록 조회
+    // 내 글 목록 조회 주소 변경
     function loadMyPosts() {
-        fetch("/api/user/posts")
+        fetch("/user/mypage/post")
             .then(res => res.json())
             .then(data => {
                 const tbody = document.getElementById('posts-tbody');
@@ -245,10 +245,10 @@
                 }
                 data.forEach(post => {
                     const row = `<tr>
-                        <td><span class="status-badge">${post.id}</span></td>
-                        <td><a href="/board/view/${post.id}" style="color:#4d7cff; text-decoration:none; font-weight:600;">${post.title}</a></td>
-                        <td style="color:#64748b;">${post.writeDate}</td>
-                    </tr>`;
+                    <td><span class="status-badge">${post.id}</span></td>
+                    <td><a href="/board/view/${post.id}" style="color:#4d7cff; text-decoration:none; font-weight:600;">${post.title}</a></td>
+                    <td style="color:#64748b;">${post.writeDate}</td>
+                </tr>`;
                     tbody.innerHTML += row;
                 });
             }).catch(err => console.error(err));

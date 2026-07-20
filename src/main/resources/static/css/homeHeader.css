@@ -305,7 +305,7 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     border: 1px solid #e2e8f0;
     padding: 8px 0;
-    z-index: 1000;
+    z-index: 100001;
     text-align: left;
 }
 .profile-dropdown.active {
@@ -346,12 +346,12 @@
     position: fixed;
     top: 80px;
     right: 80px;
-    width: 380px;
-    height: 350px; /* 600px -> 350px로 변경하여 불필요한 아래 여백 제거 */
+    width: 480px;
+    height: 550px;
     background-color: #ffffff;
     border-radius: 20px;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
-    z-index: 999;
+    z-index: 100001;
     flex-direction: column;
     overflow: hidden;
     animation: fadeInPopup 0.2s ease-out;
@@ -371,35 +371,55 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 20px;
-    background-color: #637ae4;
+    min-height: 72px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    background:
+            radial-gradient(
+                    circle at top right,
+                    rgba(114, 210, 255, 0.38),
+                    transparent 42%
+            ),
+            linear-gradient(
+                    135deg,
+                    var(--primary) 0%,
+                    var(--primary-dark) 55%,
+                    #6577df 100%
+            );
     color: #ffffff;
 }
 
 .todo-modal-title {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 18px;
+    font-weight: 800;
     color: #ffffff;
-    letter-spacing: -0.5px;
+    letter-spacing: -0.02em;
 }
 
 .todo-modal-close {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    font-size: 12px;
-    cursor: pointer;
-    color: #ffffff;
-    display: flex;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
+    font-size: 14px;
+    cursor: pointer;
+    color: #ffffff;
+    box-sizing: border-box;
+    transition:
+            background var(--transition, 0.2s),
+            transform var(--transition, 0.2s),
+            border-color var(--transition, 0.2s);
 }
 
 .todo-modal-close:hover {
-    background: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.36);
+    transform: rotate(4deg);
 }
 
 /* 3. 메모 내부 본문 영역 */
