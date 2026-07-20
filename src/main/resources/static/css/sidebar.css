@@ -216,3 +216,28 @@
     display: flex;
     margin: 0 auto;
 }
+
+
+.sidebar__footer {
+    display: flex;
+    align-items: center;
+}
+
+.sidebar__footer .sidebar__link {
+    width: auto;
+}
+
+.sidebar__footer form {
+    margin: 0;
+    display: flex;
+}
+
+.sidebar__footer button.sidebar__link {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    outline: none;
+    appearance: none;
+    font: inherit;
+    cursor: pointer;
+}

@@ -3,6 +3,7 @@ package com.example.WorkTopus.projects.controller;
 import com.example.WorkTopus.projects.dto.response.DashboardResponse;
 import com.example.WorkTopus.projects.service.DashboardService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,10 +20,12 @@ public class DashboardController {
             "/projects/{projectId}/dashboard",
             "/projects/{projectId}/boards/dashboard"
     })
-    public ModelAndView dashboard(@PathVariable Long projectId) {
+    public ModelAndView dashboard(@PathVariable Long projectId,
+                                  Authentication authentication) {
 
         DashboardResponse dashboard =
-                dashboardService.getDashboard(projectId);
+                dashboardService.getDashboard(projectId,
+                        authentication.getName());
 
         ModelAndView mav =
                 new ModelAndView("projects/dashboard");

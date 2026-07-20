@@ -41,4 +41,18 @@ public interface KanbanCardRepository extends JpaRepository<KanbanCard, Long> {
             Long projectId,
             String deletedYn
     );
+
+    // 개인 담당자 조회
+    long countByProjectIdAndAssigneeAndDeletedYn(
+            Long projectId,
+            String assignee,
+            String deletedYn
+    );
+
+    long countByProjectIdAndAssigneeAndStatusAndDeletedYn(
+            Long projectId,
+            String assignee,
+            KanbanStatus status,
+            String deletedYn
+    );
 }

@@ -15,4 +15,5 @@ public class CommentResponse {
     private String writerName;
     private String content;
     private String createdAt;
+    private boolean mine;
 }

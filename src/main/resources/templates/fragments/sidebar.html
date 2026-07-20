@@ -8,7 +8,7 @@
 
         <div class="sidebar__header">
 
-            <a th:href="@{/projects/dashboard}" class="sidebar__logo">
+            <a th:href="@{/projects}" class="sidebar__logo">
                 <img th:src="@{/images/logo.png}"
                      alt="WorkTopus"
                      class="sidebar__logo-img">
@@ -42,16 +42,7 @@
                        class="sidebar__link">
         <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
         </span>
-                        <span class="sidebar__text">프로젝트(일반)</span>
-                    </a>
-                </li>
-
-                <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/boards/modal-list(projectId=${projectId})}"
-                       class="sidebar__link">
-        <span class="sidebar__icon" th:insert="~{fragments/icons :: project1}">
-        </span>
-                        <span class="sidebar__text">프로젝트(팝업형)</span>
+                        <span class="sidebar__text">프로젝트</span>
                     </a>
                 </li>
 
@@ -80,14 +71,6 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/memo}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: memo}">
-                        </span>
-                        <span class="sidebar__text">메모</span>
-                    </a>
-                </li>
-
-                <li class="sidebar__item">
                     <!-- 주소 경로를 /manage/프로젝트ID 구조로 깔끔하게 변경합니다 -->
                     <a th:href="@{/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
@@ -102,17 +85,17 @@
 
         <div class="sidebar__footer">
 
-            <a th:href="@{/info}" class="sidebar__link" aria-label="내 정보">
+            <a th:href="@{/user/mypage}" class="sidebar__link" aria-label="내 정보">
                 <span class="sidebar__icon" th:insert="~{fragments/icons :: info}">
                 </span>
             </a>
 
             <span class="sidebar__divider"></span>
-
             <form th:action="@{/logout}" method="post">
                 <button type="submit"
                         class="sidebar__link sidebar__logout"
                         aria-label="로그아웃">
+
                     <span class="sidebar__icon"
                           th:insert="~{fragments/icons :: logout}">
                     </span>
