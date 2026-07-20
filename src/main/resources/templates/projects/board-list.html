@@ -131,13 +131,13 @@
                     </a>
 
                     <p class="board_card-desc"
-                       th:text="${#strings.abbreviate(board.content, 80)}">
+                       th:text="${board.contentPreview}">
                         게시글 내용 미리보기
                     </p>
 
                     <div class="board_card-meta">
                         <span th:text="'👤 ' + ${board.writerName}">👤 작성자</span>
-                        <span>💬 0</span>
+                        <span th:text="'💬 ' + ${board.commentCount}">💬 0</span>
                         <span th:text="'👁 ' + ${board.viewCount}">👁 0</span>
                         <span th:text="${board.createdAt != null ? '📅 ' + #temporals.format(board.createdAt, 'yyyy.MM.dd') : '📅 -'}">
                         📅 -

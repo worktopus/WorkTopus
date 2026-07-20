@@ -6,16 +6,21 @@ import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
 import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;
 import com.example.WorkTopus.projects.dto.response.BoardListResponse;
+import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.service.BoardService;
+import com.example.WorkTopus.projects.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,6 +28,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class BoardController {
 
     private final BoardService boardService;
+    private final CommentService commentService;
 
     @GetMapping
     public ModelAndView list(
@@ -75,13 +81,18 @@ public class BoardController {
     @GetMapping("/{boardId}")
     public ModelAndView detail(
             @PathVariable Long projectId,
-            @PathVariable Long boardId
+            @PathVariable Long boardId,
+            Authentication authentication
     ) {
         BoardDetailResponse board = boardService.findDetail(projectId, boardId);
+
+        List<CommentResponse> comments = commentService.findAll(boardId, authentication.getName());
 
         ModelAndView mav = new ModelAndView("projects/board-detail");
         mav.addObject("projectId", projectId);
         mav.addObject("board", board);
+        mav.addObject("comments", comments);
+        mav.addObject("commentCount", comments.size());
 
         return mav;
     }
