@@ -1,0 +1,251 @@
+/* ==========================================================
+   WorkTopus Editor
+   - 에디터 본문, 인라인 툴바, 색상 팔레트, 슬래시 명령어만 담당
+========================================================== */
+
+.wt_editor {
+    position: relative;
+    width: 100%;
+}
+
+/* ==========================================================
+   Editable Area
+========================================================== */
+
+.wt_editor_content {
+    width: 100%;
+    min-height: 380px;
+
+    padding: 22px 24px;
+
+    box-sizing: border-box;
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    background: #f8fafc;
+    color: var(--text-main);
+
+    font-size: 15px;
+    line-height: 1.8;
+
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    outline: none;
+
+    transition: .2s;
+}
+
+.wt_editor_content:focus {
+    border-color: var(--primary);
+    background: #fff;
+}
+
+.wt_editor_content:empty::before {
+    content: "내용을 입력하세요. '/' 를 입력하면 블록 명령어를 사용할 수 있습니다.";
+
+    color: #a0aec0;
+
+    pointer-events: none;
+}
+
+.wt_editor_hint {
+    margin: 10px 0 0;
+
+    font-size: 13px;
+    color: var(--text-sub);
+}
+
+.wt_editor_hint strong {
+    color: var(--primary);
+}
+
+/* ==========================================================
+   Inline Toolbar
+========================================================== */
+
+.wt_editor_inline {
+    position: absolute;
+    z-index: 100;
+
+    display: none;
+    align-items: center;
+    gap: 4px;
+
+    padding: 6px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: #fff;
+
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .15);
+
+    transform: translateX(-50%);
+}
+
+.wt_editor_inline.is_active {
+    display: flex;
+}
+
+.wt_editor_inline_btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 34px;
+    height: 34px;
+
+    border: none;
+    border-radius: 999px;
+
+    background: transparent;
+    color: var(--text-main);
+
+    font-size: 14px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.wt_editor_inline_btn:hover,
+.wt_editor_inline_btn.is_active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.wt_editor_inline_btn svg {
+    width: 18px;
+    height: 18px;
+
+    fill: currentColor;
+    color: inherit;
+
+    pointer-events: none;
+}
+
+.wt_editor_divider {
+    width: 1px;
+    height: 20px;
+
+    background: var(--border);
+}
+
+/* ==========================================================
+   Color / Highlight Palette
+========================================================== */
+
+.wt_editor_color_palette,
+.wt_editor_highlight_palette {
+    position: absolute;
+    z-index: 110;
+
+    display: none;
+    gap: 6px;
+
+    padding: 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    background: #fff;
+
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .15);
+}
+
+.wt_editor_color_palette.is_active,
+.wt_editor_highlight_palette.is_active {
+    display: flex;
+}
+
+.wt_editor_color_palette button,
+.wt_editor_highlight_palette button {
+    width: 22px;
+    height: 22px;
+
+    border: 1px solid var(--border);
+    border-radius: 999px;
+
+    cursor: pointer;
+}
+
+/* ==========================================================
+   Slash Command
+========================================================== */
+
+.wt_editor_command {
+    position: absolute;
+    z-index: 90;
+
+    display: none;
+    flex-direction: column;
+
+    width: 240px;
+
+    padding: 8px;
+
+    border: 1px solid var(--border);
+    border-radius: 14px;
+
+    background: #fff;
+
+    box-shadow: 0 14px 36px rgba(15, 23, 42, .14);
+}
+
+.wt_editor_command.is_active {
+    display: flex;
+}
+
+.wt_editor_command_item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 0;
+    border-radius: 10px;
+
+    background: transparent;
+    color: var(--text-main);
+
+    font-size: 14px;
+    font-weight: 600;
+    text-align: left;
+
+    cursor: pointer;
+
+    transition: .15s;
+}
+
+.wt_editor_command_item span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 24px;
+    height: 24px;
+
+    color: var(--text-sub);
+}
+
+.wt_editor_command_item:hover,
+.wt_editor_command_item.is_selected {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 700px) {
+    .wt_editor_command {
+        width: calc(100% - 36px);
+    }
+}

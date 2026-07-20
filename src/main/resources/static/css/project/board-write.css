@@ -1,0 +1,277 @@
+/* ==========================================================
+   Board Write Page
+   - 게시글 작성 페이지의 레이아웃/폼/첨부파일/버튼만 담당
+   - 에디터 내부 UI는 board-editor.css에서 관리
+========================================================== */
+
+.board_write {
+    max-width: 1200px;
+    padding: 28px;
+    margin: 10px auto;
+
+    border: 1px solid var(--border);
+    border-radius: 20px;
+
+    background: var(--card);
+    box-shadow: var(--shadow);
+}
+
+/* ==========================================================
+   Header
+========================================================== */
+
+.board_write_head {
+    margin-bottom: 32px;
+}
+
+.board_write_label {
+    margin: 0 0 8px;
+
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+
+    color: var(--primary);
+}
+
+.board_write_title {
+    margin: 0;
+
+    font-size: 30px;
+    font-weight: 800;
+
+    color: var(--text-main);
+}
+
+.board_write_desc {
+    margin: 10px 0 0;
+
+    font-size: 14px;
+    line-height: 1.7;
+
+    color: var(--text-sub);
+}
+
+/* ==========================================================
+   Form / Card
+========================================================== */
+
+.board_write_form {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.board_write_card {
+    width: 100%;
+}
+
+/* ==========================================================
+   Row / Field
+========================================================== */
+
+.board_write_row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.board_write_field {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    margin-top: 22px;
+}
+
+.board_write_row .board_write_field {
+    margin-top: 0;
+}
+
+.board_write_field_label {
+    font-size: 14px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+/* ==========================================================
+   Input / Select
+========================================================== */
+
+.board_write_input,
+.board_write_select {
+    width: 100%;
+    padding: 14px 16px;
+
+    box-sizing: border-box;
+
+    border: 1px solid transparent;
+    border-radius: 14px;
+
+    background: #f8fafc;
+    color: var(--text-main);
+
+    font-size: 15px;
+
+    transition: .2s;
+}
+
+.board_write_input::placeholder {
+    color: #a0aec0;
+}
+
+.board_write_input:focus,
+.board_write_select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: #fff;
+}
+
+#title.board_write_input {
+    padding: 18px 16px;
+
+    font-size: 22px;
+    font-weight: 700;
+}
+
+/* ==========================================================
+   File
+========================================================== */
+
+.board_write_subtitle {
+    margin: 0 0 6px;
+
+    font-size: 18px;
+    font-weight: 800;
+
+    color: var(--text-main);
+}
+
+.board_write_hint {
+    margin: 0;
+
+    font-size: 14px;
+    color: var(--text-sub);
+}
+
+.board_write_file_box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+
+    margin-top: 18px;
+    padding: 32px 26px;
+
+    border: 1px dashed var(--border);
+    border-radius: 16px;
+
+    background: #f8fafc;
+
+    cursor: pointer;
+    transition: .2s;
+}
+
+.board_write_file_box:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+}
+
+.board_write_file_icon {
+    font-size: 28px;
+}
+
+.board_write_file_text {
+    font-size: 14px;
+    font-weight: 700;
+
+    color: var(--text-main);
+}
+
+.board_write_file_sub {
+    font-size: 13px;
+
+    color: var(--text-sub);
+}
+
+.board_write_file_input {
+    display: none;
+}
+
+/* ==========================================================
+   Buttons
+========================================================== */
+
+.board_write_actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    padding-top: 6px;
+}
+
+.board_write_btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 112px;
+    height: 44px;
+
+    border-radius: 999px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+.board_write_btn_cancel {
+    border: 1px solid var(--border);
+
+    background: transparent;
+    color: var(--text-main);
+}
+
+.board_write_btn_cancel:hover {
+    background: #f8fafc;
+}
+
+.board_write_btn_submit {
+    border: none;
+
+    background: var(--primary);
+    color: #fff;
+}
+
+.board_write_btn_submit:hover {
+    opacity: .9;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 900px) {
+    .board_write {
+        max-width: 100%;
+        padding: 20px;
+    }
+
+    .board_write_row {
+        grid-template-columns: 1fr;
+    }
+
+    .board_write_actions {
+        flex-direction: column-reverse;
+    }
+
+    .board_write_btn {
+        width: 100%;
+    }
+}
