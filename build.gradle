@@ -32,6 +32,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
+    // 게시판 목록 미리보기
+    implementation 'org.jsoup:jsoup:1.18.1'
+
     // 실제 이메일 발송을 담당하는 스프링 메일 스타터 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 

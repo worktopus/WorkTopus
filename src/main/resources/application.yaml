@@ -53,6 +53,7 @@ spring:
       hibernate:
         format_sql: true
 
+
   profiles:
     include: secret
 
