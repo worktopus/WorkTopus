@@ -41,6 +41,8 @@ dependencies {
     // oracle
     runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 
+    // postgresql
+    // runtimeOnly 'org.postgresql:postgresql'
 
     // 지갑
     runtimeOnly 'com.oracle.database.security:oraclepki:21.19.0.0'

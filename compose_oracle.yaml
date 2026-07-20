@@ -1,0 +1,24 @@
+services:
+  oracle-container:
+    image: gvenzl/oracle-free:23-slim
+    container_name: oracle-container
+    restart: unless-stopped
+    ports:
+      - "11521:1521"
+    environment:
+      APP_USER: ADMIN
+      APP_USER_PASSWORD: 'WorkTopus1234!'
+      ORACLE_PASSWORD: 'WorkTopus1234!'
+    volumes:
+      - oracle-db-data:/opt/oracle/oradata
+    networks:
+      - springboot-oracle-net
+
+volumes:
+  oracle-db-data:
+    name: oracle-db-data
+
+networks:
+  springboot-oracle-net:
+    name: springboot-oracle-net
+    driver: bridge

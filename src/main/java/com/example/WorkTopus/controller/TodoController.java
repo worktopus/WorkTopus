@@ -34,10 +34,14 @@ public class TodoController {
         return ResponseEntity.ok(savedTodo);
     }
 
-    // 투두 수정
+    // 투두 내용 수정 (PATCH)
     @PatchMapping("/{todoId}")
-    public ResponseEntity<Void> toggleTodo(@PathVariable Long todoId) {
-        todoService.toggleTodo(todoId);
+    public ResponseEntity<Void> updateTodo(
+            @PathVariable Long todoId,
+            @RequestBody Map<String, String> request) {
+
+        String content = request.get("content"); // 프론트에서 보낸 수정한 텍스트 추출
+        todoService.updateTodoContent(todoId, content);
         return ResponseEntity.ok().build();
     }
 

@@ -1,5 +1,6 @@
 package com.example.WorkTopus.service;
 
+import com.example.WorkTopus.dto.Post;
 import com.example.WorkTopus.dto.UserCreateForm;
 import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.entity.Users;
@@ -12,6 +13,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -124,7 +127,8 @@ public class UserService implements UserDetailsService {
     }
 
     // -------------------------------------------------------------------------------------
-    // 마이페이지에서 정보 수정
+    // 마이페이지에서 정보 수정 //
+    // 이름 변경
     @Transactional
     public void updateName(String userId, String newName) {
         if (newName == null || newName.isBlank()) {
@@ -163,6 +167,30 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다. ID: " + userId));
 
         userRepository.delete(user);
+    }
+
+    // 마이페이지에서 글 조회 //
+    public List<Post> findPostsByWriterName(String writerName) {
+
+        // 1. Board 엔티티와 프로젝트 이름이 함께 묶인 Object 배열 리스트를 조회합니다.
+        List<Object[]> results = userRepository.findActiveBoardsWithProjectNameByWriterName(writerName);
+
+        // 2. Stream API를 이용해 데이터 매핑
+        return results.stream().map(result -> {
+            // 배열에서 데이터 분할 추출
+            com.example.WorkTopus.projects.entity.Board board = (com.example.WorkTopus.projects.entity.Board) result[0];
+            String projectName = (String) result[1]; //  조인해서 가져온 프로젝트 Name 값
+            Long projectId = (Long) result[2];
+
+            com.example.WorkTopus.dto.Post dto = new com.example.WorkTopus.dto.Post();
+            dto.setId(board.getId());
+            dto.setProjectId(projectId);
+            dto.setTitle(board.getTitle());
+            dto.setProjectName(projectName); //  DTO에 프로젝트 명칭
+            dto.setWriteDateFromLocalDateTime(board.getCreatedAt());
+
+            return dto;
+        }).collect(java.util.stream.Collectors.toList());
     }
 
 }

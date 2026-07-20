@@ -150,4 +150,21 @@ public class UserController {
         return "redirect:/";
     }
 
+// ------------------------------------------------------------------------------------------
+    // 3. 내가 쓴 글 목록 조회 (비동기 JSON 응답)
+    @GetMapping("/mypage/post")
+    @ResponseBody
+    public java.util.List<com.example.WorkTopus.dto.Post> getMyPosts(Authentication authentication) {
+
+        // 스프링 시큐리티 인증 객체에서 계정 ID(예: admin) 추출
+        String userId = authentication.getName();
+
+        // 유저 엔티티에서 데이터베이스에 매핑된 실제 실명(예: 김여린, 관리자) 조회
+        Users user = userService.findByUserId(userId);
+        String writerName = user.getName();
+
+        // 실제 이름으로 작성된 글 리스트를 PostDto 형태로 받아서 반환
+        return userService.findPostsByWriterName(writerName);
+    }
+
 }

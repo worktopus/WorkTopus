@@ -33,19 +33,22 @@ public class TodoService {
         Todo todo = Todo.builder()
                 .content(content)
                 .user(user)
-                .isCompleted(false)
                 .build();
 
         return todoRepository.save(todo);
     }
 
-    // 투두 수정
+    // 투두 내용 수정
     @Transactional
-    public void toggleTodo(Long todoId) {
+    public void updateTodoContent(Long todoId, String content) {
         Todo todo = todoRepository.findById(todoId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 투두입니다."));
 
-        todo.changeUpdate(!todo.isCompleted());
+        // ⚠️ Todo 엔티티에 content를 변경하는 메서드가 필요합니다.
+        // 만약 엔티티에 changeContent 같은 메서드가 없다면,
+        // Todo 엔티티 내부에 아래 3번에 작성해 드린 메서드를 추가하거나
+        // @Setter가 있다면 todo.setContent(content); 로 작성하세요.
+        todo.changeContent(content);
     }
 
     // 4. 투두 삭제

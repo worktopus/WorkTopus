@@ -305,7 +305,7 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.1);
     border: 1px solid #e2e8f0;
     padding: 8px 0;
-    z-index: 1000;
+    z-index: 100001;
     text-align: left;
 }
 .profile-dropdown.active {
@@ -336,22 +336,25 @@
     color: #ef4444;
 }
 
-/* --- 투두리스트 메모 모달 스타일 (채팅 팝업 스타일 매칭) --- */
+/* ==========================================================
+   메모장 모달 전용 레이아웃 정밀 튜닝
+========================================================== */
+
+/* 1. 모달 전체 크기를 메모장에 어울리는 아담한 크기로 축소 */
 .todo-modal {
     display: none;
     position: fixed;
-    top: 80px; /* 헤더 아이콘들 바로 아래 자연스럽게 위치 */
+    top: 80px;
     right: 80px;
-    width: 400px;
-    height: 600px; /* 채팅창처럼 조금 더 시원하게 세로 길이 확장 */
+    width: 480px;
+    height: 550px;
     background-color: #ffffff;
-    border-radius: 24px; /* 채팅창처럼 아주 둥글고 부드러운 라운딩 적용 */
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12); /* 부드럽고 깊은 그림자 */
-    border: none; /* 외곽선 제거하여 깔끔하게 변경 */
-    z-index: 999;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+    z-index: 100001;
     flex-direction: column;
     overflow: hidden;
-    animation: fadeInPopup 0.2s ease-out; /* 팝업 켤 때 자연스러운 효과 추가 */
+    animation: fadeInPopup 0.2s ease-out;
 }
 
 @keyframes fadeInPopup {
@@ -363,103 +366,107 @@
     display: flex;
 }
 
-/* 🟣 헤더: 채팅창 특유의 보라빛 블루 테마 완벽 적용 */
+/* 2. 메모 헤더 영역 */
 .todo-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 24px;
-    background-color: #637ae4; /* 이미지 속 채팅창 헤더와 동일한 메인 컬러 */
+    min-height: 72px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    background:
+            radial-gradient(
+                    circle at top right,
+                    rgba(114, 210, 255, 0.38),
+                    transparent 42%
+            ),
+            linear-gradient(
+                    135deg,
+                    var(--primary) 0%,
+                    var(--primary-dark) 55%,
+                    #6577df 100%
+            );
     color: #ffffff;
 }
 
 .todo-modal-title {
     font-size: 18px;
-    font-weight: 700;
-    color: #ffffff; /* 헤더 텍스트 흰색 변경 */
-    letter-spacing: -0.5px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
 }
 
-/* 닫기 버튼: 채팅창 우측 X 버튼 디자인 매칭 */
 .todo-modal-close {
-    background: rgba(255, 255, 255, 0.2); /* 은은하게 감싸는 반투명 원 */
-    border: none;
-    width: 28px;
-    height: 28px;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 50%;
+    background: rgba(255, 255, 255, 0.14);
     font-size: 14px;
     cursor: pointer;
     color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s ease;
+    box-sizing: border-box;
+    transition:
+            background var(--transition, 0.2s),
+            transform var(--transition, 0.2s),
+            border-color var(--transition, 0.2s);
 }
 
 .todo-modal-close:hover {
-    background: rgba(255, 255, 255, 0.35); /* 마우스 올렸을 때 살짝 더 밝아지게 */
+    background: rgba(255, 255, 255, 0.24);
+    border-color: rgba(255, 255, 255, 0.36);
+    transform: rotate(4deg);
 }
 
-/* ⚪ 바디 구역: 회색조의 부드러운 배경 처리 */
+/* 3. 메모 내부 본문 영역 */
 .todo-modal-body {
     flex: 1;
-    padding: 20px;
-    overflow-y: auto;
+    padding: 16px;
+    background-color: #f8fafc;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    background-color: #f8fafc; /* 내부가 살짝 차분해 보이도록 변경 */
+    gap: 10px;
+    box-sizing: border-box;
 }
 
-/* --- 헤더 팝업 전용 투두 아이템 스타일 (리스트 스타일 튜닝) --- */
-#todo-popup-modal .todo-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 18px;
-    background-color: #ffffff;
-    border: 1px solid #edf2f7;
-    border-radius: 16px; /* 아이템도 카드 형태로 둥글게 매칭 */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
-    transition: all 0.2s ease;
-}
-
-#todo-popup-modal .todo-item:hover {
-    border-color: #cdd7f6; /* 마우스 올리면 헤더 메인 톤 테두리 */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(99, 122, 228, 0.08);
-}
-
-#todo-popup-modal .todo-item.completed {
-    background-color: #f1f5f9;
-    border-color: #e2e8f0;
-}
-
-#todo-popup-modal .todo-text {
+/* 4. 메모 전용 Textarea 스타일 */
+#popup-memo-textarea {
+    width: 100%;
+    flex: 1; /* 가용한 공간을 꽉 채우도록 설정 */
+    resize: none;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
     font-size: 14px;
+    font-family: inherit;
+    line-height: 1.6;
     color: #334155;
-    font-weight: 600; /* 조금 더 쨍하게 보이도록 가독성 상향 */
+    background-color: #ffffff;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.01);
+    box-sizing: border-box;
+    transition: border-color 0.2s ease;
 }
 
-#todo-popup-modal .todo-item.completed .todo-text {
-    text-decoration: line-through;
-    color: #94a3b8;
+#popup-memo-textarea:focus {
+    border-color: #637ae4; /* 포커스 시 헤더와 일치하는 보랏빛 테두리 */
 }
 
-/* 삭제 버튼 스타일 정밀 튜닝 */
-#todo-popup-modal .btn-todo-delete {
-    background: none;
-    border: none;
-    color: #94a3b8; /* 평소에는 튀지 않게 무난한 회색조 */
+/* 5. 자동 저장 가이드라인 바닥 바 */
+.memo-status-container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 4px;
+}
+
+#memo-save-status {
     font-size: 12px;
-    cursor: pointer;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: all 0.15s ease;
-}
-
-#todo-popup-modal .btn-todo-delete:hover {
-    color: #ef4444; /* 삭제에 마우스 갖다대면 경고의 빨간색 전환 */
-    background-color: #fee2e2;
+    font-weight: 500;
+    color: #94a3b8; /* 차분한 그레이 톤 */
+    transition: color 0.2s ease;
 }

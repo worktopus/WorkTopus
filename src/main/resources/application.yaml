@@ -12,12 +12,26 @@ spring:
     livereload:
       enabled: true
 
-# oracle 설정
+  # oracle 설정
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
     username: ADMIN
     password: 'WorkTopus1234!'
+
+  # oracle 설정 (docker)
+#  datasource:
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@localhost:11521/FREEPDB1
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
+
+# postgresql 설정 (docker)
+#  datasource:
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/worktopus_db?stringtype=unspecified
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
 
     hikari:
       maximum-pool-size: 2
@@ -26,20 +40,13 @@ spring:
       idle-timeout: 300000
       max-lifetime: 600000
 
-
-  hikari:
-    maximum-pool-size: 2
-    minimum-idle: 1
-    connection-timeout: 30000
-    idle-timeout: 300000
-    max-lifetime: 600000
-
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
+#    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
     hibernate:
-      #ddl-auto: update
-      ddl-auto: validate
+      ddl-auto: update
+      #ddl-auto: validate
 
     show-sql: true
     properties:
