@@ -19,3 +19,30 @@ window.addEventListener("keydown", function (e) {
         closeJoinModal();
     }
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const copyButtons = document.querySelectorAll(".copy-btn");
+
+    copyButtons.forEach(function (button) {
+        button.addEventListener("click", function () {
+            const inviteCode = button.dataset.code;
+
+            if (!inviteCode) {
+                alert("복사할 초대 코드가 없습니다.");
+                return;
+            }
+
+            navigator.clipboard.writeText(inviteCode)
+                .then(function () {
+                    button.textContent = "복사됨";
+
+                    setTimeout(function () {
+                        button.textContent = "복사";
+                    }, 1200);
+                })
+                .catch(function () {
+                    alert("초대 코드 복사에 실패했습니다.");
+                });
+        });
+    });
+});
