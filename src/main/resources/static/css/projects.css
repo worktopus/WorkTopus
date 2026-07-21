@@ -1,5 +1,4 @@
 .projects-page {
-    min-height: 100vh;
     background: #f7f9ff;
 }
 
@@ -61,11 +60,11 @@
 }
 
 .projects-label {
-    display: inline-flex;
-    align-items: center;
     height: 28px;
     padding: 0 12px;
     margin-bottom: 14px;
+    display: inline-flex;
+    align-items: center;
     color: var(--primary);
     font-size: 14px;
     font-weight: 700;
@@ -81,11 +80,11 @@
 }
 
 .projects-title {
+    margin-bottom: 10px;
     font-size: 40px;
     font-weight: 800;
     color: var(--text-main);
     letter-spacing: -0.8px;
-    margin-bottom: 10px;
 }
 
 .projects-desc {
@@ -131,10 +130,6 @@
     background: var(--primary-light);
 }
 
-.projects-content {
-    display: block;
-}
-
 .projects-summary {
     margin-bottom: 18px;
 }
@@ -164,6 +159,11 @@
     box-shadow: 0 22px 50px rgba(114, 135, 244, 0.16);
 }
 
+.project-card-link {
+    display: block;
+    color: inherit;
+}
+
 .project-card-top {
     display: flex;
     justify-content: space-between;
@@ -191,20 +191,48 @@
 
 .project-card-desc {
     min-height: 46px;
+    margin-bottom: 26px;
     font-size: 15px;
     line-height: 1.5;
     color: var(--text-sub);
-    margin-bottom: 26px;
 }
 
 .project-card-meta {
+    padding-top: 14px;
     display: flex;
-    gap: 14px;
+    align-items: center;
+    gap: 10px;
+    border-top: 1px solid #edf0ff;
 }
 
 .project-card-meta-item {
     font-size: 14px;
     color: #888;
+}
+
+.copy-btn {
+    height: 32px;
+    padding: 0 14px;
+    margin-left: auto;
+    color: var(--primary);
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    background: #fff;
+    border: 1px solid #dfe4ff;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: .2s;
+}
+
+.copy-btn:hover {
+    color: #fff;
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.copy-btn:active {
+    transform: scale(.96);
 }
 
 .projects-empty {
@@ -237,18 +265,18 @@
 }
 
 .empty-title {
+    margin-bottom: 12px;
     font-size: 24px;
     font-weight: 800;
     color: var(--text-main);
-    margin-bottom: 12px;
 }
 
 .empty-desc {
     min-height: 48px;
+    margin-bottom: 28px;
     font-size: 15px;
     line-height: 1.6;
     color: var(--text-sub);
-    margin-bottom: 28px;
 }
 
 .empty-btn {
@@ -261,7 +289,9 @@
     font-size: 16px;
     font-weight: 700;
     background: var(--primary);
+    border: none;
     border-radius: 999px;
+    cursor: pointer;
     transition: .2s;
 }
 
@@ -269,68 +299,33 @@
     background: var(--primary-hover);
 }
 
-.join-form {
-    display: flex;
-    gap: 10px;
-}
-
-.join-input {
-    flex: 1;
-    height: 48px;
-    padding: 0 16px;
-    color: var(--text-main);
-    font-size: 15px;
-    background: #f8f9ff;
-    border: 1px solid #e1e6ff;
-    border-radius: 999px;
-    outline: none;
-}
-
-.join-input:focus {
-    background: #fff;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(114, 135, 244, 0.16);
-}
-
-.join-submit {
-    width: 90px;
-    height: 48px;
-    color: #fff;
-    font-size: 15px;
-    font-weight: 700;
-    background: var(--primary);
-    border: none;
-    border-radius: 999px;
-    cursor: pointer;
-    transition: .2s;
-}
-
-.join-submit:hover {
-    background: var(--primary-hover);
-}
-
-/* ======================코드로 참가================================== */
 .join-modal {
     display: none;
 }
 
 .join-modal.active {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 100;
     display: block;
 }
 
 .join-modal-bg {
     position: absolute;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     background: rgba(34, 34, 34, 0.28);
 }
 
 .join-modal-card {
     position: absolute;
-    left: 50%;
     top: 50%;
+    left: 50%;
     width: 420px;
     padding: 34px;
     background: #fff;
@@ -340,17 +335,16 @@
 }
 
 .join-modal-title {
+    margin-bottom: 10px;
     font-size: 26px;
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: 10px;
 }
 
 .join-modal-desc {
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--text-sub);
     margin-bottom: 28px;
+    font-size: 15px;
+    color: var(--text-sub);
 }
 
 .join-modal-form {
@@ -363,7 +357,6 @@
     padding: 0 16px;
     margin-bottom: 24px;
     font-size: 15px;
-    font-weight: 400;
     color: var(--text-main);
     background: #f8f9ff;
     border: 1px solid #e1e6ff;
@@ -420,7 +413,6 @@
     padding: 14px 18px;
     margin-bottom: 24px;
     font-size: 15px;
-    font-weight: 400;
     border-radius: 14px;
 }
 
@@ -433,13 +425,3 @@
     color: #dc2626;
     background: #fff1f2;
 }
-
-/* 확인용 */
-
-/*.projects-grid {
-    display: none;
-}
-
-.projects-empty {
-    display: flex;
-}*/

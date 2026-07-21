@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // 기능 5 : 담당 역할(task-input) 입력 후 포커스가 벗어나면(blur) 실시간 비동기 자동 저장
+        // 기능 5 : 담당 역할(task-input) 입력 후 포커스가 벗어나면(blur) 실시간 비동기 자동 저장 + 헤더 즉시 동기화
         container.addEventListener('focusout', function (e) {
             if (e.target && e.target.classList.contains('task-input')) {
                 const inputField = e.target;
@@ -144,9 +144,29 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                     .then(response => {
                         if (response.ok) {
-                            // 성공 시 유저 방해 없이 조용히 인풋창 배경에 불빛 피드백 효과 부여
+                            // 성공 시 인풋창 배경 피드백 시각 효과 (초록빛 맴돌다 사라짐)
                             inputField.style.backgroundColor = '#f6ffed';
                             setTimeout(() => { inputField.style.backgroundColor = '#fff'; }, 500);
+
+                            // =========================================================
+                            // [교정] 이메일을 제외한 순수 유저 '이름'만 정밀 추출하여 헤더와 비교
+                            // =========================================================
+                            const currentRow = inputField.closest('tr');
+                            // 첫 번째 td 안의 첫 번째 div(이름 영역)의 텍스트만 정확하게 가져옵니다.
+                            const rowUserName = currentRow.querySelector('td:first-child div:first-child')?.textContent.trim();
+                            const headerUserName = document.querySelector('#header-user-name')?.textContent.trim();
+
+                            // 디버깅용 콘솔 로그 (동기화가 안 될 경우 브라우저 F12 콘솔에서 확인 가능)
+                            console.log("화면 행 이름:", rowUserName, " | 헤더 이름:", headerUserName);
+
+                            // 이름이 완벽히 매칭될 경우에만 헤더 프로필 영역의 역할을 즉시 업데이트
+                            if (headerUserName && rowUserName === headerUserName) {
+                                const headerUserTask = document.querySelector('#header-user-task');
+                                if (headerUserTask) {
+                                    headerUserTask.textContent = assignedRoleValue || 'Backend Developer';
+                                }
+                            }
+
                             return response.json();
                         }
                         throw new Error('역할 자동 저장 실패');
@@ -154,6 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .catch(error => { console.error('Auto Save Error:', error); });
             }
         });
+
     }
 
     // 파일 로드 시 실시간 데이터 호출 가동

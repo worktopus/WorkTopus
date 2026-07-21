@@ -8,23 +8,34 @@
 
     <title>프로젝트</title>
 
-    <meta name="_csrf" th:content="${_csrf.token}">
-    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <meta name="_csrf"
+          th:content="${_csrf.token}">
 
-    <link rel="stylesheet" as="style" crossorigin
+    <meta name="_csrf_header"
+          th:content="${_csrf.headerName}">
+
+    <link rel="stylesheet"
+          as="style"
+          crossorigin
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
-    <link rel="stylesheet" href="/css/projects.css">
+    <link rel="stylesheet"
+          href="/css/common.css">
 
+    <link rel="stylesheet"
+          th:href="@{/css/homeHeader.css}">
+
+    <link rel="stylesheet"
+          href="/css/projects.css">
 </head>
+
 <body>
 <div class="projects-page">
 
     <div th:replace="~{fragments/homeHeader :: homeHeader}"></div>
 
     <main class="projects-main">
+
         <p class="projects-message success-message"
            th:if="${successMessage}"
            th:text="${successMessage}">
@@ -34,81 +45,164 @@
            th:if="${errorMessage}"
            th:text="${errorMessage}">
         </p>
+
         <section class="projects-hero">
             <p class="projects-label">Workspace</p>
 
             <div class="projects-hero-row">
+
                 <div class="projects-hero-text">
                     <h1 class="projects-title">내 프로젝트</h1>
-                    <p class="projects-desc">참여 중인 프로젝트를 선택하거나 새 프로젝트를 시작하세요.</p>
+
+                    <p class="projects-desc">
+                        참여 중인 프로젝트를 선택하거나 새 프로젝트를 시작하세요.
+                    </p>
                 </div>
 
                 <div class="projects-toolbar">
-                    <a href="/projects/new" class="projects-create-btn">+ 프로젝트 생성</a>
-                    <button type="button" class="projects-join-btn" onclick="openJoinModal()">코드로 참여</button>
+
+                    <a href="/projects/new"
+                       class="projects-create-btn">
+                        + 프로젝트 생성
+                    </a>
+
+                    <button type="button"
+                            class="projects-join-btn"
+                            onclick="openJoinModal()">
+                        코드로 참여
+                    </button>
+
                 </div>
             </div>
         </section>
 
         <!-- 프로젝트 있을 때 -->
-        <section class="projects-content" th:if="${!#lists.isEmpty(projects)}">
+        <section class="projects-content"
+                 th:if="${!#lists.isEmpty(projects)}">
+
             <div class="projects-summary">
-                <p class="projects-count" th:text="${#lists.size(projects)} + '개의 프로젝트에 참여 중입니다.'">
-                    3개의 프로젝트에 참여 중입니다.
+                <p class="projects-count"
+                   th:text="${#lists.size(projects)} + '개의 프로젝트에 참여 중입니다.'">
+                    0개의 프로젝트에 참여 중입니다.
                 </p>
             </div>
 
             <div class="project-list">
-                <a th:each="project : ${projects}"
-                   th:href="@{/projects/{id}(id=${project.id})}"
-                   class="project-card">
 
-                    <div class="project-card-top">
-                        <h2 class="project-card-title" th:text="${project.name}">WorkTopus</h2>
-                        <span class="project-card-badge">진행중</span>
-                    </div>
+                <div th:each="project : ${projects}"
+                     class="project-card">
 
-                    <p class="project-card-desc" th:text="${project.description}">
-                        팀 협업과 업무 관리를 위한 프로젝트입니다.
-                    </p>
+                    <a th:href="@{/projects/{id}(id=${project.id})}"
+                       class="project-card-link">
+
+                        <div class="project-card-top">
+
+                            <h2 class="project-card-title"
+                                th:text="${project.name}">
+                                프로젝트명
+                            </h2>
+
+                            <span class="project-card-badge">
+                                진행중
+                            </span>
+
+                        </div>
+
+                        <p class="project-card-desc"
+                           th:text="${project.description}">
+                            프로젝트 설명
+                        </p>
+
+                    </a>
 
                     <div class="project-card-meta">
-                        <span class="project-card-meta-item">초대코드</span>
-                        <span class="project-card-meta-item" th:text="${project.inviteCode}">ABC123</span>
+
+                        <span class="project-card-meta-item">
+                            초대코드
+                        </span>
+
+                        <span class="project-card-meta-item"
+                              th:text="${project.inviteCode}">
+                            ABC123
+                        </span>
+
+                        <button type="button"
+                                class="copy-btn"
+                                th:data-code="${project.inviteCode}">
+                            복사
+                        </button>
+
                     </div>
-                </a>
+
+                </div>
             </div>
         </section>
-
 
         <!-- 프로젝트 없을 때 -->
-        <section class="projects-empty" th:if="${#lists.isEmpty(projects)}">
+        <section class="projects-empty"
+                 th:if="${#lists.isEmpty(projects)}">
+
             <div class="empty-card">
+
                 <div class="empty-icon">＋</div>
-                <h2 class="empty-title">프로젝트 생성</h2>
-                <p class="empty-desc">새 프로젝트를 만들고 팀원들과 업무를 관리하세요.</p>
-                <a href="/projects/new" class="empty-btn">프로젝트 생성</a>
+
+                <h2 class="empty-title">
+                    프로젝트 생성
+                </h2>
+
+                <p class="empty-desc">
+                    새 프로젝트를 만들고 팀원들과 업무를 관리하세요.
+                </p>
+
+                <a href="/projects/new"
+                   class="empty-btn">
+                    프로젝트 생성
+                </a>
+
             </div>
 
             <div class="empty-card">
-                <div class="empty-icon">#</div>
-                <h2 class="empty-title">코드로 참여</h2>
-                <p class="empty-desc">초대 코드를 입력해 기존 프로젝트에 참여하세요.</p>
 
-                <button type="button" class="empty-btn" onclick="openJoinModal()">코드 입력</button>
+                <div class="empty-icon">#</div>
+
+                <h2 class="empty-title">
+                    코드로 참여
+                </h2>
+
+                <p class="empty-desc">
+                    초대 코드를 입력해 기존 프로젝트에 참여하세요.
+                </p>
+
+                <button type="button"
+                        class="empty-btn"
+                        onclick="openJoinModal()">
+                    코드 입력
+                </button>
+
             </div>
         </section>
+
     </main>
 </div>
 
-<div class="join-modal" id="joinModal">
-    <div class="join-modal-bg" onclick="closeJoinModal()"></div>
+<!-- 초대코드 입력 모달 -->
+<div class="join-modal"
+     id="joinModal">
+
+    <div class="join-modal-bg"
+         onclick="closeJoinModal()">
+    </div>
 
     <div class="join-modal-card">
-        <h2 class="join-modal-title">초대 코드로 참여</h2>
-        <p class="join-modal-desc">팀원에게 받은 초대 코드를 입력하세요.</p>
 
-        <!--초대코드 입력 화면-->
+        <h2 class="join-modal-title">
+            초대 코드로 참여
+        </h2>
+
+        <p class="join-modal-desc">
+            팀원에게 받은 초대 코드를 입력하세요.
+        </p>
+
         <form th:action="@{/projects/join}"
               method="post"
               class="join-modal-form">
@@ -120,6 +214,7 @@
                    required>
 
             <div class="join-modal-buttons">
+
                 <button type="button"
                         class="join-modal-cancel"
                         onclick="closeJoinModal()">
@@ -130,6 +225,7 @@
                         class="join-modal-submit">
                     참여하기
                 </button>
+
             </div>
         </form>
     </div>
