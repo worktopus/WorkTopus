@@ -165,7 +165,21 @@
     </div>
 
               <!------------------------script------------------------->
+    <!-- 2026.07.21 승민(추가) -->
+    <!-- 실제 로그인 사용자 정보를 채팅 JavaScript에 전달 -->
+    <script th:inline="javascript">
+        window.loginUser = {
+            userNum: /*[[${user != null ? user.userNum : null}]]*/ null,
+            userId: /*[[${user != null ? user.userId : ''}]]*/ "",
+            name: /*[[${user != null ? user.name : ''}]]*/ ""
+        };
 
+        console.log(
+            "채팅 로그인 사용자:",
+            window.loginUser
+        );
+    </script>
+    <!-- 2026.07.21 승민(추가) -->
     <script th:src="@{/js/homeHeader.js}"></script>
 
     <!-- todo -->
