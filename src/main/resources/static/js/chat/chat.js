@@ -109,8 +109,15 @@
             "block";
 
         /*
+         * 채팅창을 열 때 WebSocket 연결과
+         * 현재 채팅방 구독 상태를 다시 확인합니다.
+         */
+        ensureRealtimeConnection();
+
+        /*
          * 팝업을 열면 먼저 프로젝트 데이터를 조회합니다.
          */
+
         if (
             app.project &&
             typeof app.project.loadProjects ===
@@ -682,6 +689,17 @@
             Boolean(connected);
 
         updateMessageInputState();
+
+        /*
+         * 서버 재시작 또는 네트워크 끊김 후
+         * 연결이 복구되면 현재 채팅방을 다시 구독합니다.
+         */
+        if (
+            connected &&
+            app.state.currentRoomId
+        ) {
+            subscribeCurrentRoom();
+        }
     }
 
 
@@ -704,6 +722,29 @@
             "function"
         ) {
             window.connect();
+        }
+    }
+
+    /* =====================================================
+        실시간 연결 및 현재 방 구독 확인
+        ===================================================== */
+
+    function ensureRealtimeConnection() {
+
+        /*
+         * 연결이 끊어진 경우 다시 연결합니다.
+         */
+        if (!isWebSocketConnected()) {
+            connectWebSocket();
+            return;
+        }
+
+        /*
+         * 이미 연결되어 있으면 현재 채팅방을
+         * 다시 구독 상태로 맞춥니다.
+         */
+        if (app.state.currentRoomId) {
+            subscribeCurrentRoom();
         }
     }
 
@@ -950,6 +991,7 @@
     ===================================================== */
 
     function changeTabDisplay(type) {
+
         const groupChat =
             document.getElementById(
                 "groupChat"
@@ -963,19 +1005,27 @@
         const isGroup =
             type === "group";
 
+
+        /*
+         * block이 아니라 flex로 표시해야
+         * 메시지 영역이 남은 높이를 차지하고
+         * 내부 스크롤이 정상적으로 작동합니다.
+         */
         if (groupChat) {
             groupChat.style.display =
                 isGroup
-                    ? "block"
+                    ? "flex"
                     : "none";
         }
+
 
         if (privateChat) {
             privateChat.style.display =
                 isGroup
                     ? "none"
-                    : "block";
+                    : "flex";
         }
+
 
         const groupTab =
             document.getElementById(
@@ -987,12 +1037,14 @@
                 "privateTab"
             );
 
+
         if (groupTab) {
             groupTab.classList.toggle(
                 "active",
                 isGroup
             );
         }
+
 
         if (privateTab) {
             privateTab.classList.toggle(
@@ -1001,15 +1053,18 @@
             );
         }
 
+
         /*
-        탭 버튼에 ID가 없는 기존 HTML 구조도 지원합니다.
-        */
+         * 탭 버튼에 ID가 없는 기존 HTML 구조도 지원합니다.
+         */
         const tabButtons =
             document.querySelectorAll(
                 ".chat-tabs button"
             );
 
+
         if (tabButtons.length >= 2) {
+
             tabButtons[0]
                 .classList.toggle(
                 "active",
@@ -1022,6 +1077,53 @@
                 !isGroup
             );
         }
+
+
+        /*
+         * 숨겨져 있던 채팅 영역이 실제로 표시된 다음
+         * 가장 최신 메시지 위치로 이동합니다.
+         *
+         * requestAnimationFrame을 두 번 사용하면
+         * 브라우저가 flex 높이를 계산한 뒤 스크롤을 이동합니다.
+         */
+        requestAnimationFrame(
+            function () {
+
+                requestAnimationFrame(
+                    function () {
+
+                        if (
+                            isGroup &&
+                            app.groupChat &&
+                            typeof app.groupChat
+                                .scrollToBottom ===
+                            "function"
+                        ) {
+                            app.groupChat
+                                .scrollToBottom(
+                                    false
+                                );
+
+                            return;
+                        }
+
+
+                        if (
+                            !isGroup &&
+                            app.privateChat &&
+                            typeof app.privateChat
+                                .scrollToBottom ===
+                            "function"
+                        ) {
+                            app.privateChat
+                                .scrollToBottom(
+                                    false
+                                );
+                        }
+                    }
+                );
+            }
+        );
     }
 
 
