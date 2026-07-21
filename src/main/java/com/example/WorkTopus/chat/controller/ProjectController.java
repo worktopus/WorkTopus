@@ -87,29 +87,6 @@ public class ProjectController {
 
 
     /*
-     * 기존 테스트용 프로젝트 생성 주소
-     *
-     * GET /project/create
-     */
-    @GetMapping("/project/create")
-    public String createProject(
-            Principal principal
-    ) {
-        /*
-         * 로그인 여부 확인
-         */
-        getLoginUser(principal);
-
-        projectService.createProject(
-                2L,
-                "WorkTopus"
-        );
-
-        return "프로젝트 생성 완료";
-    }
-
-
-    /*
      * 프로젝트 접근 권한 확인
      */
     private void validateProjectAccess(
