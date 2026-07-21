@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Worktopus | 게시글 상세</title>
+    <title>Worktopus | Board-Post</title>
 
     <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
@@ -162,8 +162,10 @@
                             </div>
 
                             <div class="board-detail_info-item">
-                                <span>프로젝트</span>
-                                <strong th:text="${projectId}">1</strong>
+                                <span>담당</span>
+                                <strong th:text="${board.writerAssignedRole}">
+                                    담당 미지정
+                                </strong>
                             </div>
 
                             <div class="board-detail_info-item">

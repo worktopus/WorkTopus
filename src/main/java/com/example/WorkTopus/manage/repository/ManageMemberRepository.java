@@ -17,4 +17,9 @@ public interface ManageMemberRepository extends JpaRepository<ManageMember, Long
             Long workspaceId,
             String userId
     );
+
+    Optional<ManageMember> findByWorkspaceIdAndUser_Name(
+            Long workspaceId,
+            String name
+    );
 }

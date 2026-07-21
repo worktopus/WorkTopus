@@ -30,7 +30,7 @@ public class ManageMember {
     @Column(name = "JOINED_AT")
     private LocalDateTime joinedAt;
 
-    @Transient
+    @Column(name = "ASSIGNED_ROLE")
     private String assignedRole;
 
     // ==========================================

@@ -62,4 +62,6 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
             @Param("keyword") String keyword,
             Pageable pageable
     );
+
+
 }

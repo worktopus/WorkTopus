@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Worktopus Dashboard</title>
+    <title>Worktopus | Dashboard</title>
 
     <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
@@ -41,9 +41,13 @@
                             <p class="assignment-overlay__user">
                                 <strong th:text="${dashboard.userName}">이름</strong>
                                 <br>
-                                <!-- <span th:text="${dashboard.userPosition ?: '담당 미설정'}">
-                                    담당
-                                </span> -->
+                                <span class="member-role"
+                                   th:text="${dashboard.assignedRole != null
+                                   and !#strings.isEmpty(dashboard.assignedRole)
+                                   ? dashboard.assignedRole
+                                   : '담당 역할 미지정'}">
+                                    백엔드 개발
+                                </span>
                             </p>
                         </div>
 
@@ -110,7 +114,8 @@
             </section>
 
             <!-- 작업 카드 + 차트 -->
-            <section class="dashboard__summary">
+            <section class="dashboard__summary"
+                     th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}">
 
                 <article class="task-card">
                     <div class="task-card__title">
@@ -196,7 +201,8 @@
             </section>
 
             <!-- 2주 캘린더 -->
-            <section class="calendar-card">
+            <section class="calendar-card"
+                     th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}">
                 <div class="calendar-card__header">
                     <div class="calendar-card__nav">
                         <button type="button">‹</button>

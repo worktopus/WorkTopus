@@ -116,7 +116,6 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
-
     @Override
     public BoardDetailResponse findDetail(Long projectId, Long boardId) {
         Board board = getBoard(projectId, boardId);
@@ -133,7 +132,26 @@ public class BoardServiceImpl implements BoardService {
                         .build())
                 .toList();
 
-        return BoardDetailResponse.from(board, files);
+        System.out.println("projectId = " + projectId);
+        System.out.println("writerName = [" + board.getWriterName() + "]");
+        System.out.println(
+                "projectMembers = "
+                        + manageMemberRepository.findByWorkspaceId(projectId)
+        );
+
+        String writerAssignedRole = manageMemberRepository
+                .findByWorkspaceIdAndUser_Name(
+                        projectId,
+                        board.getWriterName()
+                )
+                .map(ManageMember::getAssignedRole)
+                .orElse("담당 미지정");
+
+        return BoardDetailResponse.from(
+                board,
+                files,
+                writerAssignedRole
+        );
     }
 
     @Override
@@ -173,7 +191,9 @@ public class BoardServiceImpl implements BoardService {
                         .build())
                 .toList();
 
-        return BoardDetailResponse.from(board, files);
+        String writerAssignedRole = member.getAssignedRole();
+
+        return BoardDetailResponse.from(board, files, writerAssignedRole);
     }
 
     @Override
