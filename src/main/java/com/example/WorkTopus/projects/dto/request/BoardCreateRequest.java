@@ -8,15 +8,12 @@ import java.util.List;
 
 public record BoardCreateRequest(
 
-        @NotBlank
+        @NotBlank(message = "제목을 입력해 주세요.")
         @Size(max = 200)
         String title,
 
+        @NotBlank(message = "내용을 입력해 주세요.")
         String content,
-
-        //@NotBlank
-       // @Size(max = 100)
-        //String writerName,
 
         @NotBlank
         String category,

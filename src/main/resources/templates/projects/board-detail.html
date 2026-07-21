@@ -54,6 +54,14 @@
                                     게시글 제목
                                 </h1>
 
+                                <div class="board-tag"
+                                     th:if="${board.tag != null and !#strings.isEmpty(board.tag)}">
+                                   <span th:each="tag : ${#strings.arraySplit(board.tag, ',')}"
+                                         class="tag-chip"
+                                         th:text="'#' + ${#strings.trim(tag)}">
+                                    </span>
+                                </div>
+
                                 <div class="board-detail_meta">
                                     <span th:text="'👤 ' + ${board.writerName}">
                                         👤 작성자
@@ -73,7 +81,8 @@
 
                             <div class="board-detail_actions">
 
-                                <a th:href="@{/projects/{projectId}/boards/{boardId}/edit(
+                                <a      th:if="${isWriter}"
+                                        th:href="@{/projects/{projectId}/boards/{boardId}/edit(
                                         projectId=${projectId},
                                         boardId=${board.id}
                                    )}"
@@ -81,9 +90,10 @@
                                     수정
                                 </a>
 
-                                <form th:action="@{/projects/{projectId}/boards/{boardId}/delete(
-                                            projectId=${projectId},
-                                            boardId=${board.id}
+                                <form   th:if="${canDelete}"
+                                        th:action="@{/projects/{projectId}/boards/{boardId}/delete(
+                                        projectId=${projectId},
+                                        boardId=${board.id}
                                       )}"
                                       method="post">
 

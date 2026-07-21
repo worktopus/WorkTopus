@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -70,10 +71,18 @@ public class BoardController {
     public ModelAndView create(
             @PathVariable Long projectId,
             @RequestParam(required = false) String tag,
-            @Valid @ModelAttribute BoardCreateRequest request
+            @Valid @ModelAttribute BoardCreateRequest request,
+            Authentication authentication
     ) {
         request = request.withTag(tag);
-        Long boardId = boardService.create(projectId, request);
+
+        Long boardId = boardService.create(
+                projectId,
+                request,
+                authentication.getName()
+        );
+
+        System.out.println("현재 로그인 값: " + authentication.getName());
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId
@@ -86,15 +95,38 @@ public class BoardController {
             @PathVariable Long boardId,
             Authentication authentication
     ) {
-        BoardDetailResponse board = boardService.findDetail(projectId, boardId);
+        BoardDetailResponse board =
+                boardService.findDetail(projectId, boardId);
 
-        List<CommentResponse> comments = commentService.findAll(boardId, authentication.getName());
+        boolean isWriter =
+                boardService.isWriter(
+                        projectId,
+                        boardId,
+                        authentication.getName()
+                );
 
-        ModelAndView mav = new ModelAndView("projects/board-detail");
+        boolean canDelete =
+                boardService.canDelete(
+                        projectId,
+                        boardId,
+                        authentication.getName()
+                );
+
+        List<CommentResponse> comments =
+                commentService.findAll(
+                        boardId,
+                        authentication.getName()
+                );
+
+        ModelAndView mav =
+                new ModelAndView("projects/board-detail");
+
         mav.addObject("projectId", projectId);
         mav.addObject("board", board);
         mav.addObject("comments", comments);
         mav.addObject("commentCount", comments.size());
+        mav.addObject("isWriter", isWriter);
+        mav.addObject("canDelete", canDelete);
 
         return mav;
     }
@@ -102,15 +134,39 @@ public class BoardController {
     @GetMapping("/{boardId}/edit")
     public ModelAndView editForm(
             @PathVariable Long projectId,
-            @PathVariable Long boardId
+            @PathVariable Long boardId,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes
     ) {
-        BoardDetailResponse board = boardService.findDetail(projectId, boardId);
+        try {
+            BoardDetailResponse board =
+                    boardService.findEditableBoard(
+                            projectId,
+                            boardId,
+                            authentication.getName()
+                    );
 
-        ModelAndView mav = new ModelAndView("projects/board-edit");
-        mav.addObject("projectId", projectId);
-        mav.addObject("board", board);
+            ModelAndView mav =
+                    new ModelAndView("projects/board-edit");
 
-        return mav;
+            mav.addObject("projectId", projectId);
+            mav.addObject("board", board);
+
+            return mav;
+
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    e.getMessage()
+            );
+
+            return new ModelAndView(
+                    "redirect:/projects/"
+                            + projectId
+                            + "/boards/"
+                            + boardId
+            );
+        }
     }
 
     @PostMapping("/{boardId}/edit")
@@ -118,10 +174,12 @@ public class BoardController {
             @PathVariable Long projectId,
             @PathVariable Long boardId,
             @RequestParam(required = false) String tag,
-            @Valid @ModelAttribute BoardUpdateRequest request
+            @Valid @ModelAttribute BoardUpdateRequest request,
+            Authentication authentication
+
     ) {
         request = request.withTag(tag);
-        boardService.update(projectId, boardId, request);
+        boardService.update(projectId, boardId, request, authentication.getName());
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId
@@ -131,9 +189,14 @@ public class BoardController {
     @PostMapping("/{boardId}/delete")
     public ModelAndView delete(
             @PathVariable Long projectId,
-            @PathVariable Long boardId
+            @PathVariable Long boardId,
+            Authentication authentication
     ) {
-        boardService.delete(projectId, boardId);
+        boardService.delete(
+                projectId,
+                boardId,
+                authentication.getName()
+        );
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards"

@@ -14,19 +14,33 @@ import java.util.Optional;
 
 public interface BoardService {
 
-    Long create(Long projectId, BoardCreateRequest request);
+    Long create(Long projectId, BoardCreateRequest request, String loginEmail);
 
     Page<BoardListResponse> findBoards(Long projectId, Pageable pageable);
 
     BoardDetailResponse findDetail(Long projectId, Long boardId);
 
-    void update(Long projectId, Long boardId, BoardUpdateRequest request);
+    void update(Long projectId, Long boardId, BoardUpdateRequest request, String loginEmail);
 
-    void delete(Long projectId, Long boardId);
+    void delete(Long projectId, Long boardId, String loginEmail);
 
     Page<BoardListResponse> searchBoards(Long projectId, String keyword, Pageable pageable);
 
-    BoardDetailModalResponse getModal(Long projectId, Long boardId);
+    BoardDetailResponse findEditableBoard(Long projectId, Long boardId, String loginUserId);
 
     Optional<NoticeResponse> getLatestNotice(Long projectId);
+
+    boolean isWriter(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    );
+
+    boolean canDelete(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    );
+
+
 }
