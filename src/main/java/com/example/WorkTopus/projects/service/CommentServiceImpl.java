@@ -1,5 +1,7 @@
 package com.example.WorkTopus.projects.service;
 
+import com.example.WorkTopus.Notification.entity.NotificationType;
+import com.example.WorkTopus.Notification.service.NotificationService;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.entity.Board;
@@ -23,6 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final BoardRepository boardRepository;
     private final BoardCommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public List<CommentResponse> findAll(Long boardId, String loginUserId) {
@@ -59,6 +62,40 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(
                 BoardComment.create(board, writer, content.trim())
         );
+
+        // ================= [🔍 디버깅용 로그 추가] =================
+        System.out.println("========== [알림 디버깅 시작] ==========");
+        System.out.println("1. 현재 댓글 작성자 ID: " + userId);
+        System.out.println("2. 게시글에 저장된 writerName 값: " + board.getWriterName());
+
+        userRepository.findByUserId(board.getWriterName()).ifPresentOrElse(
+                postWriter -> {
+                    System.out.println("3. 게시글 작성자 엔티티 찾음! ID: " + postWriter.getUserId());
+
+                    if (!postWriter.getUserId().equals(writer.getUserId())) {
+                        System.out.println("4. 작성자와 댓글자가 다르므로 알림 생성 실행!");
+
+                        String message = writer.getName() + "님이 회원님의 게시글에 댓글을 남겼습니다.";
+                        String url = "/projects/" + board.getProjectId() + "/boards/" + boardId;
+
+                        notificationService.createNotification(
+                                postWriter,
+                                message,
+                                url,
+                                NotificationType.COMMENT
+                        );
+                        System.out.println("5. 알림 생성 완료!");
+                    } else {
+                        System.out.println("4-FAIL. 본인이 쓴 글에 본인이 댓글을 달았기 때문에 알림 스킵됨!");
+                    }
+                },
+                () -> {
+                    System.out.println("3-FAIL. board.getWriterName()으로 유저를 찾지 못했습니다! (값이 잘못되었거나 매칭 안됨)");
+                }
+        );
+        System.out.println("========== [알림 디버깅 끝] ==========");
+        // ========================================================
+
     }
 
     @Override

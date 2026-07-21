@@ -2,6 +2,7 @@ package com.example.WorkTopus.repository;
 
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.BoardComment;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -27,5 +28,11 @@ public interface UserRepository extends JpaRepository<Users, Long> {
             "WHERE b.writerName = :writerName AND b.deletedYn = 'N' " +
             "ORDER BY b.id DESC")
     List<Object[]> findActiveBoardsWithProjectNameByWriterName(@Param("writerName") String writerName);
+
+    @Query("SELECT c FROM BoardComment c " +
+            "JOIN FETCH c.board b " +
+            "WHERE c.writer.userNum = :userNum " +
+            "ORDER BY c.createdAt DESC")
+    List<BoardComment> findByWriterIdWithBoard(@Param("userNum") Long userNum);
 
 }
