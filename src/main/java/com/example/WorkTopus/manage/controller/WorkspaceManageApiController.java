@@ -152,4 +152,19 @@ public class WorkspaceManageApiController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+
+    /** [추가 요구사항 - 담당 역할 실시간 비동기 자동 저장 API] */
+    @PostMapping("/api/manage/member/task-update")
+    public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
+        try {
+            Long memberId = Long.parseLong(payload.get("memberId").toString());
+            String assignedRole = payload.get("assignedRole").toString();
+
+            workspaceManageService.updateMemberTask(memberId, assignedRole);
+            return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
 }

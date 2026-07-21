@@ -176,5 +176,16 @@ public class WorkspaceManageService {
             throw new IllegalArgumentException("정의되지 않은 후속 알림 정책 요구사항입니다.");
         }
     }
+
+    /** [추가 요구사항 - 담당 역할 Dirty Checking 자동 저장 서비스 로직] */
+    @Transactional
+    public void updateMemberTask(Long memberId, String assignedRole) {
+        ManageMember member = manageMemberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
+
+        // 엔티티 필드에 세팅하여 JPA 변경 감지(Dirty Checking)로 오라클 DB 실시간 업데이트 수행
+        member.setAssignedRole(assignedRole);
+    }
+
 }
 

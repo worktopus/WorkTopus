@@ -28,13 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
             .catch(error => { console.error('Fetch Members Error:', error); });
     }
 
-    // 기능 2 : 수집된 DB 전용 인자로 팀원 테이블 마크업 동적 드로잉
+    // 기능 2 : 수집된 DB 인자로 팀원 테이블 마크업 동적 드로잉 (현재 직급 삭제 반영 완료)
     function renderMemberList(members) {
         if (!container) return;
         container.innerHTML = '';
 
+        // [보완] 바인딩된 목록이 없을 때 새 헤더 규격에 맞춰 colspan=4 지정
         if (!members || members.length === 0) {
-            container.innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-sub);">현재 참여 중인 팀원이 없습니다.</td></tr>';
+            container.innerHTML = '<tr><td colspan="4" style="padding: 40px; text-align: center; color: var(--text-sub);">현재 참여 중인 팀원이 없습니다.</td></tr>';
             return;
         }
 
@@ -48,13 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
             const isSubLeader = member.projectRole === 'SUB_LEADER' ? 'selected' : '';
             const isMember = member.projectRole === 'MEMBER' ? 'selected' : '';
 
+            // [수정/삭제] 기존 현재 직급 배지 td 열을 제거하고 4개 컬럼 체계로 재편성
             tr.innerHTML = `
                 <td style="padding: 16px;">
                     <div style="font-weight: 600; color: var(--text-main);">${member.userName || '이름 없음'}</div>
                     <div style="font-size: 0.8rem; color: var(--text-sub);">${member.userEmail || '이메일 없음'}</div>
-                </td>
-                <td style="padding: 16px;">
-                    <span style="background-color: #e6f7ff; color: #1890ff; padding: 4px 10px; border-radius: 4px; font-size: 0.8rem; font-weight: 700;">${member.projectRole}</span>
                 </td>
                 <td style="padding: 16px;">
                     <select class="form-input role-select" data-id="${member.id}" ${member.projectRole === 'LEADER' ? 'disabled' : ''} style="padding: 6px 12px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px;">
@@ -93,8 +92,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         alert(data.message || '직급이 변경되었습니다.');
-                        const roleBadge = selectBox.closest('tr').querySelector('td:nth-child(2) span');
-                        if (roleBadge) roleBadge.textContent = selectedRole;
+                        // [참고] 배지 열이 삭제되었으므로 배지 텍스트 갱신 구문 생략 처리 자동 마감
                     })
                     .catch(error => { alert('직급 변경 실패: ' + error.message); });
             }
@@ -121,6 +119,32 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             }
         });
+
+        // 기능 5 : 담당 역할(task-input) 입력 후 포커스가 벗어나면(blur) 실시간 비동기 자동 저장
+        container.addEventListener('focusout', function (e) {
+            if (e.target && e.target.classList.contains('task-input')) {
+                const inputField = e.target;
+                const memberId = inputField.getAttribute('data-id');
+                const assignedRoleValue = inputField.value.trim();
+
+                fetch('/api/manage/member/task-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                    body: JSON.stringify({ memberId: parseInt(memberId), assignedRole: assignedRoleValue })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // 성공 시 유저 방해 없이 조용히 인풋창 배경에 불빛 피드백 효과 부여
+                            inputField.style.backgroundColor = '#f6ffed';
+                            setTimeout(() => { inputField.style.backgroundColor = '#fff'; }, 500);
+                            return response.json();
+                        }
+                        throw new Error('역할 자동 저장 실패');
+                    })
+                    .catch(error => { console.error('Auto Save Error:', error); });
+            }
+        });
+
     }
 
     // 파일 로드 시 실시간 데이터 호출 가동
