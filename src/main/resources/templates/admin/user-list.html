@@ -22,20 +22,11 @@
 
     <main class="admin-main">
 
-        <header class="admin-page-header">
+        <header class="admin-header">
 
             <div>
-                <p class="admin-page-header__eyebrow">
-                    MEMBER MANAGEMENT
-                </p>
-
-                <h1 class="admin-page-header__title">
-                    회원 관리
-                </h1>
-
-                <p class="admin-page-header__description">
-                    가입 회원과 계정 상태를 확인하고 관리합니다.
-                </p>
+                <h1>회원 관리</h1>
+                <p>가입 회원과 계정 상태를 확인하고 관리합니다.</p>
             </div>
 
             <div class="admin-header__actions">
@@ -163,67 +154,12 @@
 
         </section>
 
-        <!-- 검색 및 필터 -->
-        <section class="member-toolbar">
-
-            <form class="member-search"
-                  method="get"
-                  th:action="@{/admin/users}">
-
-                <div class="member-search__field">
-
-                    <input type="text"
-                           name="keyword"
-                           th:value="${keyword}"
-                           placeholder="이름, 아이디 또는 이메일 검색">
-
-                </div>
-
-                <select name="status"
-                        class="member-search__select">
-
-                    <option value=""
-                            th:selected="${status == null or status == ''}">
-                        전체 상태
-                    </option>
-
-                    <option value="ACTIVE"
-                            th:selected="${status == 'ACTIVE'}">
-                        활성
-                    </option>
-
-                    <option value="INACTIVE"
-                            th:selected="${status == 'INACTIVE'}">
-                        비활성
-                    </option>
-
-                    <option value="WITHDRAWN"
-                            th:selected="${status == 'WITHDRAWN'}">
-                        탈퇴
-                    </option>
-
-                </select>
-
-                <button type="submit"
-                        class="member-search__button">
-                    검색
-                </button>
-
-                <a th:href="@{/admin/users}"
-                   class="member-search__reset">
-                    초기화
-                </a>
-
-            </form>
-
-        </section>
-
         <!-- 회원 목록 -->
         <section class="member-table-card">
 
             <div class="member-table-card__header">
 
-                <div>
+                <div class="member-table-card__title">
                     <h2>회원 목록</h2>
 
                     <p>
@@ -233,6 +169,48 @@
                         </strong>명의 회원이 조회되었습니다.
                     </p>
                 </div>
+
+                <form class="member-search"
+                      method="get"
+                      th:action="@{/admin/users}">
+
+                    <div class="member-search__field">
+                        <input type="text"
+                               name="keyword"
+                               th:value="${keyword}"
+                               placeholder="이름, 아이디 또는 이메일 검색">
+                    </div>
+
+                    <select name="status"
+                            class="member-search__select">
+                        <option value=""
+                                th:selected="${status == null or status == ''}">
+                            전체 상태
+                        </option>
+                        <option value="ACTIVE"
+                                th:selected="${status == 'ACTIVE'}">
+                            활성
+                        </option>
+                        <option value="INACTIVE"
+                                th:selected="${status == 'INACTIVE'}">
+                            비활성
+                        </option>
+                        <option value="WITHDRAWN"
+                                th:selected="${status == 'WITHDRAWN'}">
+                            탈퇴
+                        </option>
+                    </select>
+
+                    <button type="submit"
+                            class="member-search__button">
+                        검색
+                    </button>
+
+                    <a th:href="@{/admin/users}"
+                       class="member-search__reset">
+                        초기화
+                    </a>
+                </form>
 
             </div>
 
