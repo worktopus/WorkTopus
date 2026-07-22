@@ -3,7 +3,7 @@ package com.example.WorkTopus.chat.service;
 import com.example.WorkTopus.chat.dto.PresenceStatus;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.service.UserService;
-import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -13,7 +13,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
-@RequiredArgsConstructor
 public class PresenceService {
 
     private static final String PRESENCE_TOPIC =
@@ -23,6 +22,24 @@ public class PresenceService {
 
     private final SimpMessagingTemplate
             messagingTemplate;
+
+    /*
+     * SimpMessagingTemplate은 WebSocket 설정이
+     * 완성된 다음 실제로 사용하도록 지연 주입합니다.
+     *
+     * 이렇게 해야 WebSocketConfig와
+     * PresenceService 사이의 순환 참조가 발생하지 않습니다.
+     */
+    public PresenceService(
+            UserService userService,
+            @Lazy SimpMessagingTemplate messagingTemplate
+    ) {
+        this.userService =
+                userService;
+
+        this.messagingTemplate =
+                messagingTemplate;
+    }
 
     /*
      * WebSocket 세션 ID별 사용자 정보

@@ -134,7 +134,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             const response =
                 await fetch(
-                    `/api/ai/meeting-summary/detail/` +
+                    `/api/ai/meeting-summary/project/` +
+                    encodeURIComponent(projectId) +
+                    `/detail/` +
                     encodeURIComponent(summaryId),
                     {
                         method:
