@@ -2,6 +2,7 @@ package com.example.WorkTopus.admin.controller;
 
 import com.example.WorkTopus.admin.dto.response.AdminProjectResponse;
 import com.example.WorkTopus.admin.dto.response.AdminUserResponse;
+import com.example.WorkTopus.admin.service.AdminDashboardService;
 import com.example.WorkTopus.admin.service.AdminProjectService;
 import com.example.WorkTopus.admin.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -22,10 +22,44 @@ public class AdminController {
 
     private final AdminUserService adminUserService;
     private final AdminProjectService adminProjectService;
+    private final AdminDashboardService adminDashboardService;
 
     @GetMapping("/dashboard")
-    public String dashboard() {
-        return "admin/dashboard";
+    public ModelAndView dashboard() {
+
+        ModelAndView mav = new ModelAndView("admin/dashboard");
+
+        mav.addObject(
+                "totalUserCount",
+                adminDashboardService.getTotalUserCount()
+        );
+
+        mav.addObject(
+                "activeUserCount",
+                adminDashboardService.getActiveUserCount()
+        );
+
+        mav.addObject(
+                "totalProjectCount",
+                adminDashboardService.getTotalProjectCount()
+        );
+
+        mav.addObject(
+                "todayUserCount",
+                adminDashboardService.getTodayUserCount()
+        );
+
+        mav.addObject(
+                "recentUsers",
+                adminDashboardService.getRecentUsers()
+        );
+
+        mav.addObject(
+                "recentProjects",
+                adminDashboardService.getRecentProjects()
+        );
+
+        return mav;
     }
 
     @GetMapping("/users")
