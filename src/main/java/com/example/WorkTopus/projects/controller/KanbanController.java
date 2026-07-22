@@ -6,8 +6,10 @@ import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
 import com.example.WorkTopus.projects.entity.KanbanStatus;
 import com.example.WorkTopus.projects.service.KanbanCardService;
+import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,9 +30,17 @@ import java.util.List;
 public class KanbanController {
 
     private final KanbanCardService kanbanCardService;
+    private final ProjectBoardAccessService projectBoardAccessService;
 
     @GetMapping
-    public ModelAndView kanban(@PathVariable Long projectId) {
+    public ModelAndView kanban(@PathVariable Long projectId,
+                               Authentication authentication) {
+
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         List<KanbanCardResponse> cards = kanbanCardService.findProjectCards(projectId);
 
         ModelAndView mav = new ModelAndView("projects/kanban");
@@ -46,49 +56,94 @@ public class KanbanController {
         return mav;
     }
 
+    //카드 목록 조회
     @GetMapping("/cards")
     @ResponseBody
-    public List<KanbanCardResponse> cards(@PathVariable Long projectId) {
+    public List<KanbanCardResponse> cards(
+            @PathVariable Long projectId,
+            Authentication authentication
+    ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         return kanbanCardService.findProjectCards(projectId);
     }
 
+    // 카드 생성
     @PostMapping("/cards")
     @ResponseBody
     public KanbanCardResponse create(
             @PathVariable Long projectId,
-            @Valid @RequestBody KanbanCardCreateRequest request
+            @Valid @RequestBody KanbanCardCreateRequest request,
+            Authentication authentication
     ) {
-        System.out.println("칸반 POST 실행됨");
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         return kanbanCardService.create(projectId, request);
     }
 
+    // 카드 수정
     @PutMapping("/cards/{cardId}")
     @ResponseBody
     public KanbanCardResponse update(
             @PathVariable Long projectId,
             @PathVariable Long cardId,
-            @Valid @RequestBody KanbanCardUpdateRequest request
+            @Valid @RequestBody KanbanCardUpdateRequest request,
+            Authentication authentication
     ) {
-        return kanbanCardService.update(projectId, cardId, request);
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
+        return kanbanCardService.update(
+                projectId,
+                cardId,
+                request
+        );
     }
 
+    // 카드 삭제
+    @DeleteMapping("/cards/{cardId}")
+    @ResponseBody
+    public void delete(
+            @PathVariable Long projectId,
+            @PathVariable Long cardId,
+            Authentication authentication
+    ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
+        kanbanCardService.delete(projectId, cardId);
+    }
+
+    // 카드 상태 변경
     @PatchMapping("/cards/{cardId}/status")
     @ResponseBody
     public KanbanCardResponse updateStatus(
             @PathVariable Long projectId,
             @PathVariable Long cardId,
-            @Valid @RequestBody KanbanCardStatusUpdateRequest request
+            @Valid @RequestBody KanbanCardStatusUpdateRequest request,
+            Authentication authentication
     ) {
-        return kanbanCardService.updateStatus(projectId, cardId, request);
-    }
 
-    @DeleteMapping("/cards/{cardId}")
-    @ResponseBody
-    public void delete(
-            @PathVariable Long projectId,
-            @PathVariable Long cardId
-    ) {
-        kanbanCardService.delete(projectId, cardId);
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
+        return kanbanCardService.updateStatus(
+                projectId,
+                cardId,
+                request
+        );
     }
 
     private List<KanbanCardResponse> filterByStatus(

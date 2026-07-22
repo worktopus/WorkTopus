@@ -8,6 +8,7 @@ import com.example.WorkTopus.projects.dto.response.BoardListResponse;
 import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.service.BoardService;
 import com.example.WorkTopus.projects.service.CommentService;
+import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,13 +30,21 @@ public class BoardController {
 
     private final BoardService boardService;
     private final CommentService commentService;
+    private final ProjectBoardAccessService projectBoardAccessService;
 
+    // 게시글 목록
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,
             @PageableDefault(size = 10)
-            Pageable pageable
+            Pageable pageable,
+            Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         Page<BoardListResponse> boardPage =
                 boardService.findBoards(projectId, pageable);
 
@@ -55,6 +64,7 @@ public class BoardController {
         return mav;
     }
 
+    // 게시글 검색
     @GetMapping("/search")
     @ResponseBody
     public List<BoardListResponse> search(
@@ -75,8 +85,14 @@ public class BoardController {
     }
 
 
+    // 게시글 작성
     @GetMapping("/write")
-    public ModelAndView writeForm(@PathVariable Long projectId) {
+    public ModelAndView writeForm(@PathVariable Long projectId,
+                                  Authentication authentication) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
         ModelAndView mav = new ModelAndView("projects/board-write");
         mav.addObject("projectId", projectId);
 
@@ -90,6 +106,11 @@ public class BoardController {
             @Valid @ModelAttribute BoardCreateRequest request,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         request = request.withTag(tag);
 
         Long boardId = boardService.create(
@@ -104,12 +125,18 @@ public class BoardController {
         );
     }
 
+    // 게시글 조회
     @GetMapping("/{boardId}")
     public ModelAndView detail(
             @PathVariable Long projectId,
             @PathVariable Long boardId,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         BoardDetailResponse board =
                 boardService.findDetail(projectId, boardId);
 
@@ -146,6 +173,7 @@ public class BoardController {
         return mav;
     }
 
+    // 게시글 수정
     @GetMapping("/{boardId}/edit")
     public ModelAndView editForm(
             @PathVariable Long projectId,
@@ -153,6 +181,11 @@ public class BoardController {
             Authentication authentication,
             RedirectAttributes redirectAttributes
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         try {
             BoardDetailResponse board =
                     boardService.findEditableBoard(
@@ -193,6 +226,11 @@ public class BoardController {
             Authentication authentication
 
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         request = request.withTag(tag);
         boardService.update(projectId, boardId, request, authentication.getName());
 
@@ -201,12 +239,18 @@ public class BoardController {
         );
     }
 
+    // 게시글 삭제
     @PostMapping("/{boardId}/delete")
     public ModelAndView delete(
             @PathVariable Long projectId,
             @PathVariable Long boardId,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         boardService.delete(
                 projectId,
                 boardId,
