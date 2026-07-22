@@ -4,6 +4,8 @@ import com.example.WorkTopus.dto.Post;
 import com.example.WorkTopus.dto.UserCreateForm;
 import com.example.WorkTopus.entity.Role;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.projects.entity.Board;
+import com.example.WorkTopus.projects.entity.BoardComment;
 import com.example.WorkTopus.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -14,7 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.WorkTopus.dto.Comment;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -171,26 +175,23 @@ public class UserService implements UserDetailsService {
 
     // 마이페이지에서 글 조회 //
     public List<Post> findPostsByWriterName(String writerName) {
-
-        // 1. Board 엔티티와 프로젝트 이름이 함께 묶인 Object 배열 리스트를 조회합니다.
         List<Object[]> results = userRepository.findActiveBoardsWithProjectNameByWriterName(writerName);
 
-        // 2. Stream API를 이용해 데이터 매핑
-        return results.stream().map(result -> {
-            // 배열에서 데이터 분할 추출
-            com.example.WorkTopus.projects.entity.Board board = (com.example.WorkTopus.projects.entity.Board) result[0];
-            String projectName = (String) result[1]; //  조인해서 가져온 프로젝트 Name 값
-            Long projectId = (Long) result[2];
+        // 💡 댓글 조회처럼 단 한 줄로 깔끔하게 처리!
+        return results.stream()
+                .map(res -> new Post((Board) res[0], (String) res[1], (Long) res[2]))
+                .collect(Collectors.toList());
+    }
 
-            com.example.WorkTopus.dto.Post dto = new com.example.WorkTopus.dto.Post();
-            dto.setId(board.getId());
-            dto.setProjectId(projectId);
-            dto.setTitle(board.getTitle());
-            dto.setProjectName(projectName); //  DTO에 프로젝트 명칭
-            dto.setWriteDateFromLocalDateTime(board.getCreatedAt());
+    // 마이페이지에서 댓글 조회 //
+    public List<Comment> getMyComments(Long userNum) {
+        // 1. DB에서 엔티티 리스트 조회
+        List<BoardComment> comments = userRepository.findByWriterIdWithBoard(userNum);
 
-            return dto;
-        }).collect(java.util.stream.Collectors.toList());
+        // 2. 엔티티(BoardComment) -> DTO(Comment)로 변환하여 리턴
+        return comments.stream()
+                .map(Comment::new)
+                .collect(Collectors.toList());
     }
 
 }

@@ -24,6 +24,11 @@ public record BoardCreateRequest(
         List<MultipartFile> files
 ) {
 
+    @Override
+    public boolean notice() {
+        return "NOTICE".equalsIgnoreCase(this.category) || this.notice;
+    }
+
     public BoardCreateRequest withTag(String tag) {
         return new BoardCreateRequest(
                 title,

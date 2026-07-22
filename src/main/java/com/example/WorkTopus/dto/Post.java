@@ -1,5 +1,6 @@
 package com.example.WorkTopus.dto;
 
+import com.example.WorkTopus.projects.entity.Board;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,11 +22,12 @@ public class Post {
     private String projectName;
 
     // 생성자
-    public Post(Long id, String title, LocalDateTime createdAt, String projectName) {
-        this.id = id;
-        this.title = title;
+    public Post(Board board, String projectName, Long projectId) {
+        this.id = board.getId();
+        this.projectId = projectId;
+        this.title = board.getTitle();
         this.projectName = projectName;
-        setWriteDateFromLocalDateTime(createdAt);
+        setWriteDateFromLocalDateTime(board.getCreatedAt());
     }
 
     public void setWriteDateFromLocalDateTime(LocalDateTime createdAt) {

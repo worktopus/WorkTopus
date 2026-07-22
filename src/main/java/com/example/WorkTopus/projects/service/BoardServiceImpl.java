@@ -1,5 +1,9 @@
 package com.example.WorkTopus.projects.service;
 
+import com.example.WorkTopus.Notification.entity.NotificationType;
+import com.example.WorkTopus.Notification.service.NotificationService;
+import com.example.WorkTopus.entity.ProjectMember;
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.manage.entity.ManageMember;
 import com.example.WorkTopus.manage.repository.ManageMemberRepository;
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
@@ -11,11 +15,14 @@ import com.example.WorkTopus.projects.exception.BoardNotFoundException;
 import com.example.WorkTopus.projects.repository.BoardCommentRepository;
 import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,12 +44,16 @@ public class BoardServiceImpl implements BoardService {
     private final FileStorageService fileStorageService;
     private final ManageMemberRepository manageMemberRepository;
 
+    private final NotificationService notificationService;
+    private final ProjectMemberRepository projectMemberRepository;
+
     @Override
     public Long create(
             Long projectId,
             BoardCreateRequest request,
             String loginUserId
     ) {
+        // 1. 프로젝트 멤버 여부 확인
         ManageMember member = manageMemberRepository
                 .findByWorkspaceIdAndUser_UserId(
                         projectId,
@@ -56,6 +67,7 @@ public class BoardServiceImpl implements BoardService {
 
         boolean notice = "NOTICE".equals(request.category());
 
+        // 2. 게시글 생성 및 저장
         Board board = new Board(
                 projectId,
                 request.title(),
@@ -68,7 +80,45 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard = boardRepository.save(board);
 
+        // 3. 첨부파일 저장
         saveAttachments(savedBoard.getId(), request.files());
+
+        // ================= [게시글 등록 알림 처리] =================
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserId = (authentication != null) ? authentication.getName() : loginUserId;
+
+        // 1) 해당 프로젝트의 팀원 목록 조회
+        List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
+
+        // 2) 카테고리 한글 명칭 매핑
+        String categoryName = switch (request.category()) {
+            case "NOTICE" -> "공지사항";
+            case "FREE" -> "자유게시판";
+            case "IDEA" -> "아이디어";
+            case "QUESTION" -> "질문게시판";
+            default -> "게시판";
+        };
+
+        // 3) 전체 팀원에게 알림 발송 (본인 제외)
+        for (ProjectMember projectMember : members) {
+            Users targetUser = projectMember.getUser();
+
+            // 작성자 본인이면 알림 발송 대상에서 제외
+            if (currentUserId != null && currentUserId.equals(targetUser.getUserId())) {
+                continue;
+            }
+
+            String message = "[" + categoryName + "] " + savedBoard.getTitle() + " 글이 등록되었습니다.";
+            String url = "/projects/" + projectId + "/boards/" + savedBoard.getId();
+
+            notificationService.createNotification(
+                    targetUser,
+                    message,
+                    url,
+                    NotificationType.NOTICE
+            );
+        }
+        // =======================================================
 
         return savedBoard.getId();
     }
@@ -96,16 +146,12 @@ public class BoardServiceImpl implements BoardService {
 
             boardFileRepository.save(boardFile);
         }
-
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
-
-
         Page<Board> boards = boardRepository
-
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
                         "N",
@@ -122,6 +168,7 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> searchBoards(
@@ -147,7 +194,6 @@ public class BoardServiceImpl implements BoardService {
                 createSearchSort(sort)
         );
 
-
         Page<Board> boards = boardRepository.searchBoards(
                 projectId,
                 normalizedKeyword,
@@ -165,6 +211,7 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
+
     private Sort createSearchSort(String sort) {
         if ("views".equals(sort)) {
             return Sort.by(
@@ -178,7 +225,6 @@ public class BoardServiceImpl implements BoardService {
                 Sort.Order.desc("noticeYn"),
                 Sort.Order.desc("createdAt")
         );
-
     }
 
     @Override
@@ -196,7 +242,6 @@ public class BoardServiceImpl implements BoardService {
                         .fileUrl(file.getFileUrl())
                         .build())
                 .toList();
-
 
         String writerAssignedRole = manageMemberRepository
                 .findByWorkspaceIdAndUser_Name(
@@ -407,7 +452,6 @@ public class BoardServiceImpl implements BoardService {
                 );
 
         files.forEach(BoardFile::delete);
-
     }
 
     private Board getBoard(Long projectId, Long boardId) {
@@ -417,7 +461,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private Map<Long, Long> getCommentCountMap(List<Board> boards) {
-
         if (boards == null || boards.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -435,7 +478,8 @@ public class BoardServiceImpl implements BoardService {
                 ));
     }
 
-
+    @Override
+    @Transactional(readOnly = true)
     public Optional<NoticeResponse> getLatestNotice(Long projectId) {
         return boardRepository
                 .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
@@ -446,4 +490,3 @@ public class BoardServiceImpl implements BoardService {
                 .map(NoticeResponse::from);
     }
 }
-

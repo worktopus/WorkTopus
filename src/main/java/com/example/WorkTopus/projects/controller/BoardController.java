@@ -9,6 +9,7 @@ import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.service.BoardService;
 import com.example.WorkTopus.projects.service.CommentService;
 import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
+import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -31,13 +32,13 @@ public class BoardController {
     private final BoardService boardService;
     private final CommentService commentService;
     private final ProjectBoardAccessService projectBoardAccessService;
+    private final UserService userService; // 변수명 소문자 카멜케이스로 수정
 
     // 게시글 목록
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,
-            @PageableDefault(size = 10)
-            Pageable pageable,
+            @PageableDefault(size = 10) Pageable pageable,
             Authentication authentication
     ) {
         projectBoardAccessService.validateMember(
@@ -45,15 +46,10 @@ public class BoardController {
                 authentication.getName()
         );
 
-        Page<BoardListResponse> boardPage =
-                boardService.findBoards(projectId, pageable);
+        Page<BoardListResponse> boardPage = boardService.findBoards(projectId, pageable);
+        PageResponse<BoardListResponse> boards = PageResponse.from(boardPage);
 
-        PageResponse<BoardListResponse> boards =
-                PageResponse.from(boardPage);
-
-        ModelAndView mav =
-                new ModelAndView("projects/board-list");
-
+        ModelAndView mav = new ModelAndView("projects/board-list");
         mav.addObject("projectId", projectId);
         mav.addObject("boards", boards);
         mav.addObject(
@@ -84,11 +80,12 @@ public class BoardController {
         ).getContent();
     }
 
-
-    // 게시글 작성
+    // 게시글 작성 폼
     @GetMapping("/write")
-    public ModelAndView writeForm(@PathVariable Long projectId,
-                                  Authentication authentication) {
+    public ModelAndView writeForm(
+            @PathVariable Long projectId,
+            Authentication authentication
+    ) {
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
@@ -99,6 +96,7 @@ public class BoardController {
         return mav;
     }
 
+    // 게시글 작성 등록
     @PostMapping
     public ModelAndView create(
             @PathVariable Long projectId,
@@ -106,6 +104,7 @@ public class BoardController {
             @Valid @ModelAttribute BoardCreateRequest request,
             Authentication authentication
     ) {
+        // 1. 프로젝트 접근 권한 검증
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
@@ -113,12 +112,12 @@ public class BoardController {
 
         request = request.withTag(tag);
 
+        // 2. 게시글 생성 (develop 최신 서비스 규격 적용)
         Long boardId = boardService.create(
                 projectId,
                 request,
                 authentication.getName()
         );
-
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId
@@ -137,32 +136,26 @@ public class BoardController {
                 authentication.getName()
         );
 
-        BoardDetailResponse board =
-                boardService.findDetail(projectId, boardId);
+        BoardDetailResponse board = boardService.findDetail(projectId, boardId);
 
-        boolean isWriter =
-                boardService.isWriter(
-                        projectId,
-                        boardId,
-                        authentication.getName()
-                );
+        boolean isWriter = boardService.isWriter(
+                projectId,
+                boardId,
+                authentication.getName()
+        );
 
-        boolean canDelete =
-                boardService.canDelete(
-                        projectId,
-                        boardId,
-                        authentication.getName()
-                );
+        boolean canDelete = boardService.canDelete(
+                projectId,
+                boardId,
+                authentication.getName()
+        );
 
-        List<CommentResponse> comments =
-                commentService.findAll(
-                        boardId,
-                        authentication.getName()
-                );
+        List<CommentResponse> comments = commentService.findAll(
+                boardId,
+                authentication.getName()
+        );
 
-        ModelAndView mav =
-                new ModelAndView("projects/board-detail");
-
+        ModelAndView mav = new ModelAndView("projects/board-detail");
         mav.addObject("projectId", projectId);
         mav.addObject("board", board);
         mav.addObject("comments", comments);
@@ -173,7 +166,7 @@ public class BoardController {
         return mav;
     }
 
-    // 게시글 수정
+    // 게시글 수정 폼
     @GetMapping("/{boardId}/edit")
     public ModelAndView editForm(
             @PathVariable Long projectId,
@@ -187,16 +180,13 @@ public class BoardController {
         );
 
         try {
-            BoardDetailResponse board =
-                    boardService.findEditableBoard(
-                            projectId,
-                            boardId,
-                            authentication.getName()
-                    );
+            BoardDetailResponse board = boardService.findEditableBoard(
+                    projectId,
+                    boardId,
+                    authentication.getName()
+            );
 
-            ModelAndView mav =
-                    new ModelAndView("projects/board-edit");
-
+            ModelAndView mav = new ModelAndView("projects/board-edit");
             mav.addObject("projectId", projectId);
             mav.addObject("board", board);
 
@@ -209,14 +199,12 @@ public class BoardController {
             );
 
             return new ModelAndView(
-                    "redirect:/projects/"
-                            + projectId
-                            + "/boards/"
-                            + boardId
+                    "redirect:/projects/" + projectId + "/boards/" + boardId
             );
         }
     }
 
+    // 게시글 수정 처리
     @PostMapping("/{boardId}/edit")
     public ModelAndView update(
             @PathVariable Long projectId,
@@ -224,7 +212,6 @@ public class BoardController {
             @RequestParam(required = false) String tag,
             @Valid @ModelAttribute BoardUpdateRequest request,
             Authentication authentication
-
     ) {
         projectBoardAccessService.validateMember(
                 projectId,

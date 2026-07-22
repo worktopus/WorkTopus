@@ -17,9 +17,9 @@
         <div class="header__right">
 
             <!-- 알림 -->
-            <button class="header__icon" type="button" aria-label="알림">
+            <button class="header__icon" type="button" aria-label="알림" id="header-notif-btn" onclick="toggleNotifModal(event)">
                 <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}"></span>
-                <span class="header__badge">3</span>
+                <span class="header__badge" id="header-notif-badge" style="display: none;">0</span>
             </button>
 
             <!-- 채팅 버튼 -->
@@ -75,6 +75,7 @@
         </div>
     </header>
 
+<!-----------------------------------------팝업-------------------------------------------->
     <!-- 실시간 채팅 팝업 -->
     <link rel="stylesheet" th:href="@{/css/chat.css}">
 
@@ -107,7 +108,6 @@
 
         </div>
 
-
         <!-- 2. 실제 대화 화면 -->
         <div id="chatRoomView" style="display:none;">
 
@@ -123,7 +123,6 @@
 
                 <button type="button" onclick="closeChat()" aria-label="채팅 닫기">✖</button>
             </div>
-
 
             <!-- 메시지 영역 -->
             <div class="chat-body">
@@ -177,6 +176,18 @@
         </div>
     </div>
 
+    <!-- 알림 팝업 -->
+    <div class="todo-modal" id="notif-popup-modal">
+        <div class="todo-modal-header">
+            <span class="todo-modal-title">알림</span>
+            <button class="todo-modal-close" onclick="toggleNotifModal(event)">×</button>
+        </div>
+        <div class="todo-modal-body">
+            <ul id="popup-notif-list">
+            </ul>
+        </div>
+    </div>
+
               <!------------------------script------------------------->
     <!-- 2026.07.21 승민(추가) -->
     <!-- 실제 로그인 사용자 정보를 채팅 JavaScript에 전달 -->
@@ -195,8 +206,8 @@
     <!-- 2026.07.21 승민(추가) -->
     <script th:src="@{/js/homeHeader.js}"></script>
 
-    <!-- todo -->
-    <script th:src="@{/js/todo/todo.js}"></script>
+    <!-- notification 추가 -->
+    <script th:src="@{/js/notification/notification.js}"></script>
 
     <!-- WebSocket 라이브러리 -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -213,6 +224,9 @@
     <script th:src="@{/js/chat/chat.js}"></script>
     <script th:src="@{/js/chat/meetingSummary.js}"></script>
     <script th:src="@{/js/chat/meetingHistory.js}"></script>
+
+    <!-- todo -->
+    <script th:src="@{/js/todo/todo.js}"></script>
 
 </th:block>
 
