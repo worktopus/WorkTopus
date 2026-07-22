@@ -115,7 +115,7 @@
 
             <!-- 작업 카드 + 차트 -->
             <section class="dashboard__summary"
-                     th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}">
+                     th:data-url="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}">
 
                 <article class="task-card">
                     <div class="task-card__title">
@@ -202,7 +202,7 @@
 
             <!-- 2주 캘린더 -->
             <section class="calendar-card"
-                     th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}">
+                     th:data-url="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}">
                 <div class="calendar-card__header">
                     <div class="calendar-card__nav">
                         <button type="button">‹</button>

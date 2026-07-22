@@ -80,7 +80,6 @@ public class BoardController {
                 authentication.getName()
         );
 
-        System.out.println("현재 로그인 값: " + authentication.getName());
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId

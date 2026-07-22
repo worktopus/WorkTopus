@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -132,12 +131,6 @@ public class BoardServiceImpl implements BoardService {
                         .build())
                 .toList();
 
-        System.out.println("projectId = " + projectId);
-        System.out.println("writerName = [" + board.getWriterName() + "]");
-        System.out.println(
-                "projectMembers = "
-                        + manageMemberRepository.findByWorkspaceId(projectId)
-        );
 
         String writerAssignedRole = manageMemberRepository
                 .findByWorkspaceIdAndUser_Name(

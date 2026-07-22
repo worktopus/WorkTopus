@@ -32,4 +32,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         return Math.min(100, Math.max(0, number));
     }
+
+    document.querySelectorAll("[data-url]").forEach(card => {
+        card.style.cursor = "pointer";
+
+        card.addEventListener("click", () => {
+            location.href = card.dataset.url;
+        });
+    });
 });
