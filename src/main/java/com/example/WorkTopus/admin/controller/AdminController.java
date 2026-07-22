@@ -1,12 +1,15 @@
 package com.example.WorkTopus.admin.controller;
 
+import com.example.WorkTopus.admin.dto.response.AdminProjectResponse;
 import com.example.WorkTopus.admin.dto.response.AdminUserResponse;
+import com.example.WorkTopus.admin.service.AdminProjectService;
 import com.example.WorkTopus.admin.service.AdminUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -18,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AdminController {
 
     private final AdminUserService adminUserService;
+    private final AdminProjectService adminProjectService;
 
     @GetMapping("/dashboard")
     public String dashboard() {
@@ -92,11 +96,37 @@ public class AdminController {
 
 
     @GetMapping("/projects")
-    public ModelAndView projectList() {
+    public ModelAndView projectList(
+            @RequestParam(defaultValue = "name") String searchType,
+            @RequestParam(defaultValue = "") String keyword,
+            @RequestParam(defaultValue = "0") int page
+    ) {
+
+        Pageable pageable = PageRequest.of(
+                Math.max(page, 0),
+                10,
+                Sort.by(Sort.Direction.DESC, "createdAt")
+        );
+
+        Page<AdminProjectResponse> projectPage =
+                adminProjectService.getProjects(
+                        searchType,
+                        keyword,
+                        pageable
+                );
 
         ModelAndView mv = new ModelAndView();
 
         mv.setViewName("admin/project-list");
+
+        mv.addObject("searchType", searchType);
+        mv.addObject("keyword", keyword);
+        mv.addObject("projectPage", projectPage);
+        mv.addObject("projects", projectPage.getContent());
+        mv.addObject(
+                "totalProjectCount",
+                adminProjectService.getTotalProjectCount()
+        );
 
         return mv;
     }

@@ -38,6 +38,51 @@
                 </p>
             </div>
 
+            <div class="admin-header__actions">
+
+                <button
+                        class="admin-user"
+                        type="button"
+                        id="adminUserBtn">
+
+                    <div class="admin-user__avatar">
+                        A
+                    </div>
+
+                    <span>관리자</span>
+
+                    <span class="admin-user__arrow">
+                        ▼
+                    </span>
+
+                </button>
+
+                <div class="admin-dropdown"
+                     id="adminDropdown">
+
+                    <a th:href="@{/dashboard}"
+                       class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">↗</span>
+                        <span>사용자 화면</span>
+                    </a>
+
+                    <a href="#"
+                       class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">⚙</span>
+                        <span>내 정보</span>
+                    </a>
+
+                    <div class="admin-dropdown__divider"></div>
+
+                    <a href="#"
+                       class="admin-dropdown__item admin-dropdown__item--danger">
+                        <span class="admin-dropdown__icon">↩</span>
+                        <span>로그아웃</span>
+                    </a>
+
+                </div>
+            </div>
+
         </header>
 
         <!-- 알림 메시지 -->

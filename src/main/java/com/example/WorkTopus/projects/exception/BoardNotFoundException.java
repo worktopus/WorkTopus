@@ -1,6 +1,5 @@
 package com.example.WorkTopus.projects.exception;
 
-<<<<<<< HEAD
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -10,7 +9,4 @@ public class BoardNotFoundException extends IllegalArgumentException {
     public BoardNotFoundException(String message) {
         super(message);
     }
-=======
-public class BoardNotFoundException {
->>>>>>> origin/feature/admin
 }

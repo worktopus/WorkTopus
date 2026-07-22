@@ -1,10 +1,7 @@
 package com.example.WorkTopus.projects.dto.response;
 
 import com.example.WorkTopus.projects.entity.Board;
-<<<<<<< HEAD
 import org.jsoup.Jsoup;
-=======
->>>>>>> origin/feature/admin
 
 import java.time.LocalDateTime;
 public record BoardListResponse(
