@@ -56,4 +56,11 @@ public class NotificationApiController {
         notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }
+
+    // 4. 개별 알림 삭제 API
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteNotification(@PathVariable("id") Long id) {
+        notificationService.deleteNotification(id); // NotificationService에 delete 메서드 호출
+        return ResponseEntity.ok().build();
+    }
 }

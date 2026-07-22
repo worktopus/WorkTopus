@@ -51,4 +51,11 @@ public class NotificationServiceImpl implements NotificationService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 알림입니다."));
         notification.markAsRead(); // 엔티티의 readYn = "Y" 변경
     }
+
+    // 알림 삭제
+    @Transactional
+    public void deleteNotification(Long id) {
+        notificationRepository.deleteById(id);
+    }
+
 }

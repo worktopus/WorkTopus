@@ -19,4 +19,6 @@ public interface NotificationService {
 
     // 4. 알림 읽음 처리
     void markAsRead(Long notificationId);
+
+    void deleteNotification(Long id);
 }
