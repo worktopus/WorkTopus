@@ -556,40 +556,144 @@
 
 
     /* =====================================================
+   헤더 채팅 버튼 안 읽은 메시지 표시
+===================================================== */
+
+    function updateChatButtonBadge() {
+
+        /*
+         * 모든 단체방과 개인방의 안 읽은 메시지를
+         * 하나의 숫자로 합산합니다.
+         */
+        const totalUnreadCount =
+            chatRooms.reduce(
+                function (total, room) {
+
+                    const unreadCount =
+                        Math.max(
+                            0,
+                            Number(
+                                room.unreadCount ?? 0
+                            )
+                        );
+
+                    return total + unreadCount;
+                },
+                0
+            );
+
+
+        /*
+         * header.html과 homeHeader.html 양쪽에서
+         * 동일한 클래스 이름을 사용합니다.
+         */
+        const badges =
+            document.querySelectorAll(
+                ".chat-unread-badge"
+            );
+
+
+        badges.forEach(
+            function (badge) {
+
+                if (totalUnreadCount <= 0) {
+
+                    badge.textContent = "0";
+                    badge.style.display = "none";
+
+                    return;
+                }
+
+
+                /*
+                 * 100개 이상이면 99+로 표시합니다.
+                 */
+                badge.textContent =
+                    totalUnreadCount > 99
+                        ? "99+"
+                        : String(totalUnreadCount);
+
+                badge.style.display = "flex";
+            }
+        );
+
+
+        /*
+         * 접근성 문구도 현재 숫자에 맞게 변경합니다.
+         */
+        const chatButtons =
+            document.querySelectorAll(
+                ".chat-button"
+            );
+
+
+        chatButtons.forEach(
+            function (button) {
+
+                if (totalUnreadCount <= 0) {
+                    button.setAttribute(
+                        "aria-label",
+                        "채팅 열기"
+                    );
+
+                    return;
+                }
+
+                button.setAttribute(
+                    "aria-label",
+                    `채팅 열기, 안 읽은 메시지 ${totalUnreadCount}개`
+                );
+            }
+        );
+    }
+
+
+    /* =====================================================
        채팅방 목록 출력
     ===================================================== */
 
     function renderChatRooms() {
+
+        /*
+         * 채팅방 목록을 그릴 때마다
+         * 헤더 채팅 버튼 숫자도 함께 갱신합니다.
+         */
+        updateChatButtonBadge();
+
+
         const roomList =
             document.getElementById(
                 "chatRoomList"
             );
 
+
         if (!roomList) {
             return;
         }
 
+
         const filteredRooms =
             getFilteredRooms();
+
 
         if (
             filteredRooms.length === 0
         ) {
             roomList.innerHTML = `
-                <div class="chat-room-list-empty">
-                    표시할 채팅방이 없습니다.
-                </div>
-            `;
+            <div class="chat-room-list-empty">
+                표시할 채팅방이 없습니다.
+            </div>
+        `;
 
             return;
         }
+
 
         roomList.innerHTML =
             filteredRooms
                 .map(createRoomItemHtml)
                 .join("");
     }
-
 
     /* =====================================================
        채팅방 한 개 HTML
@@ -1819,6 +1923,7 @@
     app.chatList = {
         refreshRooms,
         renderChatRooms,
+        updateChatButtonBadge,
 
         showChatListView,
         showRoomView,
