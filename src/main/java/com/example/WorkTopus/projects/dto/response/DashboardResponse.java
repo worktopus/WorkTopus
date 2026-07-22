@@ -17,6 +17,7 @@ public record DashboardResponse(
         int doneRate,
 
         String userName,
+        String assignedRole,
         long myDoneCount,
         long myKanbanCardCount,
         int myCompletionRate,

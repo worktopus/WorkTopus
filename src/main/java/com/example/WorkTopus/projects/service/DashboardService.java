@@ -4,5 +4,5 @@ import com.example.WorkTopus.projects.dto.response.DashboardResponse;
 
 public interface DashboardService {
 
-    DashboardResponse getDashboard(Long projectId, String userId);
+    DashboardResponse getDashboard(Long projectId, String loginUserId);
 }

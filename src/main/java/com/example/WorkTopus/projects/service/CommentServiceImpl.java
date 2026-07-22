@@ -49,8 +49,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public void create(Long boardId, String userId, String content) {
-        Board board = boardRepository.findById(boardId)
+    public void create(Long projectId, Long boardId, String userId, String content) {
+        Board board = boardRepository
+                .findByIdAndProjectId(boardId, projectId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
 
         Users writer = userRepository.findByUserId(userId)
@@ -63,12 +64,16 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public void delete(Long boardId, Long commentId, String userId) {
+    public void delete(Long projectId, Long boardId, Long commentId, String userId) {
         BoardComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 없습니다."));
 
+        if (!comment.getBoard().getProjectId().equals(projectId)) {
+            throw new IllegalArgumentException("잘못된 프로젝트입니다.");
+        }
+
         if (!comment.getBoard().getId().equals(boardId)) {
-            throw new IllegalArgumentException("본인이 작성한 댓글만 삭제할 수 있습니다.");
+            throw new IllegalArgumentException("잘못된 게시글입니다.");
         }
 
         if (!comment.getWriter().getUserId().equals(userId)) {
@@ -79,13 +84,17 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Transactional
-    public void update(Long boardId, Long commentId, String userId, String content
+    public void update(Long projectId, Long boardId, Long commentId, String userId, String content
     ) {
 
         BoardComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("댓글이 없습니다.")
                 );
+
+        if (!comment.getBoard().getProjectId().equals(projectId)) {
+            throw new IllegalArgumentException("잘못된 프로젝트입니다.");
+        }
 
         if (!comment.getBoard().getId().equals(boardId)) {
             throw new IllegalArgumentException("잘못된 요청입니다.");

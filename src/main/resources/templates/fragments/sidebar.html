@@ -71,14 +71,6 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/memo}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: memo}">
-                        </span>
-                        <span class="sidebar__text">메모</span>
-                    </a>
-                </li>
-
-                <li class="sidebar__item">
                     <!-- [수정] /manage/ 앞부분에 /projects 를 추가하여 매핑 주소를 일치시킵니다 -->
                     <a th:href="@{/projects/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">

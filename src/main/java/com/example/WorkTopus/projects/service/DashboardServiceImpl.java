@@ -1,5 +1,7 @@
 package com.example.WorkTopus.projects.service;
 
+import com.example.WorkTopus.manage.entity.ManageMember;
+import com.example.WorkTopus.manage.repository.ManageMemberRepository;
 import com.example.WorkTopus.projects.dto.response.*;
 import com.example.WorkTopus.projects.entity.KanbanCard;
 import com.example.WorkTopus.projects.entity.KanbanStatus;
@@ -30,9 +32,16 @@ public class DashboardServiceImpl implements DashboardService {
     private final KanbanCardRepository kanbanCardRepository;
     private final CalendarScheduleRepository calendarScheduleRepository;
     private final UserService userService;
+    private final ManageMemberRepository manageMemberRepository;
 
     @Override
-    public DashboardResponse getDashboard(Long projectId, String userId) {
+    public DashboardResponse getDashboard(Long projectId, String loginUserId) {
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(projectId, loginUserId)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("프로젝트 참여 정보를 찾을 수 없습니다.")
+                );
+
         long boardCount =
                 boardRepository.countByProjectIdAndDeletedYn(projectId, "N");
 
@@ -86,7 +95,7 @@ public class DashboardServiceImpl implements DashboardService {
                 findUpcomingSchedules(projectId, today);
 
         // 개인 데이터는 로그인 사용자 연동 전 임시 값
-        Users user = userService.findByUserId(userId);
+        Users user = userService.findByUserId(loginUserId);
         String userName = user.getName();
 
         long myKanbanCardCount =
@@ -122,6 +131,7 @@ public class DashboardServiceImpl implements DashboardService {
                 calculateRate(doneCount, kanbanCardCount),
 
                 userName,
+                member.getAssignedRole(),
                 myDoneCount,
                 myKanbanCardCount,
                 myCompletionRate,

@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Worktopus | 프로젝트 게시판</title>
+    <title>Worktopus | Project-Board</title>
 
     <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
@@ -82,40 +82,41 @@
             </section>
 
             <!-- 검색 / 필터 -->
-            <form class="board_toolbar"
-                  th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
-                  method="get">
+            <section class="board_toolbar"
+                     th:data-project-id="${projectId}">
 
                 <div class="board_search">
                     <input type="text"
+                           id="boardSearchInput"
                            class="board_search-input"
-                           th:value="${keyword}"
+                           autocomplete="off"
                            placeholder="게시글 제목, 작성자, 태그 검색">
                 </div>
 
-                <select class="board_select">
-                    <option>전체 카테고리</option>
-                    <option>공지</option>
-                    <option>회의</option>
-                    <option>개발</option>
-                    <option>디자인</option>
-                    <option>기획</option>
+                <select id="boardCategoryFilter"
+                        class="board_select"
+                        aria-label="게시글 카테고리 필터">
+                    <option value="">전체 카테고리</option>
+                    <option value="NOTICE">공지</option>
+                    <option value="MEETING">회의</option>
+                    <option value="WORK">업무</option>
+                    <option value="RESOURCE">자료</option>
+                    <option value="IDEA">아이디어</option>
+                    <option value="ETC">기타</option>
                 </select>
 
-                <select class="board_select">
-                    <option>최신순</option>
-                    <option>댓글 많은 순</option>
-                    <option>조회순</option>
+                <select id="boardSortFilter"
+                        class="board_select"
+                        aria-label="게시글 정렬">
+                    <option value="latest">최신순</option>
+                    <option value="views">조회순</option>
                 </select>
 
-                <button type="submit" class="board_search-btn">
-                    검색
-                </button>
-
-            </form>
+            </section>
 
             <!-- 게시글 목록 -->
-            <section class="board_list">
+            <section class="board_list"
+                        id="boardList">
 
                 <article class="board_card"
                          th:each="board : ${boards.content}">
@@ -157,7 +158,9 @@
             </section>
 
             <!-- 페이지네이션 -->
-            <nav class="board_pagination" th:if="${boards.totalPages > 0}">
+            <nav class="board_pagination"
+                 id="boardPagination"
+                 th:if="${boards.totalPages > 0}">
 
                 <a th:if="${boards.startPage > 1}"
                    th:href="@{/projects/{projectId}/boards(
