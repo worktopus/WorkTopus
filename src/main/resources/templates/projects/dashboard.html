@@ -2,7 +2,7 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Worktopus Dashboard</title>
+    <title>Worktopus | Dashboard</title>
 
     <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
@@ -41,9 +41,13 @@
                             <p class="assignment-overlay__user">
                                 <strong th:text="${dashboard.userName}">이름</strong>
                                 <br>
-                                <!-- <span th:text="${dashboard.userPosition ?: '담당 미설정'}">
-                                    담당
-                                </span> -->
+                                <span class="member-role"
+                                   th:text="${dashboard.assignedRole != null
+                                   and !#strings.isEmpty(dashboard.assignedRole)
+                                   ? dashboard.assignedRole
+                                   : '담당 역할 미지정'}">
+                                    백엔드 개발
+                                </span>
                             </p>
                         </div>
 
@@ -110,7 +114,8 @@
             </section>
 
             <!-- 작업 카드 + 차트 -->
-            <section class="dashboard__summary">
+            <section class="dashboard__summary"
+                     th:data-url="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}">
 
                 <article class="task-card">
                     <div class="task-card__title">
@@ -196,7 +201,8 @@
             </section>
 
             <!-- 2주 캘린더 -->
-            <section class="calendar-card">
+            <section class="calendar-card"
+                     th:data-url="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}">
                 <div class="calendar-card__header">
                     <div class="calendar-card__nav">
                         <button type="button">‹</button>
@@ -241,23 +247,5 @@
 <script th:src="@{/js/sidebar.js}"></script>
 <script src="/js/header.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-
-<!-- 프로젝트 -->
-<script src="/js/chat/project.js"></script>
-
-<!-- 채팅 -->
-<script src="/js/chat/websocket.js"></script>
-<script src="/js/chat/member.js"></script>
-<script src="/js/chat/groupChat.js"></script>
-<script src="/js/chat/privateChat.js"></script>
-<script src="/js/chat/history.js"></script>
-<script src="/js/chat/chatList.js"></script>
-<script src="/js/chat/chat.js"></script>
-
-<!-- AI 회의요약 -->
-<script src="/js/chat/meetingSummary.js"></script>
-<script src="/js/chat/meetingHistory.js"></script>
 </body>
 </html>

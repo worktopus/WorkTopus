@@ -14,38 +14,29 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class WorkspaceManageApiController {
-
     private final WorkspaceManageService workspaceManageService;
 
-    /**
-     * 4-1 일반 관리 설정 데이터 저장 및 이미지 업로드 API
-     */
+    /**4-1 일반 관리 설정 데이터 저장 및 이미지 업로드 API */
     @PostMapping("/api/manage/{workspaceId}/general-update")
     public ResponseEntity<?> updateGeneralSettings(
             @PathVariable("workspaceId") Long workspaceId,
             @ModelAttribute WorkspaceGeneralUpdateDto dto) {
         try {
-            // [디버깅 로그] 프론트에서 데이터가 정상적으로 넘어오는지 체크
             System.out.println("=========================================");
             System.out.println("▶ [API 요청 수신] Workspace ID : " + workspaceId);
             System.out.println("▶ [수신 데이터] 변경할 이름 : " + (dto != null ? dto.getWorkspaceName() : "null"));
             System.out.println("=========================================");
-
-            Long currentUserId = 1L; // 임시 목업 아이디 고정값 유지
+            Long currentUserId = 1L;
             workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
-
             return ResponseEntity.ok().body(Map.of("message", "설정이 성공적으로 저장되었습니다."));
         } catch (Exception e) {
-            // 서버 콘솔창에 빨간색으로 진짜 에러 이유를 강제로 출력하게 만듭니다.
             System.err.println("❌ [설정 저장 실패 서버 에러 로그]");
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /**
-     * 4-1 워크스페이스 전체 완전 삭제 API
-     */
+    /** 4-1 워크스페이스 전체 완전 삭제 API*/
     @DeleteMapping("/api/manage/{workspaceId}")
     public ResponseEntity<?> deleteWorkspace(@PathVariable("workspaceId") Long workspaceId) {
         try {
@@ -57,9 +48,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**
-     * 4-2-1 기존 비동기 JSON 수신용 초대 API 주소
-     */
+    /**4-2-1 기존 비동기 JSON 수신용 초대 API 주소*/
     @PostMapping("/api/manage/invite")
     public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {
         try {
@@ -71,25 +60,19 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**
-     * 일반 HTML 폼 전송 방식 초대 기능
-     */
+    /**일반 HTML 폼 전송 방식 초대 기능*/
     @PostMapping("/project/manage/invite/send")
     public ResponseEntity<?> handleFormSubmitInvite(
             @RequestParam(value = "emails", required = false) List<String> emails) {
         try {
             Long currentUserId = 1L;
-
             if (emails == null || emails.isEmpty()) {
                 throw new IllegalArgumentException("입력된 이메일 데이터가 전송되지 않았습니다.");
             }
-
             WorkspaceInviteRequestDto dto = new WorkspaceInviteRequestDto();
-            dto.setWorkspaceId(45L); // 현재 화면 주소에 맞춤형 연동
+            dto.setWorkspaceId(45L);
             dto.setEmails(emails);
-
             workspaceManageService.inviteTeamMembers(dto, currentUserId);
-
             return ResponseEntity.ok().body(
                     "<div style='padding: 40px; text-align: center; font-family: sans-serif; line-height: 1.6;'>" +
                             "   <h2 style='color: #28a745; margin-bottom: 10px;'>🎉 구글 이메일 초대장 발송 완료!</h2>" +
@@ -107,10 +90,7 @@ public class WorkspaceManageApiController {
             );
         }
     }
-
-    /**
-     * 4-2. 팀원 직급(역할) 비동기 수정 API
-     */
+    /**4-2. 팀원 직급(역할) 비동기 수정 API*/
     @PostMapping("/api/manage/member/role-update")
     public ResponseEntity<?> updateMemberRole(@RequestBody com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto dto) {
         try {
@@ -121,9 +101,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**
-     * 4-2-2. 팀원 워크스페이스 제외(추방) 비동기 API
-     */
+    /** 4-2-2. 팀원 워크스페이스 제외(추방) 비동기 API*/
     @DeleteMapping("/api/manage/member/{memberId}")
     public ResponseEntity<?> kickMember(@PathVariable("memberId") Long memberId) {
         try {
@@ -134,15 +112,59 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**
-     * 자바스크립트 렌더러용 실시간 팀원 목록 반환 API
-     */
+    /**자바스크립트 렌더러용 실시간 팀원 목록 반환 API*/
     @GetMapping("/api/manage/{workspaceId}/members-data")
-    public ResponseEntity getMembersJsonData(
+    public ResponseEntity<?> getMembersJsonData(
             @PathVariable("workspaceId") Long workspaceId) {
-        List members = workspaceManageService.getWorkspaceMembers(workspaceId);
+        List<?> members = workspaceManageService.getWorkspaceMembers(workspaceId);
         return ResponseEntity.ok(members);
     }
 
+    /** [게시판관리 - 이름 비동기 수정 연동 API] */
+    @PostMapping("/api/manage/board/update-name")
+    public ResponseEntity<?> updateBoardName(@RequestBody Map<String, Object> payload) {
+        try {
+            Long boardId = Long.parseLong(payload.get("boardId").toString());
+            String boardName = payload.get("boardName").toString();
+
+            // [참고] 팀원들이 작성해둘 서비스 메서드 호출 구역 확장부
+            // workspaceManageService.updateBoardName(boardId, boardName);
+
+            return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** [게시판관리 - 안전 숨김 조치 및 후속 정책 연동 API] */
+    @DeleteMapping("/api/manage/board/{boardId}/hide-policy")
+    public ResponseEntity<?> hideBoardWithPolicy(
+            @PathVariable("boardId") Long boardId,
+            @RequestBody Map<String, String> payload) {
+        try {
+            String actionPolicy = payload.get("actionPolicy"); // "CHAT" 또는 "POPUP" 수집
+
+            // [참고] 팀원들이 작성해둘 숨김 처리 및 워크챗 발송/경고 플래그 DB 동기화 로직 확장부
+            // workspaceManageService.hideBoardWithPolicy(boardId, actionPolicy);
+
+            return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /** [추가 요구사항 - 담당 역할 실시간 비동기 자동 저장 API] */
+    @PostMapping("/api/manage/member/task-update")
+    public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
+        try {
+            Long memberId = Long.parseLong(payload.get("memberId").toString());
+            String assignedRole = payload.get("assignedRole").toString();
+
+            workspaceManageService.updateMemberTask(memberId, assignedRole);
+            return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
 }

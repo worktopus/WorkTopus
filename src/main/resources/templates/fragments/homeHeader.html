@@ -22,11 +22,24 @@
                 <span class="header__badge" id="header-notif-badge" style="display: none;">0</span>
             </button>
 
-            <!-- 채팅 -->
-            <button id="chatButton" class="header__icon" type="button" onclick="openChat()" aria-label="채팅 열기">
-                <span th:insert="~{fragments/icons :: chat}"></span>
-            </button>
+            <!-- 채팅 버튼 -->
+            <button id="chatButton"
+                    class="header__icon chat-button"
+                    type="button"
+                    onclick="openChat()"
+                    aria-label="채팅 열기">
 
+                <!-- 채팅 아이콘 -->
+                <span th:insert="~{fragments/icons :: chat}"></span>
+
+                <!-- 전체 안 읽은 메시지 숫자 -->
+                <span class="header__badge chat-unread-badge"
+                      aria-label="안 읽은 메시지"
+                      style="display: none;">
+                    0
+                </span>
+
+            </button>
             <!-- 메모 -->
             <button class="header__icon" id="header-memo-btn" onclick="toggleTodoModal(event)">
                 <span th:replace="~{fragments/icons :: memo}"></span>
@@ -176,7 +189,21 @@
     </div>
 
               <!------------------------script------------------------->
+    <!-- 2026.07.21 승민(추가) -->
+    <!-- 실제 로그인 사용자 정보를 채팅 JavaScript에 전달 -->
+    <script th:inline="javascript">
+        window.loginUser = {
+            userNum: /*[[${user != null ? user.userNum : null}]]*/ null,
+            userId: /*[[${user != null ? user.userId : ''}]]*/ "",
+            name: /*[[${user != null ? user.name : ''}]]*/ ""
+        };
 
+        console.log(
+            "채팅 로그인 사용자:",
+            window.loginUser
+        );
+    </script>
+    <!-- 2026.07.21 승민(추가) -->
     <script th:src="@{/js/homeHeader.js}"></script>
 
     <!-- notification 추가 -->

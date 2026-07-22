@@ -97,6 +97,18 @@
 
         clearReconnectTimer();
 
+        /*
+         * 이전 연결이 끊어진 뒤 구독 객체만 남아 있으면
+         * 새 연결에서도 이미 구독 중인 것으로 잘못 판단할 수 있습니다.
+         *
+         * 새 연결을 만들기 전에 이전 연결과 구독 상태를
+         * 모두 초기화합니다.
+         *
+         * pendingRoomId는 지우지 않으므로 연결 성공 후
+         * 마지막으로 선택한 채팅방을 다시 구독합니다.
+         */
+        cleanupConnection();
+
         const socket =
             new SockJS(
                 SOCKET_ENDPOINT
@@ -104,6 +116,16 @@
 
         stompClient =
             Stomp.over(socket);
+
+        /*
+         * 연결이 끊어진 상태를 빠르게 감지하기 위한
+         * STOMP heartbeat 설정입니다.
+         */
+        stompClient.heartbeat.outgoing =
+            10000;
+
+        stompClient.heartbeat.incoming =
+            10000;
 
         /*
         STOMP 디버그 로그를 끕니다.

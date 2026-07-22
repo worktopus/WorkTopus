@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>프로젝트 관리 | WorkTopus Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-custom.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-project.css}">
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <th:block th:replace="~{admin/admin-sidebar :: sidebar}"></th:block>
+
+    <main class="admin-main">
+
+        <header class="admin-header">
+            <div>
+                <h1>프로젝트 관리</h1>
+                <p>서비스에 생성된 프로젝트를 조회하고 관리합니다.</p>
+            </div>
+
+            <div class="admin-header__actions">
+
+                <button
+                        class="admin-user"
+                        type="button"
+                        id="adminUserBtn">
+
+                    <span>
+                    관리자
+                    </span>
+
+                    <span class="admin-user__arrow">
+                        ▼
+                    </span>
+
+                </button>
+
+                <div class="admin-dropdown" id="adminDropdown">
+
+                    <a th:href="@{/projects}" class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">↗</span>
+                        <span>사용자 화면</span>
+                    </a>
+
+                    <a th:href="@{/user/mypage}" class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">⚙</span>
+                        <span>내 정보</span>
+                    </a>
+
+                    <div class="admin-dropdown__divider"></div>
+                    <form th:action="@{/logout}" method="post">
+                        <button
+                                type="submit"
+                                class="admin-dropdown__item admin-dropdown__item--danger">
+                            <span class="admin-dropdown__icon">↩</span>
+                            <span>로그아웃</span>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+        </header>
+
+        <section class="project-summary">
+
+            <article class="project-summary__card">
+
+                <span class="project-summary__label">
+                    전체 프로젝트
+                </span>
+
+                <strong class="project-summary__value"
+                        th:text="${totalProjectCount}">
+                    0
+                </strong>
+
+                <p class="project-summary__description">
+                    누적 생성 프로젝트
+                </p>
+
+            </article>
+
+        </section>
+
+        <section class="project-table-card">
+
+            <div class="project-table-card__header">
+
+                <div>
+                    <h2>프로젝트 목록</h2>
+
+                    <p>
+                        총
+                        <span th:text="${projectPage.totalElements}">0</span>개의
+                        프로젝트가 조회되었습니다.
+                    </p>
+                </div>
+
+                <form th:action="@{/admin/projects}"
+                      method="get"
+                      class="project-search">
+
+                    <select name="searchType"
+                            class="project-search__select">
+
+                        <option value="name"
+                                th:selected="${searchType == 'name'}">
+                            프로젝트명
+                        </option>
+
+                        <option value="leader"
+                                th:selected="${searchType == 'leader'}">
+                            팀장명
+                        </option>
+
+                    </select>
+
+                    <div class="project-search__field">
+                    <input type="text"
+                           name="keyword"
+                           class="project-search__input"
+                           th:value="${keyword}"
+                           placeholder="검색어를 입력하세요">
+                    </div>
+
+                    <button type="submit"
+                            class="project-search__button">
+                        검색
+                    </button>
+
+                    <a th:if="${keyword != null and !#strings.isEmpty(keyword)}"
+                       th:href="@{/admin/projects}"
+                       class="project-search__reset">
+                        초기화
+                    </a>
+
+                </form>
+
+            </div>
+
+            <div class="project-table-wrap">
+
+                <table class="project-table">
+
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>프로젝트</th>
+                        <th>팀장</th>
+                        <th>참여 인원</th>
+                        <th>생성일</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <tr th:each="project, stat : ${projects}">
+
+                        <td th:text="${projectPage.totalElements
+                                - (projectPage.number * projectPage.size)
+                                - stat.index}">
+                            1
+                        </td>
+
+                        <td>
+                            <div class="project-name">
+
+                                <div class="project-name__icon"
+                                     th:text="${#strings.isEmpty(project.name)
+                                        ? 'P'
+                                        : #strings.substring(project.name, 0, 1)}">
+                                    P
+                                </div>
+
+                                <div class="project-name__info">
+
+                                    <strong th:text="${project.name}">
+                                        프로젝트명
+                                    </strong>
+
+                                    <span th:text="${#strings.isEmpty(project.description)
+                                        ? '프로젝트 설명이 없습니다.'
+                                        : project.description}">
+                                        프로젝트 설명
+                                    </span>
+
+                                </div>
+
+                            </div>
+                        </td>
+
+                        <td th:text="${project.ownerName}">
+                            팀장명
+                        </td>
+
+                        <td>
+                            <span class="project-member-count"
+                                  th:text="|${project.memberCount}명|">
+                                0명
+                            </span>
+                        </td>
+
+                        <td th:text="${#temporals.format(
+                                project.createdAt,
+                                'yyyy.MM.dd'
+                        )}">
+                            2026.07.02
+                        </td>
+
+                    </tr>
+
+                    <tr th:if="${projectPage.empty}">
+                        <td colspan="5"
+                            style="text-align: center; padding: 40px 0;">
+
+                            <span th:if="${keyword != null and !#strings.isEmpty(keyword)}">
+                                검색 결과가 없습니다.
+                            </span>
+
+                            <span th:unless="${keyword != null and !#strings.isEmpty(keyword)}">
+                                등록된 프로젝트가 없습니다.
+                            </span>
+
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <nav class="project-pagination"
+                 th:if="${projectPage.totalPages > 1}">
+
+                <a th:if="${!projectPage.first}"
+                   th:href="@{/admin/projects(
+                        page=${projectPage.number - 1},
+                        searchType=${searchType},
+                        keyword=${keyword}
+                   )}">
+                    이전
+                </a>
+
+                <span th:each="pageNumber :
+                        ${#numbers.sequence(0, projectPage.totalPages - 1)}">
+
+                    <a th:href="@{/admin/projects(
+                            page=${pageNumber},
+                            searchType=${searchType},
+                            keyword=${keyword}
+                       )}"
+                       th:text="${pageNumber + 1}"
+                       th:classappend="${pageNumber == projectPage.number}
+                            ? ' project-pagination__button--active'">
+                        1
+                    </a>
+
+                </span>
+
+                <a th:if="${!projectPage.last}"
+                   th:href="@{/admin/projects(
+                        page=${projectPage.number + 1},
+                        searchType=${searchType},
+                        keyword=${keyword}
+                   )}">
+                    다음
+                </a>
+
+            </nav>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script th:src="@{/js/admin/admin.js}"></script>
+
+</body>
+</html>

@@ -17,12 +17,15 @@ public record BoardDetailResponse(
         boolean notice,
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        List<FileResponse> files
+        List<FileResponse> files,
+        String writerAssignedRole
+
 ) {
 
     public static BoardDetailResponse from(
             Board board,
-            List<FileResponse> files
+            List<FileResponse> files,
+            String writerAssignedRole
     ) {
         return new BoardDetailResponse(
                 board.getId(),
@@ -36,7 +39,8 @@ public record BoardDetailResponse(
                 "Y".equals(board.getNoticeYn()),
                 board.getCreatedAt(),
                 board.getUpdatedAt(),
-                files
+                files,
+                writerAssignedRole
         );
     }
 }

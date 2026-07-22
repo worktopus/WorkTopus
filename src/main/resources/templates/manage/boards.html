@@ -1,86 +1,116 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://thymeleaf.org">
-<div th:fragment="workspaceBoards">
-    <div class="content-header">
-        <h3>📋 프로젝트 게시판 관리 및 통계</h3>
-        <p>게시판의 활성화 상태를 제어하고, 버튼을 클릭해 하단으로 글 목록을 펼쳐 확인합니다.</p>
-    </div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Worktopus - 게시판 관리</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/manage.css}">
+</head>
+<body>
+<div class="layout">
+    <!-- 1. 왼쪽 사이드바 영역 연동 -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
 
-    <!-- 미니멀 대시보드 데이터 통계 지표 카드 영역 -->
-    <div class="board-summary-cards" style="display: flex; gap: 16px; margin-top: 20px; margin-bottom: 24px;">
-        <div class="summary-card" style="flex: 1; padding: 16px; background: #f8f9fa; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-            <div style="font-size: 0.85rem; color: var(--text-sub); font-weight: 600;">📢 총 공지사항 수</div>
-            <div style="font-size: 1.5rem; font-weight: 700; margin: 8px 0; color: var(--primary);">4개</div>
-            <div style="font-size: 0.75rem; color: #6c757d;">최근 작성자: <span style="font-weight: 600; color: #333;">김여진</span> (2시간 전)</div>
-        </div>
-        <div class="summary-card" style="flex: 1; padding: 16px; background: #f8f9fa; border: 1px solid var(--border); border-radius: var(--radius-sm);">
-            <div style="font-size: 0.85rem; color: var(--text-sub); font-weight: 600;">💬 총 자유게시글 수</div>
-            <div style="font-size: 1.5rem; font-weight: 700; margin: 8px 0; color: #28a745;">32개</div>
-            <div style="font-size: 0.75rem; color: #6c757d;">최근 작성자: <span style="font-weight: 600; color: #333;">신승민</span> (10분 전)</div>
-        </div>
-    </div>
+    <!-- 2. 오른쪽 메인 콘텐츠 영역 -->
+    <div class="layout__content">
+        <!-- 공통 헤더 바 연결 -->
+        <div th:replace="~{fragments/header :: header}"></div>
 
-    <!-- 게시판 관리 테이블 인터페이스 (아코디언 토글형 구조) -->
-    <div class="board-management-wrapper" style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-            <tr style="border-bottom: 2px solid var(--border); color: var(--text-main); font-size: 0.9rem;">
-                <th style="padding: 14px 16px; font-weight: 600;">게시판 이름</th>
-                <th style="padding: 14px 16px; font-weight: 600;">생성일</th>
-                <th style="padding: 14px 16px; font-weight: 600; text-align: center;">활성화 상태</th>
-                <th style="padding: 14px 16px; font-weight: 600; text-align: center;">세부 기능</th>
-            </tr>
-            </thead>
-            <tbody>
+        <!-- 실제 관리 폼 메인 페이지 -->
+        <main class="manage-container" style="padding: 40px; width: 100%;">
+            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
+                프로젝트 관리 (팀장 전용)
+            </h1>
 
-            <!-- 공지사항 원본 Row -->
-            <tr style="border-bottom: 1px solid var(--border);" class="board-item-row" id="board-row-NOTICE">
-                <td style="padding: 16px;"><span style="font-weight: 600; color: var(--text-main);">📢 공지사항</span></td>
-                <td style="padding: 16px; color: var(--text-sub); font-size: 0.9rem;">2026-07-01</td>
-                <td style="padding: 16px; text-align: center;">
-                    <label class="switch">
-                        <input type="checkbox" class="board-toggle-switch" data-board-id="1" checked>
-                        <span class="slider round"></span>
-                    </label>
-                </td>
-                <td style="padding: 16px; text-align: center;">
-                    <button type="button" class="btn btn-secondary-outline inspect-board-btn" data-board-type="NOTICE" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">글 목록 열기</button>
-                </td>
-            </tr>
-            <!-- 📢 공지사항 클릭 시 아래로 열릴 히든 아코디언 컨테이너 구역 -->
-            <tr id="details-NOTICE" style="display: none; background-color: #fafafa;">
-                <td colspan="4" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
-                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-                        <!-- JS가 실시간으로 이곳에 글 목록 피드를 깨끗하게 채워 넣습니다 -->
+            <!-- 상단 탭 메뉴 바 -->
+            <div class="manage-tabs">
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+            </div>
+
+            <!-- [탭 4] 프로젝트 게시판 관리 구역 -->
+            <div id="board-tab" class="tab-content active" style="display: block; margin-top: 24px;">
+                <div th:fragment="workspaceBoards">
+                    <div class="content-header" style="margin-bottom: 20px;">
+                        <h3>📊 게시판 관리 및 통계</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-sub);">프로젝트 내 게시판의 생성, 수정, 삭제 및 통계를 관리합니다.</p>
                     </div>
-                </td>
-            </tr>
 
-            <!-- 자유게시판 원본 Row -->
-            <tr style="border-bottom: 1px solid var(--border);" class="board-item-row" id="board-row-FREE">
-                <td style="padding: 16px;"><span style="font-weight: 600; color: var(--text-main);">💬 자유게시판</span></td>
-                <td style="padding: 16px; color: var(--text-sub); font-size: 0.9rem;">2026-07-01</td>
-                <td style="padding: 16px; text-align: center;">
-                    <label class="switch">
-                        <input type="checkbox" class="board-toggle-switch" data-board-id="2" checked>
-                        <span class="slider round"></span>
-                    </label>
-                </td>
-                <td style="padding: 16px; text-align: center;">
-                    <button type="button" class="btn btn-secondary-outline inspect-board-btn" data-board-type="FREE" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">글 목록 열기</button>
-                </td>
-            </tr>
-            <!-- 💬 자유게시판 클릭 시 아래로 열릴 히든 아코디언 컨테이너 구역 -->
-            <tr id="details-FREE" style="display: none; background-color: #fafafa;">
-                <td colspan="4" style="padding: 20px 24px; border-bottom: 1px solid var(--border);">
-                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 10px;">
-                        <!-- JS가 실시간으로 이곳에 글 목록 피드를 깨끗하게 채워 넣습니다 -->
+                    <!-- 간이 통계 대시보드 구역 -->
+                    <div class="board-stats-wrapper" style="display: flex; gap: 20px; margin-bottom: 24px;">
+                        <div class="stat-card" style="flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
+                            <h4 style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px;">전체 게시글 수</h4>
+                            <p style="font-size: 1.8rem; font-weight: 700; color: var(--primary);" id="totalPostsCount">0</p>
+                        </div>
+                        <div class="stat-card" style="flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
+                            <h4 style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px;">오늘 방문자 수</h4>
+                            <p style="font-size: 1.8rem; font-weight: 700; color: #28a745;" id="todayViewsCount">0</p>
+                        </div>
                     </div>
-                </td>
-            </tr>
 
-            </tbody>
-        </table>
+                    <!-- 게시판 목록 및 제어 테이블 -->
+                    <div class="boards-table-wrapper" style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                            <tr style="border-bottom: 2px solid var(--border); color: var(--text-sub); font-size: 0.9rem;">
+                                <th style="padding: 12px 8px; width: 45%;">게시판 이름</th>
+                                <th style="padding: 12px 8px; width: 25%;">생성자</th>
+                                <th style="padding: 12px 8px; width: 30%; text-align: center;">관리</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- [공지사항 로우] -->
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 12px 8px; font-weight: 600;" class="board-name-text">공지사항</td>
+                                <td style="padding: 12px 8px;">팀장</td>
+                                <td style="padding: 12px 8px; text-align: center;">
+                                    <button type="button" class="btn btn-edit" data-board-id="1" style="background: var(--border); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">수정</button>
+                                    <button type="button" class="btn btn-delete-board" data-board-id="1" style="background: var(--danger); color:#fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">삭제</button>
+                                    <button type="button" class="inspect-board-btn" data-board-type="NOTICE" style="background:transparent; color:var(--text-sub); border:1px solid var(--border); padding:6px 12px; border-radius:4px; cursor:pointer; margin-left:5px;">글 목록 열기</button>
+                                </td>
+                            </tr>
+                            <tr id="details-NOTICE" style="display: none; background: #fafbfc;">
+                                <td colspan="3" style="padding: 16px;">
+                                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                                </td>
+                            </tr>
+
+                            <!-- [자유게시판 로우] -->
+                            <tr style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 12px 8px; font-weight: 600;" class="board-name-text">자유게시판</td>
+                                <td style="padding: 12px 8px;">팀원</td>
+                                <td style="padding: 12px 8px; text-align: center;">
+                                    <button type="button" class="btn btn-edit" data-board-id="2" style="background: var(--border); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">수정</button>
+                                    <button type="button" class="btn btn-delete-board" data-board-id="2" style="background: var(--danger); color:#fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">삭제</button>
+                                    <button type="button" class="inspect-board-btn" data-board-type="FREE" style="background:transparent; color:var(--text-sub); border:1px solid var(--border); padding:6px 12px; border-radius:4px; cursor:pointer; margin-left:5px;">글 목록 열기</button>
+                                </td>
+                            </tr>
+                            <tr id="details-FREE" style="display: none; background: #fafbfc;">
+                                <td colspan="3" style="padding: 16px;">
+                                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                                </td>
+                            </tr>
+
+                            <tr th:if="${boards != null && #lists.isEmpty(boards)}" style="display: none;">
+                                <td colspan="3" style="text-align: center; padding: 40px; color: var(--text-sub);">생성된 게시판이 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
+
+<script th:src="@{/js/manage/project-manage.js}"></script>
+<script th:src="@{/js/manage/manage-board.js}"></script>
+</body>
 </html>

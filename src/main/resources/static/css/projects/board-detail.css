@@ -610,3 +610,26 @@
         gap: 6px;
     }
 }
+/* =========================
+   16. Tag
+========================= */
+
+.board-tag {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 18px;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-size: 13px;
+    font-weight: 600;
+
+    margin-right: 5px;
+}

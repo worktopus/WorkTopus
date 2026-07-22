@@ -1,50 +1,93 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://thymeleaf.org">
-<!-- th:fragment 선언을 포함한 단독 테이블 컴포넌트입니다 -->
-<div th:fragment="workspaceMembers">
-    <div class="content-header">
-        <h3 style="color: var(--text-main);">👥 팀원 및 역할 관리</h3>
-        <p style="font-size: 0.85rem; color: var(--text-sub);">현재 참여 중인 팀원의 목록을 확인하고 역할을 제어합니다.</p>
-    </div>
-    <div class="member-table-wrapper" style="overflow-x: auto; margin-top: 12px;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-            <thead>
-            <tr style="border-bottom: 2px solid var(--border); color: var(--text-main);">
-                <th style="padding: 14px 16px; font-weight: 600;">팀원 정보</th>
-                <th style="padding: 14px 16px; font-weight: 600;">현재 직급</th>
-                <th style="padding: 14px 16px; font-weight: 600;">직급 변경</th>
-                <th style="padding: 14px 16px; font-weight: 600;">담당 역할</th>
-                <th style="padding: 14px 16px; font-weight: 600; text-align: center;">제외</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:if="${#lists.isEmpty(members)}">
-                <td colspan="5" style="padding: 40px; text-align: center; color: var(--text-sub);">팀원이 없습니다.</td>
-            </tr>
-            <tr th:each="member : ${members}" style="border-bottom: 1px solid var(--border);">
-                <td style="padding: 16px;">
-                    <div style="font-weight: 600;" th:text="${member.userName}">신승민</div>
-                    <div style="font-size: 0.8rem; color: var(--text-sub);" th:text="${member.userEmail}">email</div>
-                </td>
-                <td style="padding: 16px;">
-                    <span th:text="${member.projectRole}" style="background-color: var(--primary-soft); color: var(--primary); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 700;">직급</span>
-                </td>
-                <td style="padding: 16px;">
-                    <select class="form-input role-select" th:data-id="${member.id}" th:disabled="${member.projectRole == 'LEADER'}" style="padding: 6px 12px; font-size: 0.85rem;">
-                        <option value="LEADER" th:selected="${member.projectRole == 'LEADER'}">팀장</option>
-                        <option value="SUB_LEADER" th:selected="${member.projectRole == 'SUB_LEADER'}">부팀장</option>
-                        <option value="MEMBER" th:selected="${member.projectRole == 'MEMBER'}">팀원</option>
-                    </select>
-                </td>
-                <td style="padding: 16px;">
-                    <input type="text" class="form-input task-input" th:data-id="${member.id}" th:value="${member.assignedRole}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 80%;">
-                </td>
-                <td style="padding: 16px; text-align: center;">
-                    <button class="btn btn-danger-outline kick-btn" th:data-id="${member.id}" th:style="${member.projectRole == 'LEADER'} ? 'display:none;' : ''" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">제외</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Worktopus - 팀원 관리</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/manage.css}">
+</head>
+<body>
+<div class="layout">
+    <!-- [공통 레이아웃 - 좌측 사이드바 조립] -->
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="layout__content">
+        <!-- [공통 레이아웃 - 상단 헤더 바 조립] -->
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <main class="manage-container" style="padding: 40px; width: 100%;">
+            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
+                프로젝트 관리 (팀장 전용)
+            </h1>
+
+            <!-- [상단 탭 바 - 동적 ID 경로 고정] -->
+            <div class="manage-tabs">
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+            </div>
+
+            <!-- [탭 2] 팀원 및 역할 관리 구역 -->
+            <div id="member-tab" class="tab-content active" style="display: block; margin-top: 24px;">
+                <div th:fragment="workspaceMembers">
+                    <div class="content-header" style="margin-bottom: 20px;">
+                        <h3>👥 팀원 및 역할 관리</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-sub);">현재 참여 중인 팀원의 목록을 확인하고 역할을 제어합니다.</p>
+                    </div>
+
+                    <!-- [팀원 제어 테이블 대형 매프레임] -->
+                    <div class="members-table-wrapper" style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                            <tr style="border-bottom: 2px solid var(--border); color: var(--text-sub); font-size: 0.9rem;">
+                                <!-- [변경/삭제 완료] 팀원 정보->팀원이름 교정 및 현재 직급 열 전면 삭제 -->
+                                <th style="padding: 12px 8px; width: 40%;">팀원 이름</th>
+                                <th style="padding: 12px 8px; width: 25%;">직급 변경</th>
+                                <th style="padding: 12px 8px; width: 25%;">담당 역할</th>
+                                <th style="padding: 12px 8px; width: 10%; text-align: center;">제외</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <!-- [참고] 오라클 DB 유저 데이터셋 루프 - 실시간 자바스크립트 엔진(manage-member.js)이 제어합니다 -->
+                            <tr th:each="member : ${members}" style="border-bottom: 1px solid var(--border);">
+                                <td style="padding: 12px 8px;">
+                                    <div style="font-weight: 600;" th:text="${member.userName}">홍길동</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-sub);" th:text="${member.userEmail}">example@gmail.com</div>
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <select class="form-input role-select" th:data-id="${member.id}" th:disabled="${member.projectRole == 'LEADER'}" style="padding: 6px 12px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px;">
+                                        <option value="LEADER" th:selected="${member.projectRole == 'LEADER'}">팀장</option>
+                                        <option value="SUB_LEADER" th:selected="${member.projectRole == 'SUB_LEADER'}">부팀장</option>
+                                        <option value="MEMBER" th:selected="${member.projectRole == 'MEMBER'}">팀원</option>
+                                    </select>
+                                </td>
+                                <td style="padding: 12px 8px;">
+                                    <input type="text" class="form-input task-input" th:data-id="${member.id}" th:value="${member.assignedRole}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 80%; border: 1px solid var(--border); border-radius: 4px;">
+                                </td>
+                                <td style="padding: 12px 8px; text-align: center;">
+                                    <button class="btn btn-danger-outline kick-btn" th:data-id="${member.id}" th:if="${member.projectRole != 'LEADER'}" style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 4px;">제외</button>
+                                </td>
+                            </tr>
+                            <!-- [보완] 현재 기방에 바인딩된 목록이 아예 없을 때의 폴백 메시지 (컬럼수 4개로 조정) -->
+                            <tr th:if="${members == null || #lists.isEmpty(members)}" id="thymeleaf-empty-row">
+                                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-sub);">현재 참여 중인 팀원이 없습니다.</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
     </div>
 </div>
+
+<script th:src="@{/js/manage/project-manage.js}"></script>
+<script th:src="@{/js/manage/manage-member.js}"></script>
+</body>
 </html>

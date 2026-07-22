@@ -8,10 +8,9 @@ public interface CommentService {
 
     List<CommentResponse> findAll(Long boardId, String loginUserid);
 
-    void create(Long boardId, String userId, String content);
+    void create(Long projectId, Long boardId, String userId, String content);
 
-    void delete(Long boardId, Long commentId, String userId);
+    void delete(Long projectId, Long boardId, Long commentId, String userId);
 
-    void update(Long boardId, Long commentId, String userId, String content);
-
+    void update(Long projectId, Long boardId, Long commentId, String userId, String content);
 }

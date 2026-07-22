@@ -5,6 +5,7 @@ import com.example.WorkTopus.projects.entity.BoardFile;
 import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
 import com.example.WorkTopus.projects.service.FileStorageService;
+import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ContentDisposition;
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.InvalidMediaTypeException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,12 +31,20 @@ public class BoardFileController {
     private final BoardFileRepository boardFileRepository;
     private final BoardRepository boardRepository;
     private final FileStorageService fileStorageService;
+    private final ProjectBoardAccessService projectBoardAccessService;
 
     @GetMapping("/{fileId}/download")
     public ResponseEntity<Resource> download(
             @PathVariable Long projectId,
-            @PathVariable Long fileId
+            @PathVariable Long fileId,
+            Authentication authentication
     ) {
+
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         BoardFile boardFile = boardFileRepository.findById(fileId)
                 .filter(file -> "N".equals(file.getDeletedYn()))
                 .orElseThrow(this::fileNotFound);

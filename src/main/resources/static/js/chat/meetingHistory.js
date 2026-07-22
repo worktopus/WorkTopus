@@ -779,7 +779,8 @@
 
             app.meetingSummary
                 .showStoredSummary(
-                    summary
+                    summary,
+                    id
                 );
 
 

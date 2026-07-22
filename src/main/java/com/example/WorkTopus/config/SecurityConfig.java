@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 public class SecurityConfig {
 
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomLoginSuccessHandler customLoginSuccessHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,9 +33,9 @@ public class SecurityConfig {
                                 "/css/**", "/images/**", "/js/**", "/error/**",
                                 "/login", "/home/**"
                         ).permitAll()       // 로그인 없이 사용가능
-                        // .requestMatchers(
-                        //        "/admin/**", "/vupdate", "/vdelete"
-                        // ).hasRole("ADMIN")  // 추후 관리자페이지
+                         .requestMatchers(
+                                "/admin/**"
+                        ).hasRole("ADMIN")  // 추후 관리자페이지
                         .requestMatchers(
                                 "/projects/**", "/user/**", "/api/**"
                         ).authenticated()   // 로그인이 필요
@@ -43,7 +44,7 @@ public class SecurityConfig {
                 .formLogin(form->form
                                 .loginPage("/login")
                                 .loginProcessingUrl("/login")  // 생략가능
-                                .defaultSuccessUrl("/projects", true)
+                                .successHandler(customLoginSuccessHandler)
                                 .failureUrl("/login?error")
                                 .permitAll() // 로그인 페이지는 누구나 접근가능하다
                         // 로그인화면, 로그인처리 url, 로그인 실패 url 은 실패없이 접근가능 해야함
@@ -53,10 +54,7 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
                         )
-                        .successHandler((request, response, authentication) -> {
-                            System.out.println("OAuth2 로그인 성공 = " + authentication.getName());
-                            response.sendRedirect("/projects");
-                        })
+                        .successHandler(customLoginSuccessHandler)
                         .failureHandler((request, response, exception) -> {
                             System.out.println("OAuth2 로그인 실패");
                             exception.printStackTrace();

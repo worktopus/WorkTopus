@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>게시글 작성 | WorkTopus</title>
+    <title>WorkTopus | Write</title>
 
     <link rel="stylesheet" th:href="@{/css/chat.css}">
     <link rel="stylesheet" th:href="@{/css/common.css}">
@@ -38,12 +38,13 @@
             </div>
 
 
-        <!-- 작성 폼 -->
-        <form class="board_write_form"
-              th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
-              method="post"
-              enctype="multipart/form-data">
-            <input type="hidden" name="notice" value="false">
+        <!-- 작성 폼 (2026.07.20 승민 수정)-->
+            <form class="board_write_form"
+                  th:action="@{/projects/{projectId}/boards(projectId=${projectId})}"
+                  th:attr="data-project-id=${projectId}"
+                  method="post"
+                  enctype="multipart/form-data">
+
 
             <!-- 기본 정보 -->
             <div class="board_write_card">
@@ -58,11 +59,15 @@
                                 name="category"
                                 class="board_write_select"
                                 required>
-                            <option value="">게시판을 선택하세요</option>
-                            <option value="NOTICE">공지사항</option>
-                            <option value="FREE">자유게시판</option>
+
+                            <option value="">전체 카테고리</option>
+                            <option value="NOTICE">공지</option>
+                            <option value="MEETING">회의</option>
+                            <option value="WORK">업무</option>
+                            <option value="RESOURCE">자료</option>
                             <option value="IDEA">아이디어</option>
-                            <option value="QUESTION">질문</option>
+                            <option value="ETC">기타</option>
+
                         </select>
                     </div>
 
@@ -300,23 +305,5 @@
 <script th:src="@{/js/sidebar.js}"></script>
 <script src="/js/header.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
-
-<!-- 프로젝트 -->
-<script src="/js/chat/project.js"></script>
-
-<!-- 채팅 -->
-<script src="/js/chat/websocket.js"></script>
-<script src="/js/chat/member.js"></script>
-<script src="/js/chat/groupChat.js"></script>
-<script src="/js/chat/privateChat.js"></script>
-<script src="/js/chat/history.js"></script>
-<script src="/js/chat/chatList.js"></script>
-<script src="/js/chat/chat.js"></script>
-
-<!-- AI 회의요약 -->
-<script src="/js/chat/meetingSummary.js"></script>
-<script src="/js/chat/meetingHistory.js"></script></body>
 </body>
 </html>

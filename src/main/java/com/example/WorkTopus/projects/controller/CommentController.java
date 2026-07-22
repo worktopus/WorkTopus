@@ -2,6 +2,7 @@ package com.example.WorkTopus.projects.controller;
 
 import com.example.WorkTopus.projects.dto.request.CommentCreateRequest;
 import com.example.WorkTopus.projects.service.CommentService;
+import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
 
     private final CommentService commentService;
+    private final ProjectBoardAccessService projectBoardAccessService;
 
     @PostMapping
     public String createComment(
@@ -22,7 +24,13 @@ public class CommentController {
             @Valid @ModelAttribute CommentCreateRequest request,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         commentService.create(
+                projectId,
                 boardId,
                 authentication.getName(),
                 request.getContent()
@@ -39,7 +47,13 @@ public class CommentController {
             @PathVariable Long commentId,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         commentService.delete(
+                projectId,
                 boardId,
                 commentId,
                 authentication.getName()
@@ -57,8 +71,13 @@ public class CommentController {
             @RequestParam String content,
             Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
 
         commentService.update(
+                projectId,
                 boardId,
                 commentId,
                 authentication.getName(),

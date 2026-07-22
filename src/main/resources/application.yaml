@@ -19,19 +19,19 @@ spring:
     username: ADMIN
     password: 'WorkTopus1234!'
 
-  # oracle 설정 (docker)
-#  datasource:
-#    driver-class-name: oracle.jdbc.OracleDriver
-#    url: jdbc:oracle:thin:@localhost:11521/FREEPDB1
-#    username: ADMIN
-#    password: 'WorkTopus1234!'
+    # oracle 설정 (docker)
+    #  datasource:
+    #    driver-class-name: oracle.jdbc.OracleDriver
+    #    url: jdbc:oracle:thin:@localhost:11521/FREEPDB1
+    #    username: ADMIN
+    #    password: 'WorkTopus1234!'
 
-# postgresql 설정 (docker)
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/worktopus_db?stringtype=unspecified
-#    username: ADMIN
-#    password: 'WorkTopus1234!'
+    # postgresql 설정 (docker)
+    #  datasource:
+    #    driver-class-name: org.postgresql.Driver
+    #    url: jdbc:postgresql://localhost:5432/worktopus_db?stringtype=unspecified
+    #    username: ADMIN
+    #    password: 'WorkTopus1234!'
 
     hikari:
       maximum-pool-size: 2
@@ -42,7 +42,7 @@ spring:
 
   jpa:
     database-platform: org.hibernate.dialect.OracleDialect
-#    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    #    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
     hibernate:
       ddl-auto: update
@@ -71,6 +71,9 @@ spring:
           starttls:
             enable: true
             required: true
+          ssl:
+            trust: smtp.gmail.com  # <--- 팀원 추가
+
 
 
   security:

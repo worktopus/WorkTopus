@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<body>
+
+<aside class="admin-sidebar"
+       th:fragment="sidebar">
+
+    <div class="admin-brand">
+        <strong>WorkTopus</strong>
+        <span>Platform Admin</span>
+    </div>
+
+    <nav class="admin-nav">
+
+        <a class="admin-nav__link"
+           th:href="@{/admin/dashboard}">
+            대시보드
+        </a>
+
+        <a class="admin-nav__link"
+           th:href="@{/admin/users}">
+            회원 관리
+        </a>
+
+        <a class="admin-nav__link"
+           th:href="@{/admin/projects}">
+            프로젝트 관리
+        </a>
+
+        <a class="admin-nav__link"
+           th:href="@{/admin/reports}">
+            문의 / 신고
+        </a>
+
+    </nav>
+
+</aside>
+
+</body>
+</html>

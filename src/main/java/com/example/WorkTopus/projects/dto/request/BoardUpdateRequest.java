@@ -20,8 +20,6 @@ public record BoardUpdateRequest(
         @Size(max = 200)
         String tag,
 
-        boolean notice,
-
         List<Long> deleteFileIds,
 
         List<MultipartFile> files
@@ -33,7 +31,6 @@ public record BoardUpdateRequest(
                 content,
                 category,
                 tag != null ? tag : this.tag,
-                notice,
                 deleteFileIds,
                 files
         );

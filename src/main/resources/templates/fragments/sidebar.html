@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://thymeleaf.org">
 
 <body>
 
@@ -71,8 +71,8 @@
                 </li>
 
                 <li class="sidebar__item">
-                    <!-- 주소 경로를 /manage/프로젝트ID 구조로 깔끔하게 변경합니다 -->
-                    <a th:href="@{/manage/{id}(id=${projectId})}" class="sidebar__link">
+                    <!-- [수정] /manage/ 앞부분에 /projects 를 추가하여 매핑 주소를 일치시킵니다 -->
+                    <a th:href="@{/projects/manage/{id}(id=${projectId})}" class="sidebar__link">
                         <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
                         </span>
                         <span class="sidebar__text">설정</span>
@@ -91,11 +91,11 @@
             </a>
 
             <span class="sidebar__divider"></span>
+
             <form th:action="@{/logout}" method="post">
                 <button type="submit"
                         class="sidebar__link sidebar__logout"
                         aria-label="로그아웃">
-
                     <span class="sidebar__icon"
                           th:insert="~{fragments/icons :: logout}">
                     </span>
@@ -103,7 +103,9 @@
             </form>
 
         </div>
+
     </aside>
 </th:block>
+
 </body>
 </html>

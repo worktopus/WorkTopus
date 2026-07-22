@@ -10,9 +10,9 @@
 
     window.loginUser =
         window.loginUser || {
-            userNum: 1,
-            userId: "testuser",
-            name: "신승민"
+            userNum: null,
+            userId: "",
+            name: ""
         };
 
     app.state.loginUser =
@@ -61,6 +61,43 @@
 
 
     /* =====================================================
+       프로젝트·팀원 자동 갱신 설정
+    ===================================================== */
+
+    /*
+     * 채팅창이 열린 상태에서 프로젝트와 팀원 정보를
+     * 다시 확인하는 간격입니다.
+     *
+     * 30000ms = 30초
+     */
+    const CHAT_DATA_REFRESH_INTERVAL_MS =
+        30000;
+
+
+    /*
+     * 자동 갱신 타이머 ID
+     */
+    let chatDataRefreshTimer =
+        null;
+
+
+    /*
+     * 이전 갱신 요청이 끝나기 전에
+     * 같은 요청이 중복 실행되는 것을 막습니다.
+     */
+    let chatDataRefreshInProgress =
+        false;
+
+
+    /*
+     * focus와 visibilitychange 이벤트를
+     * 한 번만 등록하기 위한 상태입니다.
+     */
+    let chatDataRefreshEventsBound =
+        false;
+
+
+    /* =====================================================
        채팅 초기화
     ===================================================== */
 
@@ -72,6 +109,13 @@
         app.state.initialized = true;
 
         bindChatEvents();
+
+        /*
+         * 다른 브라우저 탭이나 프로그램에서 돌아왔을 때
+         * 열린 채팅창의 프로젝트·팀원 정보를 다시 조회합니다.
+         */
+        bindChatDataRefreshEvents();
+
         syncLegacyVariables();
         updateMessageInputState();
 
@@ -109,6 +153,12 @@
             "block";
 
         /*
+         * 채팅창을 열 때 WebSocket 연결과
+         * 현재 채팅방 구독 상태를 다시 확인합니다.
+         */
+        ensureRealtimeConnection();
+
+        /*
          * 팝업을 열면 먼저 프로젝트 데이터를 조회합니다.
          */
         if (
@@ -118,6 +168,12 @@
         ) {
             await app.project.loadProjects();
         }
+
+        /*
+         * 채팅창이 열린 동안 프로젝트·팀원 정보를
+         * 일정한 간격으로 다시 확인합니다.
+         */
+        startChatDataAutoRefresh();
 
         /*
          * 처음에는 실제 대화창이 아니라
@@ -149,6 +205,180 @@
 
         modal.style.display =
             "none";
+
+        /*
+         * 채팅창을 닫으면 불필요한 자동 조회를 중지합니다.
+         */
+        stopChatDataAutoRefresh();
+    }
+
+
+    /* =====================================================
+       프로젝트·팀원 데이터 자동 갱신
+    ===================================================== */
+
+    async function refreshChatData() {
+        /*
+         * 채팅창이 닫혀 있으면 API를 호출하지 않습니다.
+         */
+        if (!isChatModalOpen()) {
+            return;
+        }
+
+        /*
+         * 이전 자동 갱신이 끝나지 않았다면
+         * 중복 요청을 보내지 않습니다.
+         */
+        if (chatDataRefreshInProgress) {
+            return;
+        }
+
+        chatDataRefreshInProgress =
+            true;
+
+        try {
+            /*
+             * 로그인 사용자가 참여 중인 프로젝트를 다시 조회합니다.
+             *
+             * project.js의 loadProjects()가 완료되면
+             * 채팅방 목록 refreshRooms()도 함께 실행됩니다.
+             */
+            if (
+                app.project &&
+                typeof app.project.loadProjects ===
+                "function"
+            ) {
+                await app.project.loadProjects();
+            }
+
+            /*
+             * 현재 선택된 프로젝트의 팀원 목록은
+             * 캐시를 사용하지 않고 서버에서 다시 조회합니다.
+             */
+            if (
+                app.state.currentProjectId !==
+                null &&
+                app.member &&
+                typeof app.member
+                    .refreshCurrentMembers ===
+                "function"
+            ) {
+                await app.member
+                    .refreshCurrentMembers();
+            }
+
+        } catch (error) {
+            /*
+             * 자동 갱신 실패가 현재 채팅 기능 전체를
+             * 중단시키지 않도록 경고만 출력합니다.
+             */
+            console.warn(
+                "채팅 프로젝트·팀원 자동 갱신 실패",
+                error
+            );
+
+        } finally {
+            chatDataRefreshInProgress =
+                false;
+        }
+    }
+
+
+    /* =====================================================
+       자동 갱신 타이머 시작
+    ===================================================== */
+
+    function startChatDataAutoRefresh() {
+        /*
+         * 이미 타이머가 실행 중이면
+         * 중복 생성하지 않습니다.
+         */
+        if (chatDataRefreshTimer !== null) {
+            return;
+        }
+
+        chatDataRefreshTimer =
+            window.setInterval(
+                refreshChatData,
+                CHAT_DATA_REFRESH_INTERVAL_MS
+            );
+    }
+
+
+    /* =====================================================
+       자동 갱신 타이머 중지
+    ===================================================== */
+
+    function stopChatDataAutoRefresh() {
+        if (chatDataRefreshTimer === null) {
+            return;
+        }
+
+        window.clearInterval(
+            chatDataRefreshTimer
+        );
+
+        chatDataRefreshTimer =
+            null;
+    }
+
+
+    /* =====================================================
+       채팅창 열림 여부 확인
+    ===================================================== */
+
+    function isChatModalOpen() {
+        const modal =
+            document.getElementById(
+                "chatModal"
+            );
+
+        if (!modal) {
+            return false;
+        }
+
+        return (
+            window.getComputedStyle(
+                modal
+            ).display !==
+            "none"
+        );
+    }
+
+
+    /* =====================================================
+       브라우저 화면 복귀 시 즉시 갱신
+    ===================================================== */
+
+    function bindChatDataRefreshEvents() {
+        if (chatDataRefreshEventsBound) {
+            return;
+        }
+
+        chatDataRefreshEventsBound =
+            true;
+
+        /*
+         * 다른 프로그램 또는 브라우저 탭에서
+         * WorkTopus 화면으로 돌아온 경우입니다.
+         */
+        window.addEventListener(
+            "focus",
+            refreshChatData
+        );
+
+        /*
+         * 숨겨졌던 WorkTopus 탭이
+         * 다시 표시된 경우입니다.
+         */
+        document.addEventListener(
+            "visibilitychange",
+            function () {
+                if (!document.hidden) {
+                    refreshChatData();
+                }
+            }
+        );
     }
 
 
@@ -384,8 +614,8 @@
         }
 
         /*
-        자기 자신과는 개인 채팅을 열지 않습니다.
-        */
+         * 자기 자신과는 개인 채팅을 열지 않습니다.
+         */
         if (
             loginUserNum ===
             memberUserNum
@@ -547,11 +777,11 @@
         }
 
         /*
-        projectId, roomId, 메시지 내용을 서버에 전달합니다.
-
-        senderNum과 senderName은 개발 단계 호환용으로 넣습니다.
-        최종 서버에서는 로그인 정보를 기준으로 다시 설정해야 합니다.
-        */
+         * projectId, roomId, 메시지 내용을 서버에 전달합니다.
+         *
+         * senderNum과 senderName은 개발 단계 호환용으로 넣습니다.
+         * 최종 서버에서는 로그인 정보를 기준으로 다시 설정해야 합니다.
+         */
         const message = {
             projectId:
             app.state.currentProjectId,
@@ -671,6 +901,7 @@
         }
     }
 
+
     /* =====================================================
        WebSocket 연결 상태 변경
     ===================================================== */
@@ -682,6 +913,17 @@
             Boolean(connected);
 
         updateMessageInputState();
+
+        /*
+         * 서버 재시작 또는 네트워크 끊김 후
+         * 연결이 복구되면 현재 채팅방을 다시 구독합니다.
+         */
+        if (
+            connected &&
+            app.state.currentRoomId
+        ) {
+            subscribeCurrentRoom();
+        }
     }
 
 
@@ -704,6 +946,29 @@
             "function"
         ) {
             window.connect();
+        }
+    }
+
+
+    /* =====================================================
+       실시간 연결 및 현재 방 구독 확인
+    ===================================================== */
+
+    function ensureRealtimeConnection() {
+        /*
+         * 연결이 끊어진 경우 다시 연결합니다.
+         */
+        if (!isWebSocketConnected()) {
+            connectWebSocket();
+            return;
+        }
+
+        /*
+         * 이미 연결되어 있으면 현재 채팅방을
+         * 다시 구독 상태로 맞춥니다.
+         */
+        if (app.state.currentRoomId) {
+            subscribeCurrentRoom();
         }
     }
 
@@ -963,19 +1228,27 @@
         const isGroup =
             type === "group";
 
+
+        /*
+         * block이 아니라 flex로 표시해야
+         * 메시지 영역이 남은 높이를 차지하고
+         * 내부 스크롤이 정상적으로 작동합니다.
+         */
         if (groupChat) {
             groupChat.style.display =
                 isGroup
-                    ? "block"
+                    ? "flex"
                     : "none";
         }
+
 
         if (privateChat) {
             privateChat.style.display =
                 isGroup
                     ? "none"
-                    : "block";
+                    : "flex";
         }
+
 
         const groupTab =
             document.getElementById(
@@ -987,12 +1260,14 @@
                 "privateTab"
             );
 
+
         if (groupTab) {
             groupTab.classList.toggle(
                 "active",
                 isGroup
             );
         }
+
 
         if (privateTab) {
             privateTab.classList.toggle(
@@ -1001,13 +1276,15 @@
             );
         }
 
+
         /*
-        탭 버튼에 ID가 없는 기존 HTML 구조도 지원합니다.
-        */
+         * 탭 버튼에 ID가 없는 기존 HTML 구조도 지원합니다.
+         */
         const tabButtons =
             document.querySelectorAll(
                 ".chat-tabs button"
             );
+
 
         if (tabButtons.length >= 2) {
             tabButtons[0]
@@ -1022,6 +1299,50 @@
                 !isGroup
             );
         }
+
+
+        /*
+         * 숨겨져 있던 채팅 영역이 실제로 표시된 다음
+         * 가장 최신 메시지 위치로 이동합니다.
+         *
+         * requestAnimationFrame을 두 번 사용하면
+         * 브라우저가 flex 높이를 계산한 뒤 스크롤을 이동합니다.
+         */
+        requestAnimationFrame(
+            function () {
+                requestAnimationFrame(
+                    function () {
+                        if (
+                            isGroup &&
+                            app.groupChat &&
+                            typeof app.groupChat
+                                .scrollToBottom ===
+                            "function"
+                        ) {
+                            app.groupChat
+                                .scrollToBottom(
+                                    false
+                                );
+
+                            return;
+                        }
+
+                        if (
+                            !isGroup &&
+                            app.privateChat &&
+                            typeof app.privateChat
+                                .scrollToBottom ===
+                            "function"
+                        ) {
+                            app.privateChat
+                                .scrollToBottom(
+                                    false
+                                );
+                        }
+                    }
+                );
+            }
+        );
     }
 
 
@@ -1369,9 +1690,9 @@
             app.state.currentRoomId;
 
         /*
-        기존 코드에서 currentUserId가 숫자 사용자 식별값으로
-        사용됐기 때문에 임시로 userNum을 넣습니다.
-        */
+         * 기존 코드에서 currentUserId가 숫자 사용자 식별값으로
+         * 사용됐기 때문에 임시로 userNum을 넣습니다.
+         */
         window.currentUserId =
             app.state.loginUser.userNum;
 

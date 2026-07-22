@@ -4,8 +4,10 @@ import com.example.WorkTopus.projects.dto.request.CalendarScheduleCreateRequest;
 import com.example.WorkTopus.projects.dto.request.CalendarScheduleUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.CalendarScheduleResponse;
 import com.example.WorkTopus.projects.service.CalendarScheduleService;
+import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,9 +27,17 @@ import java.util.List;
 public class CalendarController {
 
     private final CalendarScheduleService calendarScheduleService;
+    private final ProjectBoardAccessService projectBoardAccessService;
 
     @GetMapping
-    public ModelAndView calendar(@PathVariable Long projectId) {
+    public ModelAndView calendar(@PathVariable Long projectId,
+                                 Authentication authentication) {
+
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         ModelAndView mav = new ModelAndView("projects/calendar");
         mav.addObject("projectId", projectId);
         return mav;
@@ -35,16 +45,29 @@ public class CalendarController {
 
     @GetMapping("/schedules")
     @ResponseBody
-    public List<CalendarScheduleResponse> schedules(@PathVariable Long projectId) {
+    public List<CalendarScheduleResponse> schedules(
+            @PathVariable Long projectId,
+            Authentication authentication
+    ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         return calendarScheduleService.findProjectSchedules(projectId);
     }
-
     @PostMapping("/schedules")
     @ResponseBody
     public CalendarScheduleResponse create(
             @PathVariable Long projectId,
-            @Valid @RequestBody CalendarScheduleCreateRequest request
+            @Valid @RequestBody CalendarScheduleCreateRequest request,
+            Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         return calendarScheduleService.create(projectId, request);
     }
 
@@ -53,17 +76,33 @@ public class CalendarController {
     public CalendarScheduleResponse update(
             @PathVariable Long projectId,
             @PathVariable Long scheduleId,
-            @Valid @RequestBody CalendarScheduleUpdateRequest request
+            @Valid @RequestBody CalendarScheduleUpdateRequest request,
+            Authentication authentication
     ) {
-        return calendarScheduleService.update(projectId, scheduleId, request);
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
+        return calendarScheduleService.update(
+                projectId,
+                scheduleId,
+                request
+        );
     }
 
     @DeleteMapping("/schedules/{scheduleId}")
     @ResponseBody
     public void delete(
             @PathVariable Long projectId,
-            @PathVariable Long scheduleId
+            @PathVariable Long scheduleId,
+            Authentication authentication
     ) {
+        projectBoardAccessService.validateMember(
+                projectId,
+                authentication.getName()
+        );
+
         calendarScheduleService.delete(projectId, scheduleId);
     }
 }

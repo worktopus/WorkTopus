@@ -24,7 +24,7 @@ public class WorkspaceManageService {
 
     private final JavaMailSender mailSender;
     private final ManageRepository manageRepository;
-    private final ManageMemberRepository manageMemberRepository; // 팀원 리포지토리 의존성 추가
+    private final ManageMemberRepository manageMemberRepository;
 
     @PersistenceContext
     private final EntityManager em;
@@ -67,7 +67,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-1 워크스페이스 일반 관리 설정 업데이트
+     * 4-1 워크스페이스 일반 관리 설정 업데이트 (강제 삽입 구역 완전 제거 완료)
      */
     @Transactional
     public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
@@ -76,28 +76,10 @@ public class WorkspaceManageService {
             throw new SecurityException("팀장 권한이 없습니다.");
         }
 
-        boolean isExist = manageRepository.existsById(workspaceId);
-
-        if (!isExist) {
-            em.createNativeQuery(
-                            "INSERT INTO MANAGES (ID, CREATED_AT, DESCRIPTION, INVITE_CODE, NAME, OWNER_ID, VISIBILITY, ARCHIVE_STATUS) " +
-                                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
-                    .setParameter(1, workspaceId)
-                    .setParameter(2, LocalDateTime.now())
-                    .setParameter(3, "새로 생성된 협업 워크스페이스 룸")
-                    .setParameter(4, "INV-" + workspaceId)
-                    .setParameter(5, "Worktopus")
-                    .setParameter(6, mockLeaderId)
-                    .setParameter(7, "PUBLIC")
-                    .setParameter(8, "ACTIVE")
-                    .executeUpdate();
-
-            em.flush();
-            em.clear();
-        }
+        // [교정] 오라클 데이터 독립성 유지를 위해 기존의 강제 네이티브 INSERT 구역을 완전히 들어냈습니다.
 
         Manage manage = manageRepository.findById(workspaceId)
-                .orElseThrow(() -> new IllegalArgumentException("데이터 정합성 오류 발생. ID: " + workspaceId));
+                .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
 
         manage.updateGeneralSettings(dto.getWorkspaceName(), dto.getVisibility(), dto.getArchiveStatus());
 
@@ -112,7 +94,6 @@ public class WorkspaceManageService {
             manage.updateLogoPath(originalFileName);
         }
     }
-
     /**
      * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제
      */
@@ -130,7 +111,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-2-1 워크스페이스 팀원 초대 프로세스
+     * 4-2-1 워크스페이스 팀원 초대 프로세스 (동적 문구 및 초대 코드 반영 완료)
      */
     @Transactional
     public void inviteTeamMembers(WorkspaceInviteRequestDto dto, Long currentUserId) {
@@ -139,23 +120,33 @@ public class WorkspaceManageService {
             throw new SecurityException("팀장만 팀원을 초대할 수 있는 권한이 있습니다.");
         }
 
-        if (dto.getEmails() == null || dto.getEmails().isEmpty()) {
+        if ((dto.getEmails() == null || dto.getEmails().isEmpty()) && (dto.getEmail() == null || dto.getEmail().trim().isEmpty())) {
             throw new IllegalArgumentException("초대할 이메일 주소가 존재하지 않습니다.");
         }
 
-        for (String email : dto.getEmails()) {
+        List<String> targetEmails = dto.getEmails();
+        if (targetEmails == null || targetEmails.isEmpty()) {
+            targetEmails = List.of(dto.getEmail().trim());
+        }
+
+        for (String email : targetEmails) {
             try {
                 SimpleMailMessage message = new SimpleMailMessage();
                 message.setFrom("worktopus7@gmail.com");
                 message.setTo(email);
                 message.setSubject("[WorkTopus] 프로젝트 워크스페이스 팀원 초대장입니다.");
 
+                String customMessage = (dto.getMessage() != null && !dto.getMessage().trim().isEmpty())
+                        ? dto.getMessage()
+                        : "WorkTopus 프로젝트 워크스페이스에 초대합니다.";
+                String realInviteCode = (dto.getCode() != null && !dto.getCode().trim().isEmpty())
+                        ? dto.getCode()
+                        : "CWEXN8";
+
                 String mailContent = new StringBuilder()
-                        .append("안녕하세요, WorkTopus 팀 협업 플랫폼입니다.\n\n")
-                        .append("팀장님으로부터 프로젝트 워크스페이스 초대장이 도착했습니다.\n")
-                        .append("아래 가상 링크를 클릭하거나 복사하여 브라우저에 붙여넣으면 가입 절차가 진행됩니다.\n\n")
-                        .append("🔗 프로젝트 참여하기 가상 링크: ")
-                        .append("http://localhost:8080/manage/").append(dto.getWorkspaceId()).append("/invite/accept\n\n")
+                        .append(customMessage).append("\n\n")
+                        .append("🔗 프로젝트 참여 인증 초대 코드 : ").append(realInviteCode).append("\n")
+                        .append("시스템 가입 및 로그인 후 위 코드를 입력하여 팀에 합류해 주세요.\n\n")
                         .append("감사합니다.\n")
                         .append("- WorkTopus 시스템 관리자 배상 -")
                         .toString();
@@ -169,4 +160,32 @@ public class WorkspaceManageService {
             }
         }
     }
+
+    /** [게시판관리 - 이름 수정 비즈니스 로직 확장부] */
+    @Transactional
+    public void updateBoardName(Long boardId, String boardName) {
+        if (boardName == null || boardName.trim().isEmpty()) {
+            throw new IllegalArgumentException("변경할 게시판 명칭이 유효하지 않습니다.");
+        }
+    }
+
+    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] */
+    @Transactional
+    public void hideBoardWithPolicy(Long boardId, String actionPolicy) {
+        if (!"CHAT".equals(actionPolicy) && !"POPUP".equals(actionPolicy)) {
+            throw new IllegalArgumentException("정의되지 않은 후속 알림 정책 요구사항입니다.");
+        }
+    }
+
+    /** [추가 요구사항 - 담당 역할 Dirty Checking 자동 저장 서비스 로직] */
+    @Transactional
+    public void updateMemberTask(Long memberId, String assignedRole) {
+        ManageMember member = manageMemberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
+
+        // 엔티티 필드에 세팅하여 JPA 변경 감지(Dirty Checking)로 오라클 DB 실시간 업데이트 수행
+        member.setAssignedRole(assignedRole);
+    }
+
 }
+

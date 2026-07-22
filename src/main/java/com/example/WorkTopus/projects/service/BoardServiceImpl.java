@@ -4,6 +4,8 @@ import com.example.WorkTopus.Notification.entity.NotificationType;
 import com.example.WorkTopus.Notification.service.NotificationService;
 import com.example.WorkTopus.entity.ProjectMember;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.manage.entity.ManageMember;
+import com.example.WorkTopus.manage.repository.ManageMemberRepository;
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.*;
@@ -16,14 +18,15 @@ import com.example.WorkTopus.projects.repository.BoardRepository;
 import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,36 +42,55 @@ public class BoardServiceImpl implements BoardService {
     private final BoardFileRepository boardFileRepository;
     private final BoardCommentRepository boardCommentRepository;
     private final FileStorageService fileStorageService;
+    private final ManageMemberRepository manageMemberRepository;
 
     private final NotificationService notificationService;
     private final ProjectMemberRepository projectMemberRepository;
 
     @Override
-    public Long create(Long projectId, BoardCreateRequest request, Users loginUser) {
+    public Long create(
+            Long projectId,
+            BoardCreateRequest request,
+            String loginUserId
+    ) {
+        // 1. 프로젝트 멤버 여부 확인
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "해당 프로젝트의 멤버가 아닙니다."
+                        )
+                );
 
+        boolean notice = "NOTICE".equals(request.category());
+
+        // 2. 게시글 생성 및 저장
         Board board = new Board(
                 projectId,
                 request.title(),
                 request.content(),
-                "관리자",
-                request.notice(),
+                member.getUserName(),
+                notice,
                 request.category(),
                 request.tag()
         );
 
         Board savedBoard = boardRepository.save(board);
 
+        // 3. 첨부파일 저장
         saveAttachments(savedBoard.getId(), request.files());
 
         // ================= [게시글 등록 알림 처리] =================
-// 💡 SecurityContext에서 현재 로그인한 사용자 계정 ID 가져오기
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserId = (authentication != null) ? authentication.getName() : null;
+        String currentUserId = (authentication != null) ? authentication.getName() : loginUserId;
 
-// 1. 해당 프로젝트의 팀원 목록 조회
+        // 1) 해당 프로젝트의 팀원 목록 조회
         List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
 
-// 2. 카테고리 한글 명칭 매핑 (선택 사항 - 알림 문구를 예쁘게 만들기 위함)
+        // 2) 카테고리 한글 명칭 매핑
         String categoryName = switch (request.category()) {
             case "NOTICE" -> "공지사항";
             case "FREE" -> "자유게시판";
@@ -77,31 +99,26 @@ public class BoardServiceImpl implements BoardService {
             default -> "게시판";
         };
 
-// 3. 전체 팀원에게 알림 발송
-        for (ProjectMember member : members) {
-            Users targetUser = member.getUser();
+        // 3) 전체 팀원에게 알림 발송 (본인 제외)
+        for (ProjectMember projectMember : members) {
+            Users targetUser = projectMember.getUser();
 
-            // 💡 [본인 제외 조건]
-            boolean isSelfByEntity = (loginUser != null && targetUser.getUserNum().equals(loginUser.getUserNum()));
-            boolean isSelfByUserId = (currentUserId != null && currentUserId.equals(targetUser.getUserId()));
-
-            if (isSelfByEntity || isSelfByUserId) {
-                continue; // 작성자 본인이면 제외
+            // 작성자 본인이면 알림 발송 대상에서 제외
+            if (currentUserId != null && currentUserId.equals(targetUser.getUserId())) {
+                continue;
             }
 
-            // 알림 메시지 구성 예시: [공지사항] 새로운 게시글이 등록되었습니다.
             String message = "[" + categoryName + "] " + savedBoard.getTitle() + " 글이 등록되었습니다.";
             String url = "/projects/" + projectId + "/boards/" + savedBoard.getId();
 
-            // NotificationType은 기존 BOARD 또는 NOTICE/CATEGORY 타입을 활용
             notificationService.createNotification(
                     targetUser,
                     message,
                     url,
-                    NotificationType.NOTICE // 또는 정의하신 BOARD / POST 타입
+                    NotificationType.NOTICE
             );
         }
-// =======================================================
+        // =======================================================
 
         return savedBoard.getId();
     }
@@ -134,7 +151,6 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
-
         Page<Board> boards = boardRepository
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
@@ -154,6 +170,64 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<BoardListResponse> searchBoards(
+            Long projectId,
+            String keyword,
+            String category,
+            String sort,
+            Pageable pageable
+    ) {
+        String normalizedKeyword =
+                keyword == null || keyword.isBlank()
+                        ? null
+                        : keyword.trim();
+
+        String normalizedCategory =
+                category == null || category.isBlank()
+                        ? null
+                        : category.trim();
+
+        Pageable searchPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                createSearchSort(sort)
+        );
+
+        Page<Board> boards = boardRepository.searchBoards(
+                projectId,
+                normalizedKeyword,
+                normalizedCategory,
+                searchPageable
+        );
+
+        Map<Long, Long> commentCountMap =
+                getCommentCountMap(boards.getContent());
+
+        return boards.map(board ->
+                BoardListResponse.from(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0L)
+                )
+        );
+    }
+
+    private Sort createSearchSort(String sort) {
+        if ("views".equals(sort)) {
+            return Sort.by(
+                    Sort.Order.desc("noticeYn"),
+                    Sort.Order.desc("viewCount"),
+                    Sort.Order.desc("createdAt")
+            );
+        }
+
+        return Sort.by(
+                Sort.Order.desc("noticeYn"),
+                Sort.Order.desc("createdAt")
+        );
+    }
+
+    @Override
     public BoardDetailResponse findDetail(Long projectId, Long boardId) {
         Board board = getBoard(projectId, boardId);
         board.increaseViewCount();
@@ -169,26 +243,169 @@ public class BoardServiceImpl implements BoardService {
                         .build())
                 .toList();
 
-        return BoardDetailResponse.from(board, files);
+        String writerAssignedRole = manageMemberRepository
+                .findByWorkspaceIdAndUser_Name(
+                        projectId,
+                        board.getWriterName()
+                )
+                .map(ManageMember::getAssignedRole)
+                .orElse("담당 미지정");
+
+        return BoardDetailResponse.from(
+                board,
+                files,
+                writerAssignedRole
+        );
     }
 
     @Override
-    public void update(Long projectId, Long boardId, BoardUpdateRequest request) {
+    @Transactional(readOnly = true)
+    public BoardDetailResponse findEditableBoard(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    ) {
         Board board = getBoard(projectId, boardId);
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "프로젝트 멤버가 아닙니다."
+                        )
+                );
+
+        if (!board.getWriterName().equals(member.getUserName())) {
+            throw new IllegalArgumentException(
+                    "작성자 본인만 수정할 수 있습니다."
+            );
+        }
+
+        List<FileResponse> files = boardFileRepository
+                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(boardId, "N")
+                .stream()
+                .map(file -> FileResponse.builder()
+                        .id(file.getId())
+                        .originalName(file.getOriginalName())
+                        .storedName(file.getStoredName())
+                        .fileUrl(file.getFileUrl())
+                        .build())
+                .toList();
+
+        String writerAssignedRole = member.getAssignedRole();
+
+        return BoardDetailResponse.from(board, files, writerAssignedRole);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isWriter(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    ) {
+        Board board = getBoard(projectId, boardId);
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "프로젝트 멤버가 아닙니다."
+                        )
+                );
+
+        return board.getWriterName()
+                .equals(member.getUserName());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean canDelete(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    ) {
+        Board board = getBoard(projectId, boardId);
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "프로젝트 멤버가 아닙니다."
+                        )
+                );
+
+        boolean isWriter =
+                board.getWriterName()
+                        .equals(member.getUserName());
+
+        boolean isProjectOwner =
+                "OWNER".equals(member.getProjectRole());
+
+        return isWriter || isProjectOwner;
+    }
+
+    @Override
+    public void update(
+            Long projectId,
+            Long boardId,
+            BoardUpdateRequest request,
+            String loginUserId
+    ) {
+        Board board = getBoard(projectId, boardId);
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "프로젝트 멤버가 아닙니다."
+                        )
+                );
+
+        boolean isWriter =
+                board.getWriterName().equals(member.getUserName());
+
+        if (!isWriter) {
+            throw new IllegalArgumentException(
+                    "작성자 본인만 수정할 수 있습니다."
+            );
+        }
+
         List<BoardFile> existingFiles = boardFileRepository
-                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(boardId, "N");
+                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(
+                        boardId,
+                        "N"
+                );
+
+        boolean notice = "NOTICE".equals(request.category());
 
         board.update(
                 request.title(),
                 request.content(),
-                request.notice(),
+                notice,
                 request.category(),
                 request.tag()
         );
 
-        if (request.deleteFileIds() != null && !request.deleteFileIds().isEmpty()) {
+        if (request.deleteFileIds() != null
+                && !request.deleteFileIds().isEmpty()) {
+
             existingFiles.stream()
-                    .filter(file -> request.deleteFileIds().contains(file.getId()))
+                    .filter(file ->
+                            request.deleteFileIds().contains(file.getId())
+                    )
                     .forEach(BoardFile::delete);
         }
 
@@ -196,12 +413,43 @@ public class BoardServiceImpl implements BoardService {
     }
 
     @Override
-    public void delete(Long projectId, Long boardId) {
+    public void delete(
+            Long projectId,
+            Long boardId,
+            String loginUserId
+    ) {
         Board board = getBoard(projectId, boardId);
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        projectId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "해당 프로젝트의 멤버가 아닙니다."
+                        )
+                );
+
+        boolean isWriter =
+                board.getWriterName().equals(member.getUserName());
+
+        boolean isProjectOwner =
+                "OWNER".equals(member.getProjectRole());
+
+        if (!isWriter && !isProjectOwner) {
+            throw new IllegalArgumentException(
+                    "작성자 또는 프로젝트 팀장만 삭제할 수 있습니다."
+            );
+        }
+
         board.delete();
 
         List<BoardFile> files = boardFileRepository
-                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(boardId, "N");
+                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(
+                        boardId,
+                        "N"
+                );
 
         files.forEach(BoardFile::delete);
     }
@@ -213,7 +461,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private Map<Long, Long> getCommentCountMap(List<Board> boards) {
-
         if (boards == null || boards.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -233,60 +480,6 @@ public class BoardServiceImpl implements BoardService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<BoardListResponse> searchBoards(
-            Long projectId,
-            String keyword,
-            Pageable pageable
-    ) {
-
-        Page<Board> boards =
-                boardRepository.searchBoards(projectId, keyword, pageable);
-
-        Map<Long, Long> commentCountMap =
-                getCommentCountMap(boards.getContent());
-
-        return boards.map(board ->
-                BoardListResponse.from(
-                        board,
-                        commentCountMap.getOrDefault(board.getId(), 0L)
-                )
-        );
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public BoardDetailModalResponse getModal(Long projectId, Long boardId) {
-
-        Board board = getBoard(projectId, boardId);
-        List<FileResponse> files = boardFileRepository
-                .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(boardId, "N")
-                .stream()
-                .map(file -> FileResponse.builder()
-                        .id(file.getId())
-                        .originalName(file.getOriginalName())
-                        .storedName(file.getStoredName())
-                        .fileUrl(file.getFileUrl())
-                        .build())
-                .toList();
-
-        return BoardDetailModalResponse.builder()
-                .id(board.getId())
-                .title(board.getTitle())
-                .content(board.getContent())
-                .writerName(board.getWriterName())
-                .viewCount(board.getViewCount())
-                .notice("Y".equals(board.getNoticeYn())) // 또는 board.isNotice()
-                .createdAt(
-                        board.getCreatedAt() != null
-                                ? board.getCreatedAt().format(DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm"))
-                                : "-"
-                )
-                .commentCount(0L)
-                .files(files)
-                .comments(List.of())
-                .build();
-    }
-
     public Optional<NoticeResponse> getLatestNotice(Long projectId) {
         return boardRepository
                 .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(

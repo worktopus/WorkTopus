@@ -1,50 +1,45 @@
-/**
- * WorkTopus - 팀원 및 역할 관리 비동기 실시간 렌더링 및 UI 제어 엔진
- */
+// [manage-member.js : 팀원 역할 렌더링 및 비동기 직급 변경/추방 제어]
 document.addEventListener('DOMContentLoaded', function () {
-    // manage.html 내부에 존재하는 팀원 테이블 tbody 요소를 정확하게 타겟팅합니다.
-    const container = document.querySelector('#member-tab table tbody');
+    const container = document.querySelector('.members-table-wrapper table tbody') || document.querySelector('#member-tab table tbody');
 
-    // 스프링 시큐리티 CSRF 보안 토큰 추출
-    const csrfTokenInput = document.querySelector('input[name="_csrf"]');
-    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+    // CSRF 보안 토큰 파싱
+    const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
+    const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
 
-    // URL 주소창에서 현재 workspaceId(예: 22)를 안전하게 추출합니다.
+    // URL 구조 분석하여 workspaceId 바인딩
     const pathSegments = window.location.pathname.split('/').filter(Boolean);
-    const workspaceId = pathSegments[pathSegments.length - 1] || 22;
+    let workspaceId = 22;
 
-    /**
-     * [핵심 추가] 1. 서버(백엔드)에서 실제 오라클 DB 팀원 데이터를 비동기로 조회해오는 함수
-     */
+    const membersIndex = pathSegments.indexOf('members');
+    if (membersIndex > 0) {
+        workspaceId = pathSegments[membersIndex - 1];
+    } else {
+        workspaceId = pathSegments[pathSegments.length - 1] || 22;
+    }
+
+    // 기능 1 : DB 백엔드로부터 실시간 팀원 목록 JSON 수집
     function loadWorkspaceMembers() {
-        // 백엔드 컨트롤러가 모델 데이터를 잘 넘겨주고 있다면, 비동기 호출을 통해 JSON 배열을 가져옵니다.
-        fetch(`/api/manage/${workspaceId}/members-data`, {
-            method: 'GET'
-        })
+        fetch(`/api/manage/${workspaceId}/members-data`, { method: 'GET' })
             .then(response => {
                 if (response.ok) return response.json();
                 throw new Error('팀원 목록을 불러오는 데 실패했습니다.');
             })
             .then(members => {
-                // 가져온 진짜 데이터 배열을 렌더러 함수에 토스합니다.
+                console.log("백엔드에서 넘어온 데이터 전체보기:", members); // 🔍 이 로그를 추가해서 F12 콘솔을 확인하세요!
                 renderMemberList(members);
             })
-            .catch(error => {
-                console.error('Fetch Members Error:', error);
-                // 만약 API가 준비 안 되었다면 타임리프 기본 바인딩을 신뢰하므로 경고 로그만 남깁니다.
-            });
+            .catch(error => { console.error('Fetch Members Error:', error); });
     }
 
-    /**
-     * 2. 오라클 DB에서 넘어온 실제 데이터 구조와 변수명을 1:1로 일치시킨 실시간 HTML 렌더러
-     */
+
+    // 기능 2 : 수집된 DB 인자로 팀원 테이블 마크업 동적 드로잉 (현재 직급 삭제 반영 완료)
     function renderMemberList(members) {
         if (!container) return;
         container.innerHTML = '';
 
-        // 데이터가 없거나 0명일 때 예외 방어 처리
+        // [보완] 바인딩된 목록이 없을 때 새 헤더 규격에 맞춰 colspan=4 지정
         if (!members || members.length === 0) {
-            container.innerHTML = '<tr><td colspan="5" style="padding: 40px; text-align: center; color: var(--text-sub);">현재 참여 중인 팀원이 없습니다.</td></tr>';
+            container.innerHTML = '<tr><td colspan="4" style="padding: 40px; text-align: center; color: var(--text-sub);">현재 참여 중인 팀원이 없습니다.</td></tr>';
             return;
         }
 
@@ -52,50 +47,44 @@ document.addEventListener('DOMContentLoaded', function () {
             const tr = document.createElement('tr');
             tr.className = 'member-row';
             tr.style.borderBottom = '1px solid var(--border)';
-
-            // 후속 비동기 수정/삭제 통신에서 참조할 수 있도록 데이터 고유 고정 ID(PK)를 명확히 바인딩합니다.
             tr.setAttribute('data-member-id', member.id);
 
-            // DB 직급 데이터(projectRole) 코드를 판별하여 select 박스 초기 활성화 세팅
-            const isLeader = member.projectRole === 'LEADER' ? 'selected' : '';
-            const isSubLeader = member.projectRole === 'SUB_LEADER' ? 'selected' : '';
-            const isMember = member.projectRole === 'MEMBER' ? 'selected' : '';
+            // [수정] 오라클 DB의 ROLE 값(OWNER, MEMBER) 또는 백엔드 규격(LEADER)을 통합 지원
+            const currentRole = member.projectRole || member.role;
 
-            // [변수명 완전 교정]: member.name -> member.userName / member.email -> member.userEmail로 변경
+            // OWNER 혹은 LEADER일 때 모두 '팀장'으로 매핑
+            const isLeader = (currentRole === 'OWNER' || currentRole === 'LEADER') ? 'selected' : '';
+            const isSubLeader = (currentRole === 'SUB_LEADER') ? 'selected' : '';
+            // MEMBER일 때 '팀원'으로 매핑
+            const isMember = (currentRole === 'MEMBER') ? 'selected' : '';
+
+            // [수정/삭제] 기존 현재 직급 배지 td 열을 제거하고 4개 컬럼 체계로 재편성
             tr.innerHTML = `
                 <td style="padding: 16px;">
-                    <div style="font-weight: 600;">${member.userName || '이름 없음'}</div>
+                    <div style="font-weight: 600; color: var(--text-main);">${member.userName || '이름 없음'}</div>
                     <div style="font-size: 0.8rem; color: var(--text-sub);">${member.userEmail || '이메일 없음'}</div>
                 </td>
                 <td style="padding: 16px;">
-                    <span style="background-color: var(--primary-soft); color: var(--primary); padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 700;">
-                        ${member.projectRole}
-                    </span>
-                </td>
-                <td style="padding: 16px;">
-                    <select class="form-input role-select" data-id="${member.id}" ${member.projectRole === 'LEADER' ? 'disabled' : ''} style="padding: 6px 12px; font-size: 0.85rem;">
+                    <!-- [수정] OWNER 또는 LEADER 권한일 때 셀렉트 박스 비활성화 조건 처리 -->
+                    <select class="form-input role-select" data-id="${member.id}" ${(currentRole === 'OWNER' || currentRole === 'LEADER') ? 'disabled' : ''} style="padding: 6px 12px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px;">
                         <option value="LEADER" ${isLeader}>팀장</option>
                         <option value="SUB_LEADER" ${isSubLeader}>부팀장</option>
                         <option value="MEMBER" ${isMember}>팀원</option>
                     </select>
                 </td>
                 <td style="padding: 16px;">
-                    <input type="text" class="form-input task-input" data-id="${member.id}" value="${member.assignedRole || ''}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 80%;">
+                    <input type="text" class="form-input task-input" data-id="${member.id}" value="${member.assignedRole || ''}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 80%; border: 1px solid var(--border); border-radius: 4px;">
                 </td>
                 <td style="padding: 16px; text-align: center;">
-                    <button class="btn btn-danger-outline kick-btn" data-id="${member.id}" ${member.projectRole === 'LEADER' ? 'style="display:none;"' : ''} style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer;">제외</button>
+                    <!-- [수정] OWNER 또는 LEADER 권한일 때 제외 버튼 숨김 처리 -->
+                    <button class="btn btn-danger-outline kick-btn" data-id="${member.id}" ${(currentRole === 'OWNER' || currentRole === 'LEADER') ? 'style="display:none;"' : ''} style="padding: 6px 12px; font-size: 0.8rem; cursor: pointer; background: transparent; color: var(--danger); border: 1px solid var(--danger); border-radius: 4px;">제외</button>
                 </td>
             `;
-
             container.appendChild(tr);
         });
     }
-
-    /**
-     * 3. 비동기 이벤트 핸들러 바인딩 (직급 변경 및 팀원 추방 기능)
-     */
     if (container) {
-        // 직급 변경 셀렉트 박스(select) 이벤트 연동
+        // 기능 3 : 직급 셀렉트 체인지 비동기 수정 통신
         container.addEventListener('change', function (e) {
             if (e.target && e.target.classList.contains('role-select')) {
                 const selectBox = e.target;
@@ -104,14 +93,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 fetch('/api/manage/member/role-update', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    body: JSON.stringify({
-                        memberId: parseInt(memberId),
-                        projectRole: selectedRole
-                    })
+                    headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                    body: JSON.stringify({ memberId: parseInt(memberId), projectRole: selectedRole })
                 })
                     .then(response => {
                         if (response.ok) return response.json();
@@ -119,18 +102,13 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         alert(data.message || '직급이 변경되었습니다.');
-                        const roleBadge = selectBox.closest('tr').querySelector('td:nth-child(2) span');
-                        if (roleBadge) {
-                            roleBadge.textContent = selectedRole;
-                        }
+                        // [참고] 배지 열이 삭제되었으므로 배지 텍스트 갱신 구문 생략 처리 자동 마감
                     })
-                    .catch(error => {
-                        alert('직급 변경 실패: ' + error.message);
-                    });
+                    .catch(error => { alert('직급 변경 실패: ' + error.message); });
             }
         });
 
-        // 팀원 제외(추방) 버튼 클릭 이벤트 연동
+        // 기능 4 : 팀원 공간 강제 제외(추방) 비동기 통신
         container.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('kick-btn')) {
                 const kickBtn = e.target;
@@ -138,12 +116,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const targetRow = kickBtn.closest('tr');
 
                 if (confirm('정말로 이 팀원을 현재 워크스페이스 공간에서 강제 제외하시겠습니까?')) {
-                    fetch(`/api/manage/member/${memberId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        }
-                    })
+                    fetch(`/api/manage/member/${memberId}`, { method: 'DELETE', headers: { [csrfHeader]: csrfToken } })
                         .then(response => {
                             if (response.ok) return response.json();
                             return response.json().then(err => { throw new Error(err.error); });
@@ -152,14 +125,58 @@ document.addEventListener('DOMContentLoaded', function () {
                             alert(data.message || '팀원이 제외되었습니다.');
                             if (targetRow) targetRow.remove();
                         })
-                        .catch(error => {
-                            alert('제외 처리 실패: ' + error.message);
-                        });
+                        .catch(error => { alert('제외 처리 실패: ' + error.message); });
                 }
             }
         });
+
+        // 기능 5 : 담당 역할(task-input) 입력 후 포커스가 벗어나면(blur) 실시간 비동기 자동 저장 + 헤더 즉시 동기화
+        container.addEventListener('focusout', function (e) {
+            if (e.target && e.target.classList.contains('task-input')) {
+                const inputField = e.target;
+                const memberId = inputField.getAttribute('data-id');
+                const assignedRoleValue = inputField.value.trim();
+
+                fetch('/api/manage/member/task-update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                    body: JSON.stringify({ memberId: parseInt(memberId), assignedRole: assignedRoleValue })
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // 성공 시 인풋창 배경 피드백 시각 효과 (초록빛 맴돌다 사라짐)
+                            inputField.style.backgroundColor = '#f6ffed';
+                            setTimeout(() => { inputField.style.backgroundColor = '#fff'; }, 500);
+
+                            // =========================================================
+                            // [교정] 이메일을 제외한 순수 유저 '이름'만 정밀 추출하여 헤더와 비교
+                            // =========================================================
+                            const currentRow = inputField.closest('tr');
+                            // 첫 번째 td 안의 첫 번째 div(이름 영역)의 텍스트만 정확하게 가져옵니다.
+                            const rowUserName = currentRow.querySelector('td:first-child div:first-child')?.textContent.trim();
+                            const headerUserName = document.querySelector('#header-user-name')?.textContent.trim();
+
+                            // 디버깅용 콘솔 로그 (동기화가 안 될 경우 브라우저 F12 콘솔에서 확인 가능)
+                            console.log("화면 행 이름:", rowUserName, " | 헤더 이름:", headerUserName);
+
+                            // 이름이 완벽히 매칭될 경우에만 헤더 프로필 영역의 역할을 즉시 업데이트
+                            if (headerUserName && rowUserName === headerUserName) {
+                                const headerUserTask = document.querySelector('#header-user-task');
+                                if (headerUserTask) {
+                                    headerUserTask.textContent = assignedRoleValue || 'Backend Developer';
+                                }
+                            }
+
+                            return response.json();
+                        }
+                        throw new Error('역할 자동 저장 실패');
+                    })
+                    .catch(error => { console.error('Auto Save Error:', error); });
+            }
+        });
+
     }
 
-    // [엔진 가동] 페이지가 열릴 때 자동으로 오라클 DB 목록을 한 번 긁어옵니다.
+    // 파일 로드 시 실시간 데이터 호출 가동
     loadWorkspaceMembers();
 });
