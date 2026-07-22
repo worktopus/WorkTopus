@@ -144,7 +144,7 @@
              */
             const response =
                 await fetch(
-                    `${MEETING_SUMMARY_API}/projects/${encodeURIComponent(projectId)}`,
+                    `${MEETING_SUMMARY_API}/project/${encodeURIComponent(projectId)}`,
                     {
                         method:
                             "GET",
