@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>문의 / 신고 관리 | WorkTopus Admin</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-custom.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/css/admin/admin-report.css}">
+</head>
+
+<body>
+
+<div class="admin-layout">
+
+    <!-- 관리자 사이드바 -->
+    <th:block th:replace="~{admin/admin-sidebar :: sidebar}"></th:block>
+
+    <main class="admin-main">
+
+        <!-- 페이지 헤더 -->
+        <header class="admin-header">
+
+            <div>
+                <h1>문의 / 신고 관리</h1>
+                <p>
+                    서비스 이용 문의와 신고 내역을 확인하고 처리합니다.
+                </p>
+            </div>
+
+            <div class="admin-header__actions">
+
+                <button
+                        class="admin-user"
+                        type="button"
+                        id="adminUserBtn">
+
+                    <span>
+                    관리자
+                    </span>
+
+                    <span class="admin-user__arrow">
+                        ▼
+                    </span>
+
+                </button>
+
+                <div class="admin-dropdown" id="adminDropdown">
+
+                    <a th:href="@{/projects}" class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">↗</span>
+                        <span>사용자 화면</span>
+                    </a>
+
+                    <a th:href="@{/user/mypage}" class="admin-dropdown__item">
+                        <span class="admin-dropdown__icon">⚙</span>
+                        <span>내 정보</span>
+                    </a>
+
+                    <div class="admin-dropdown__divider"></div>
+                    <form th:action="@{/logout}" method="post">
+                        <button
+                                type="submit"
+                                class="admin-dropdown__item admin-dropdown__item--danger">
+                            <span class="admin-dropdown__icon">↩</span>
+                            <span>로그아웃</span>
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </header>
+
+        <!-- 문의 / 신고 통계 -->
+        <section class="report-summary">
+
+            <article class="report-summary__card">
+
+                <span class="report-summary__label">
+                    전체 접수
+                </span>
+
+                <strong class="report-summary__value">
+                    18
+                </strong>
+
+                <p class="report-summary__description">
+                    누적 문의 및 신고
+                </p>
+
+            </article>
+
+            <article class="report-summary__card">
+
+                <span class="report-summary__label">
+                    처리 대기
+                </span>
+
+                <strong class="report-summary__value">
+                    3
+                </strong>
+
+                <p class="report-summary__description">
+                    아직 확인하지 않은 항목
+                </p>
+
+            </article>
+
+            <article class="report-summary__card">
+
+                <span class="report-summary__label">
+                    처리 중
+                </span>
+
+                <strong class="report-summary__value">
+                    2
+                </strong>
+
+                <p class="report-summary__description">
+                    관리자 확인 진행 중
+                </p>
+
+            </article>
+
+            <article class="report-summary__card">
+
+                <span class="report-summary__label">
+                    처리 완료
+                </span>
+
+                <strong class="report-summary__value">
+                    13
+                </strong>
+
+                <p class="report-summary__description">
+                    답변 또는 조치 완료
+                </p>
+
+            </article>
+
+        </section>
+
+        <!-- 유형 탭 -->
+        <section class="report-tabs">
+
+            <button type="button"
+                    class="report-tabs__button report-tabs__button--active"
+                    data-tab="all">
+                전체
+                <span>18</span>
+            </button>
+
+            <button type="button"
+                    class="report-tabs__button"
+                    data-tab="inquiry">
+                문의
+                <span>11</span>
+            </button>
+
+            <button type="button"
+                    class="report-tabs__button"
+                    data-tab="report">
+                신고
+                <span>7</span>
+            </button>
+
+        </section>
+
+        <!-- 검색 및 필터 -->
+        <section class="report-toolbar">
+
+            <form class="report-search"
+                  method="get"
+                  th:action="@{/admin/reports}">
+
+                <select name="status"
+                        class="report-search__select">
+
+                    <option value="">
+                        전체 상태
+                    </option>
+
+                    <option value="WAITING">
+                        처리 대기
+                    </option>
+
+                    <option value="PROCESSING">
+                        처리 중
+                    </option>
+
+                    <option value="COMPLETED">
+                        처리 완료
+                    </option>
+
+                </select>
+
+                <select name="searchType"
+                        class="report-search__select">
+
+                    <option value="title">
+                        제목
+                    </option>
+
+                    <option value="writer">
+                        작성자
+                    </option>
+
+                </select>
+
+                <div class="report-search__field">
+
+                    <input type="text"
+                           name="keyword"
+                           placeholder="검색어를 입력하세요">
+
+                </div>
+
+                <button type="submit"
+                        class="report-search__button">
+                    검색
+                </button>
+
+            </form>
+
+        </section>
+
+        <!-- 문의 / 신고 목록 -->
+        <section class="report-table-card">
+
+            <div class="report-table-card__header">
+
+                <div>
+                    <h2>접수 목록</h2>
+                    <p>총 18건의 문의와 신고가 조회되었습니다.</p>
+                </div>
+
+            </div>
+
+            <div class="report-table-wrap">
+
+                <table class="report-table">
+
+                    <thead>
+                    <tr>
+                        <th>번호</th>
+                        <th>유형</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>접수일</th>
+                        <th>상태</th>
+                        <th>관리</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+
+                    <!-- 문의 -->
+                    <tr data-report-type="inquiry">
+
+                        <td>18</td>
+
+                        <td>
+                            <span class="report-type report-type--inquiry">
+                                문의
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="report-title">
+                                <strong>프로젝트 초대 알림이 오지 않습니다.</strong>
+                                <span>프로젝트 초대 및 알림 관련 문의</span>
+                            </div>
+                        </td>
+
+                        <td>김여린</td>
+
+                        <td>2026.07.13</td>
+
+                        <td>
+                            <span class="report-status report-status--waiting">
+                                처리 대기
+                            </span>
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="report-detail-button">
+                                상세
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    <!-- 신고 -->
+                    <tr data-report-type="report">
+
+                        <td>17</td>
+
+                        <td>
+                            <span class="report-type report-type--report">
+                                신고
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="report-title">
+                                <strong>부적절한 게시글을 신고합니다.</strong>
+                                <span>프로젝트 게시판 게시글 신고</span>
+                            </div>
+                        </td>
+
+                        <td>홍길동</td>
+
+                        <td>2026.07.13</td>
+
+                        <td>
+                            <span class="report-status report-status--processing">
+                                처리 중
+                            </span>
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="report-detail-button">
+                                상세
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    <!-- 완료된 문의 -->
+                    <tr data-report-type="inquiry">
+
+                        <td>16</td>
+
+                        <td>
+                            <span class="report-type report-type--inquiry">
+                                문의
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="report-title">
+                                <strong>회원 정보를 수정하고 싶습니다.</strong>
+                                <span>계정 및 회원 정보 관련 문의</span>
+                            </div>
+                        </td>
+
+                        <td>이민지</td>
+
+                        <td>2026.07.12</td>
+
+                        <td>
+                            <span class="report-status report-status--completed">
+                                처리 완료
+                            </span>
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="report-detail-button">
+                                상세
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    <!-- 완료된 신고 -->
+                    <tr data-report-type="report">
+
+                        <td>15</td>
+
+                        <td>
+                            <span class="report-type report-type--report">
+                                신고
+                            </span>
+                        </td>
+
+                        <td>
+                            <div class="report-title">
+                                <strong>프로젝트 채팅 도배 사용자 신고</strong>
+                                <span>채팅 이용 방해 및 반복 메시지 신고</span>
+                            </div>
+                        </td>
+
+                        <td>박민수</td>
+
+                        <td>2026.07.11</td>
+
+                        <td>
+                            <span class="report-status report-status--completed">
+                                처리 완료
+                            </span>
+                        </td>
+
+                        <td>
+                            <button type="button"
+                                    class="report-detail-button">
+                                상세
+                            </button>
+                        </td>
+
+                    </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- 페이징 -->
+            <nav class="report-pagination">
+
+                <button type="button"
+                        disabled>
+                    이전
+                </button>
+
+                <button type="button"
+                        class="report-pagination__button--active">
+                    1
+                </button>
+
+                <button type="button">
+                    2
+                </button>
+
+                <button type="button">
+                    3
+                </button>
+
+                <button type="button">
+                    다음
+                </button>
+
+            </nav>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script th:src="@{/js/admin/admin.js}"></script>
+<script th:src="@{/js/admin/report.js}"></script>
+
+</body>
+</html>

@@ -96,13 +96,16 @@ public class BoardServiceImpl implements BoardService {
 
             boardFileRepository.save(boardFile);
         }
+
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
 
+
         Page<Board> boards = boardRepository
+
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
                         "N",
@@ -175,6 +178,7 @@ public class BoardServiceImpl implements BoardService {
                 Sort.Order.desc("noticeYn"),
                 Sort.Order.desc("createdAt")
         );
+
     }
 
     @Override
@@ -403,6 +407,7 @@ public class BoardServiceImpl implements BoardService {
                 );
 
         files.forEach(BoardFile::delete);
+
     }
 
     private Board getBoard(Long projectId, Long boardId) {
@@ -441,3 +446,4 @@ public class BoardServiceImpl implements BoardService {
                 .map(NoticeResponse::from);
     }
 }
+

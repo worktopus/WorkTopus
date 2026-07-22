@@ -1,0 +1,402 @@
+/* ==========================================================
+   Report Summary
+========================================================== */
+
+.report-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.report-summary__card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.report-summary__label {
+    color: var(--text-sub);
+    font-size: 14px;
+}
+
+.report-summary__value {
+    color: var(--text-main);
+    font-size: 28px;
+    line-height: 1;
+}
+
+.report-summary__description {
+    margin: 0;
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+/* ==========================================================
+   Type Tabs
+========================================================== */
+
+.report-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    padding: 6px;
+    width: fit-content;
+    background: var(--primary-soft);
+    border-radius: 12px;
+}
+
+.report-tabs__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 38px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-sub);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.report-tabs__button span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--text-sub) 12%, transparent);
+    font-size: 11px;
+}
+
+.report-tabs__button:hover {
+    color: var(--primary-dark);
+}
+
+.report-tabs__button--active {
+    background: var(--card);
+    color: var(--primary-dark);
+    box-shadow: 0 2px 7px color-mix(in srgb, var(--primary-dark) 10%, transparent);
+}
+
+.report-tabs__button--active span {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+/* ==========================================================
+   Search
+========================================================== */
+
+.report-toolbar {
+    margin-bottom: 18px;
+}
+
+.report-search {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.report-search__field {
+    width: 280px;
+}
+
+.report-search__field input,
+.report-search__select {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--text-main);
+    outline: none;
+    transition: var(--transition);
+}
+
+.report-search__select {
+    width: 140px;
+}
+
+.report-search__field input:focus,
+.report-search__select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.report-search__button {
+    height: 42px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--primary);
+    color: var(--text-right);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.report-search__button:hover {
+    background: var(--primary-hover);
+}
+
+/* ==========================================================
+   Report Table
+========================================================== */
+
+.report-table-card {
+    overflow: hidden;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow);
+}
+
+.report-table-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border-bottom: 1px solid var(--border);
+}
+
+.report-table-card__header h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.report-table-card__header p {
+    margin: 0;
+    color: var(--text-sub);
+    font-size: 13px;
+}
+
+.report-table-wrap {
+    overflow-x: auto;
+}
+
+.report-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+.report-table th,
+.report-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.report-table th {
+    background: var(--primary-soft);
+    color: var(--text-sub);
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.report-table td {
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.report-table tbody tr {
+    transition: var(--transition);
+}
+
+.report-table tbody tr:hover {
+    background: var(--primary-soft);
+}
+
+.report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* ==========================================================
+   Report Title
+========================================================== */
+
+.report-title {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    max-width: 380px;
+}
+
+.report-title strong {
+    overflow: hidden;
+    color: var(--text-main);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.report-title span {
+    overflow: hidden;
+    color: var(--text-sub);
+    font-size: 12px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ==========================================================
+   Type Badge
+========================================================== */
+
+.report-type,
+.report-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 66px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.report-type--inquiry {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+.report-type--report {
+    background: color-mix(in srgb, var(--danger) 11%, var(--card));
+    color: color-mix(in srgb, var(--danger) 78%, var(--text-main));
+}
+
+/* ==========================================================
+   Status Badge
+========================================================== */
+
+.report-status--waiting {
+    background: color-mix(in srgb, var(--warning) 15%, var(--card));
+    color: color-mix(in srgb, var(--warning) 70%, var(--text-main));
+}
+
+.report-status--processing {
+    background: color-mix(in srgb, var(--secondary) 16%, var(--card));
+    color: var(--primary-dark);
+}
+
+.report-status--completed {
+    background: color-mix(in srgb, var(--success) 13%, var(--card));
+    color: color-mix(in srgb, var(--success) 72%, var(--text-main));
+}
+
+/* ==========================================================
+   Detail Button
+========================================================== */
+
+.report-detail-button {
+    padding: 7px 13px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text-sub);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.report-detail-button:hover {
+    border-color: var(--primary);
+    background: var(--primary-soft);
+    color: var(--primary-dark);
+}
+
+/* ==========================================================
+   Pagination
+========================================================== */
+
+.report-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+}
+
+.report-pagination a,
+.report-pagination button,
+.report-pagination span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--text-sub);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.report-pagination button {
+    cursor: pointer;
+}
+
+.report-pagination a:hover,
+.report-pagination button:hover:not(:disabled) {
+    border-color: var(--primary);
+    color: var(--primary-dark);
+}
+
+.report-pagination button:disabled,
+.report-pagination__disabled {
+    opacity: 0.45;
+    cursor: default;
+    pointer-events: none;
+}
+
+.report-pagination__button--active {
+    border-color: var(--primary) !important;
+    background: var(--primary) !important;
+    color: var(--text-right) !important;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 1100px) {
+
+    .report-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+
+    .report-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .report-tabs {
+        width: 100%;
+    }
+
+    .report-tabs__button {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .report-search {
+        flex-direction: column;
+    }
+
+    .report-search__field,
+    .report-search__select,
+    .report-search__button {
+        width: 100%;
+    }
+}
