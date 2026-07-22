@@ -1,14 +1,12 @@
 package com.example.WorkTopus.chat.controller;
 
 import com.example.WorkTopus.chat.dto.ChatMessage;
+import com.example.WorkTopus.chat.service.ChatRoomAccessService;
 import com.example.WorkTopus.chat.service.ChatService;
-import com.example.WorkTopus.chat.service.ProjectMemberService;
 import com.example.WorkTopus.entity.Users;
-import com.example.WorkTopus.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,46 +15,50 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.security.Principal;
 import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
 
-    private static final int MAX_MESSAGE_LENGTH = 2000;
-
     /*
-     * 단체 채팅방:
-     * project_2_group
+     * 채팅 메시지 최대 길이
      */
-    private static final Pattern GROUP_ROOM_PATTERN =
-            Pattern.compile(
-                    "^project_(\\d+)_group$"
-            );
+    private static final int MAX_MESSAGE_LENGTH =
+            2000;
+
 
     /*
-     * 개인 채팅방:
-     * project_2_private_1_4
+     * 채팅 메시지 저장과
+     * 이전 대화 조회를 처리합니다.
      */
-    private static final Pattern PRIVATE_ROOM_PATTERN =
-            Pattern.compile(
-                    "^project_(\\d+)_private_(\\d+)_(\\d+)$"
-            );
-
-    private final ChatService chatService;
-
-    private final ProjectMemberService projectMemberService;
-
-    private final UserService userService;
-
-    private final SimpMessagingTemplate messagingTemplate;
+    private final ChatService
+            chatService;
 
 
     /*
-     * 메시지 전송
+     * 단체방과 개인방 접근 권한을
+     * 공통으로 검사합니다.
+     */
+    private final ChatRoomAccessService
+            chatRoomAccessService;
+
+
+    /*
+     * 저장된 메시지를 해당 채팅방 구독자에게
+     * 실시간으로 전송합니다.
+     */
+    private final SimpMessagingTemplate
+            messagingTemplate;
+
+
+    /*
+     * =====================================================
+     * 채팅 메시지 전송
+     * =====================================================
      *
      * 클라이언트 전송 주소:
+     *
      * /app/chat.send
      */
     @MessageMapping("/chat.send")
@@ -64,17 +66,28 @@ public class ChatController {
             ChatMessage message,
             Principal principal
     ) {
-        Users loginUser =
-                getLoginUser(principal);
 
-        validateMessage(
-                message,
-                loginUser.getUserNum()
-        );
+        /*
+         * 메시지 내용과 채팅방 접근 권한을 검사합니다.
+         *
+         * 모든 검사를 통과하면
+         * 실제 로그인 사용자 정보를 반환받습니다.
+         */
+        Users loginUser =
+                validateMessage(
+                        message,
+                        principal
+                );
+
 
         /*
          * 프런트에서 보낸 senderNum과 senderName은
-         * 신뢰하지 않고 로그인 사용자 정보로 덮어씁니다.
+         * 브라우저에서 조작될 수 있으므로 사용하지 않습니다.
+         /*
+         * 프런트에서 보낸 senderNum과 senderName은
+         * *
+         * Spring Security의 실제 로그인 사용자 정보로
+         * 다시 설정합니다.
          */
         message.setSenderNum(
                 loginUser.getUserNum()
@@ -84,287 +97,226 @@ public class ChatController {
                 loginUser.getName()
         );
 
+
+        /*
+         * 채팅방 ID의 앞뒤 공백을 제거합니다.
+         */
+        message.setRoomId(
+                message.getRoomId().trim()
+        );
+
+
+        /*
+         * 메시지 내용의 앞뒤 공백을 제거합니다.
+         */
         message.setMessage(
                 message.getMessage().trim()
         );
 
-        message.setType("TALK");
 
+        /*
+         * 현재 전송되는 메시지는
+         * 일반 대화 메시지입니다.
+         */
+        message.setType(
+                "TALK"
+        );
+
+
+        /*
+         * 브라우저에서 전달한 시간이 아닌
+         * 서버의 현재 시간을 사용합니다.
+         */
         message.setCreatedAt(
                 OffsetDateTime.now()
         );
 
-        /*
-         * 저장 후 messageId 등이 포함된 객체를 받습니다.
-         */
-        ChatMessage savedMessage =
-                chatService.save(message);
 
         /*
-         * 해당 채팅방 구독자에게 메시지 전송
+         * 메시지를 DB에 저장합니다.
+         *
+         * 저장 후 messageId 등이 포함된
+         * ChatMessage 객체를 반환받습니다.
+         */
+        ChatMessage savedMessage =
+                chatService.save(
+                        message
+                );
+
+
+        /*
+         * 해당 채팅방을 구독하고 있는 사용자들에게
+         * 저장된 메시지를 실시간 전송합니다.
+         *
+         * 예:
+         *
+         * /topic/chat/project_22_group
+         *
+         * /topic/chat/project_22_private_3_8
          */
         messagingTemplate.convertAndSend(
-                "/topic/chat/" +
-                        savedMessage.getRoomId(),
+                "/topic/chat/"
+                        + savedMessage.getRoomId(),
                 savedMessage
         );
     }
 
 
     /*
+     * =====================================================
      * 채팅방 이전 대화 조회
+     * =====================================================
      *
-     * GET /chat/history/{roomId}
+     * GET
+     * /chat/history/{roomId}
+     *
+     * 예:
+     *
+     * GET
+     * /chat/history/project_22_group
+     *
+     * GET
+     * /chat/history/project_22_private_3_8
      */
-    @GetMapping("/chat/history/{roomId}")
+    @GetMapping(
+            "/chat/history/{roomId}"
+    )
     @ResponseBody
     public List<ChatMessage> getHistory(
             @PathVariable String roomId,
             Principal principal
     ) {
-        Users loginUser =
-                getLoginUser(principal);
 
-        validateRoomAccess(
-                roomId,
-                null,
-                loginUser.getUserNum()
-        );
+        /*
+         * 이전 대화를 조회하기 전에
+         * 현재 로그인 사용자가 해당 방에
+         * 접근할 수 있는지 검사합니다.
+         */
+        chatRoomAccessService
+                .requireRoomAccess(
+                        roomId,
+                        principal
+                );
 
+
+        /*
+         * 권한 검사를 통과한 경우에만
+         * 해당 채팅방의 메시지를 조회합니다.
+         */
         return chatService.getMessages(
-                roomId
+                roomId.trim()
         );
     }
 
 
     /*
-     * 메시지 정보 검증
+     * =====================================================
+     * 메시지 내용과 채팅방 접근 권한 검사
+     * =====================================================
+     *
+     * 모든 검사를 통과하면
+     * 실제 로그인 Users 객체를 반환합니다.
      */
-    private void validateMessage(
+    private Users validateMessage(
             ChatMessage message,
-            Long loginUserNum
+            Principal principal
     ) {
+
+        /*
+         * 메시지 객체 확인
+         */
         if (message == null) {
             throw new IllegalArgumentException(
                     "메시지 정보가 없습니다."
             );
         }
 
-        if (message.getProjectId() == null) {
+
+        /*
+         * 프로젝트 번호 확인
+         */
+        if (
+                message.getProjectId() == null
+                        || message.getProjectId() <= 0
+        ) {
             throw new IllegalArgumentException(
-                    "프로젝트 번호가 없습니다."
+                    "올바른 프로젝트 번호가 필요합니다."
             );
         }
 
+
+        /*
+         * 채팅방 번호 확인
+         */
         if (
-                message.getRoomId() == null ||
-                        message.getRoomId().isBlank()
+                message.getRoomId() == null
+                        || message.getRoomId().isBlank()
         ) {
             throw new IllegalArgumentException(
                     "채팅방 번호가 없습니다."
             );
         }
 
+
+        /*
+         * 메시지 내용 확인
+         */
         if (
-                message.getMessage() == null ||
-                        message.getMessage().isBlank()
+                message.getMessage() == null
+                        || message.getMessage().isBlank()
         ) {
             throw new IllegalArgumentException(
                     "메시지 내용을 입력하세요."
             );
         }
 
+
+        /*
+         * 메시지 최대 길이 확인
+         */
         if (
                 message.getMessage()
                         .trim()
-                        .length() >
-                        MAX_MESSAGE_LENGTH
+                        .length()
+                        > MAX_MESSAGE_LENGTH
         ) {
             throw new IllegalArgumentException(
                     "메시지는 2000자 이하로 입력하세요."
             );
         }
 
-        validateRoomAccess(
-                message.getRoomId(),
-                message.getProjectId(),
-                loginUserNum
-        );
-    }
-
-
-    /*
-     * 채팅방 접근 권한 검사
-     */
-    private void validateRoomAccess(
-            String roomId,
-            Long expectedProjectId,
-            Long loginUserNum
-    ) {
-        if (
-                roomId == null ||
-                        roomId.isBlank()
-        ) {
-            throw new IllegalArgumentException(
-                    "채팅방 번호가 없습니다."
-            );
-        }
-
-        if (loginUserNum == null) {
-            throw new AccessDeniedException(
-                    "로그인 사용자 번호가 없습니다."
-            );
-        }
 
         /*
-         * 단체 채팅방 검사
+         * 채팅방 ID에서 실제 프로젝트 번호를 추출합니다.
+         *
+         * project_22_group
+         * → 22
+         *
+         * project_22_private_3_8
+         * → 22
          */
-        Matcher groupMatcher =
-                GROUP_ROOM_PATTERN.matcher(
-                        roomId
-                );
-
-        if (groupMatcher.matches()) {
-            Long roomProjectId =
-                    Long.valueOf(
-                            groupMatcher.group(1)
-                    );
-
-            validateProjectId(
-                    roomProjectId,
-                    expectedProjectId
-            );
-
-            validateProjectMember(
-                    roomProjectId,
-                    loginUserNum
-            );
-
-            return;
-        }
-
-        /*
-         * 개인 채팅방 검사
-         */
-        Matcher privateMatcher =
-                PRIVATE_ROOM_PATTERN.matcher(
-                        roomId
-                );
-
-        if (privateMatcher.matches()) {
-            Long roomProjectId =
-                    Long.valueOf(
-                            privateMatcher.group(1)
-                    );
-
-            Long firstUserNum =
-                    Long.valueOf(
-                            privateMatcher.group(2)
-                    );
-
-            Long secondUserNum =
-                    Long.valueOf(
-                            privateMatcher.group(3)
-                    );
-
-            validateProjectId(
-                    roomProjectId,
-                    expectedProjectId
-            );
-
-            /*
-             * 작은 userNum이 앞에 있어야 합니다.
-             */
-            if (
-                    firstUserNum >=
-                            secondUserNum
-            ) {
-                throw new IllegalArgumentException(
-                        "올바르지 않은 개인 채팅방 번호입니다."
-                );
-            }
-
-            /*
-             * 로그인 사용자가 개인 채팅방의
-             * 두 참여자 중 한 명인지 확인합니다.
-             */
-            boolean roomParticipant =
-                    loginUserNum.equals(
-                            firstUserNum
-                    ) ||
-                            loginUserNum.equals(
-                                    secondUserNum
-                            );
-
-            if (!roomParticipant) {
-                throw new AccessDeniedException(
-                        "해당 개인 채팅방에 접근할 수 없습니다."
-                );
-            }
-
-            /*
-             * 로그인 사용자도 프로젝트 참여자인지 확인
-             */
-            validateProjectMember(
-                    roomProjectId,
-                    loginUserNum
-            );
-
-            /*
-             * 개인 채팅 상대방들도 모두
-             * 같은 프로젝트 참여자인지 확인합니다.
-             */
-            validateProjectMember(
-                    roomProjectId,
-                    firstUserNum
-            );
-
-            validateProjectMember(
-                    roomProjectId,
-                    secondUserNum
-            );
-
-            return;
-        }
-
-        throw new IllegalArgumentException(
-                "올바르지 않은 채팅방 번호입니다."
-        );
-    }
-
-
-    /*
-     * 프로젝트 참여자 여부 검사
-     */
-    private void validateProjectMember(
-            Long projectId,
-            Long userNum
-    ) {
-        boolean projectMember =
-                projectMemberService
-                        .isProjectMember(
-                                projectId,
-                                userNum
+        Long roomProjectId =
+                chatRoomAccessService
+                        .extractProjectId(
+                                message.getRoomId()
                         );
 
-        if (!projectMember) {
-            throw new AccessDeniedException(
-                    "해당 프로젝트의 참여자가 아닙니다."
-            );
-        }
-    }
 
-
-    /*
-     * 요청 projectId와 roomId의 프로젝트 번호 비교
-     */
-    private void validateProjectId(
-            Long roomProjectId,
-            Long expectedProjectId
-    ) {
+        /*
+         * 메시지의 projectId와
+         * roomId에 포함된 프로젝트 번호가
+         * 일치하는지 확인합니다.
+         *
+         * 예:
+         *
+         * projectId = 22
+         * roomId = project_30_group
+         *
+         * 위와 같은 요청은 차단됩니다.
+         */
         if (
-                expectedProjectId != null &&
-                        !expectedProjectId.equals(
+                !message.getProjectId()
+                        .equals(
                                 roomProjectId
                         )
         ) {
@@ -372,36 +324,23 @@ public class ChatController {
                     "프로젝트와 채팅방 정보가 일치하지 않습니다."
             );
         }
-    }
 
 
-    /*
-     * 현재 로그인 사용자 조회
-     *
-     * principal.getName()은 로그인 userId입니다.
-     */
-    private Users getLoginUser(
-            Principal principal
-    ) {
-        if (
-                principal == null ||
-                        principal.getName() == null ||
-                        principal.getName().isBlank()
-        ) {
-            throw new AccessDeniedException(
-                    "로그인이 필요합니다."
-            );
-        }
-
-        try {
-            return userService.findByUserId(
-                    principal.getName()
-            );
-
-        } catch (IllegalArgumentException exception) {
-            throw new AccessDeniedException(
-                    "로그인 사용자 정보를 찾을 수 없습니다."
-            );
-        }
+        /*
+         * 최종 채팅방 접근 권한 검사
+         *
+         * 단체방:
+         * - 프로젝트 참여자인지 검사
+         *
+         * 개인방:
+         * - 프로젝트 참여자인지 검사
+         * - 개인방 당사자인지 검사
+         * - 두 사용자 모두 프로젝트 참여자인지 검사
+         */
+        return chatRoomAccessService
+                .requireRoomAccess(
+                        message.getRoomId(),
+                        principal
+                );
     }
 }
