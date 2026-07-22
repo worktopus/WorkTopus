@@ -1,0 +1,314 @@
+/* ==========================================================
+   Project Summary
+========================================================== */
+
+.project-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-bottom: 24px;
+}
+
+.project-summary__card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    background: #ffffff;
+    border: 1px solid #e4ecf7;
+    border-radius: 16px;
+}
+
+.project-summary__label {
+    color: #666666;
+    font-size: 14px;
+}
+
+.project-summary__value {
+    color: #222222;
+    font-size: 28px;
+    line-height: 1;
+}
+
+.project-summary__description {
+    margin: 0;
+    color: #999999;
+    font-size: 13px;
+}
+
+/* ==========================================================
+   Search
+========================================================== */
+
+.project-toolbar {
+    margin-bottom: 18px;
+}
+
+.project-search {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.project-search__field {
+    width: 280px;
+}
+
+.project-search__field input,
+.project-search__select {
+    width: 100%;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #dfe7f2;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #222222;
+    outline: none;
+}
+
+.project-search__select {
+    width: 140px;
+}
+
+.project-search__field input:focus,
+.project-search__select:focus {
+    border-color: #7287f4;
+    box-shadow: 0 0 0 3px rgba(114, 135, 244, 0.12);
+}
+
+.project-search__button {
+    height: 42px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 10px;
+    background: #7287f4;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.project-search__button:hover {
+    background: #5d73ea;
+}
+
+/* ==========================================================
+   Table
+========================================================== */
+
+.project-table-card {
+    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e4ecf7;
+    border-radius: 16px;
+}
+
+.project-table-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 22px 24px;
+    border-bottom: 1px solid #edf1f6;
+}
+
+.project-table-card__header h2 {
+    margin: 0 0 6px;
+    font-size: 18px;
+}
+
+.project-table-card__header p {
+    margin: 0;
+    color: #888888;
+    font-size: 13px;
+}
+
+.project-table-wrap {
+    overflow-x: auto;
+}
+
+.project-table {
+    width: 100%;
+    min-width: 950px;
+    border-collapse: collapse;
+}
+
+.project-table th,
+.project-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #edf1f6;
+    text-align: left;
+    vertical-align: middle;
+}
+
+.project-table th {
+    background: #f8faff;
+    color: #666666;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.project-table td {
+    color: #333333;
+    font-size: 14px;
+}
+
+.project-table tbody tr:hover {
+    background: #fafbff;
+}
+
+/* ==========================================================
+   Project Name
+========================================================== */
+
+.project-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.project-name__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: #eef1ff;
+    color: #5f72d9;
+    font-weight: 800;
+}
+
+.project-name__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.project-name__info strong {
+    color: #222222;
+}
+
+.project-name__info span {
+    color: #999999;
+    font-size: 12px;
+}
+
+.project-member-count {
+    color: #555555;
+    font-weight: 600;
+}
+
+/* ==========================================================
+   Status
+========================================================== */
+
+.project-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 66px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.project-status--active {
+    background: #eaf8ef;
+    color: #25864b;
+}
+
+.project-status--completed {
+    background: #eef1ff;
+    color: #5f72d9;
+}
+
+.project-status--inactive {
+    background: #f2f3f5;
+    color: #7d828a;
+}
+
+/* ==========================================================
+   Button
+========================================================== */
+
+.project-detail-button {
+    padding: 7px 13px;
+    border: 1px solid #dfe7f2;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #555555;
+    cursor: pointer;
+}
+
+.project-detail-button:hover {
+    border-color: #7287f4;
+    background: #f5f7ff;
+    color: #5f72d9;
+}
+
+/* ==========================================================
+   Pagination
+========================================================== */
+
+.project-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 20px;
+}
+
+.project-pagination button {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border: 1px solid #dfe7f2;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #666666;
+    cursor: pointer;
+}
+
+.project-pagination button:hover:not(:disabled) {
+    border-color: #7287f4;
+    color: #5f72d9;
+}
+
+.project-pagination button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.project-pagination__button--active {
+    border-color: #7287f4 !important;
+    background: #7287f4 !important;
+    color: #ffffff !important;
+}
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 1100px) {
+
+    .project-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 760px) {
+
+    .project-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .project-search {
+        flex-direction: column;
+    }
+
+    .project-search__field,
+    .project-search__select,
+    .project-search__button {
+        width: 100%;
+    }
+}
