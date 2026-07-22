@@ -44,8 +44,7 @@
                   th:attr="data-project-id=${projectId}"
                   method="post"
                   enctype="multipart/form-data">
-        <!-- 작성 폼 (2026.07.20 승민 수정)-->
-            <input type="hidden" name="notice" value="false">
+
 
             <!-- 기본 정보 -->
             <div class="board_write_card">
@@ -60,11 +59,15 @@
                                 name="category"
                                 class="board_write_select"
                                 required>
-                            <option value="">게시판을 선택하세요</option>
-                            <option value="NOTICE">공지사항</option>
-                            <option value="FREE">자유게시판</option>
+
+                            <option value="">전체 카테고리</option>
+                            <option value="NOTICE">공지</option>
+                            <option value="MEETING">회의</option>
+                            <option value="WORK">업무</option>
+                            <option value="RESOURCE">자료</option>
                             <option value="IDEA">아이디어</option>
-                            <option value="QUESTION">질문</option>
+                            <option value="ETC">기타</option>
+
                         </select>
                     </div>
 

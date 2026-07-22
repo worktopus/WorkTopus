@@ -157,6 +157,19 @@
                             </div>
 
                             <div class="board-detail_info-item">
+                                <span>카테고리</span>
+                                <strong th:switch="${board.category}">
+                                    <span th:case="'NOTICE'">공지</span>
+                                    <span th:case="'MEETING'">회의</span>
+                                    <span th:case="'WORK'">업무</span>
+                                    <span th:case="'RESOURCE'">자료</span>
+                                    <span th:case="'IDEA'">아이디어</span>
+                                    <span th:case="'ETC'">기타</span>
+                                    <span th:case="*" th:text="${board.category}">기타</span>
+                                </strong>
+                            </div>
+
+                            <div class="board-detail_info-item">
                                 <span>조회수</span>
                                 <strong th:text="${board.viewCount}">0</strong>
                             </div>

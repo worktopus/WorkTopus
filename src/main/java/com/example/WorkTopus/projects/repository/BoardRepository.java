@@ -46,22 +46,27 @@ public interface BoardRepository extends JpaRepository<Board, Long> {
     );
 
     @Query("""
-        SELECT b
-        FROM Board b
-        WHERE b.projectId = :projectId
-          AND b.deletedYn = 'N'
-          AND (
-              LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
-              OR LOWER(b.writerName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-              OR LOWER(b.category) LIKE LOWER(CONCAT('%', :keyword, '%'))
-          )
-        ORDER BY b.noticeYn DESC, b.createdAt DESC
+    SELECT b
+    FROM Board b
+    WHERE b.projectId = :projectId
+      AND b.deletedYn = 'N'
+      AND (
+            :keyword IS NULL
+            OR LOWER(b.title) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(b.writerName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(b.category) LIKE LOWER(CONCAT('%', :keyword, '%'))
+            OR LOWER(b.tag) LIKE LOWER(CONCAT('%', :keyword, '%'))
+      )
+      AND (
+            :category IS NULL
+            OR b.category = :category
+      )
     """)
     Page<Board> searchBoards(
             @Param("projectId") Long projectId,
             @Param("keyword") String keyword,
+            @Param("category") String category,
             Pageable pageable
     );
-
 
 }

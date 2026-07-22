@@ -14,6 +14,9 @@ public interface BoardService {
 
     Long create(Long projectId, BoardCreateRequest request, String loginEmail);
 
+    Page<BoardListResponse> searchBoards(Long projectId, String keyword, String category, String sort, Pageable pageable);
+
+
     Page<BoardListResponse> findBoards(Long projectId, Pageable pageable);
 
     BoardDetailResponse findDetail(Long projectId, Long boardId);
@@ -22,7 +25,6 @@ public interface BoardService {
 
     void delete(Long projectId, Long boardId, String loginEmail);
 
-    Page<BoardListResponse> searchBoards(Long projectId, String keyword, Pageable pageable);
 
     BoardDetailResponse findEditableBoard(Long projectId, Long boardId, String loginUserId);
 
@@ -39,6 +41,7 @@ public interface BoardService {
             Long boardId,
             String loginUserId
     );
+
 
 
 }

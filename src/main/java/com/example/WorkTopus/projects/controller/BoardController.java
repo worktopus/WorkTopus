@@ -11,6 +11,7 @@ import com.example.WorkTopus.projects.service.CommentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
@@ -32,28 +33,45 @@ public class BoardController {
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,
-            @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10)
             Pageable pageable
     ) {
-        Page<BoardListResponse> boardPage;
+        Page<BoardListResponse> boardPage =
+                boardService.findBoards(projectId, pageable);
 
-        if (keyword == null || keyword.isBlank()) {
-            boardPage = boardService.findBoards(projectId, pageable);
-        } else {
-            boardPage = boardService.searchBoards(projectId, keyword, pageable);
-        }
+        PageResponse<BoardListResponse> boards =
+                PageResponse.from(boardPage);
 
-        PageResponse<BoardListResponse> boards = PageResponse.from(boardPage);
+        ModelAndView mav =
+                new ModelAndView("projects/board-list");
 
-        ModelAndView mav = new ModelAndView("projects/board-list");
         mav.addObject("projectId", projectId);
         mav.addObject("boards", boards);
-        mav.addObject("keyword", keyword);
-        mav.addObject("latestNotice",
-                boardService.getLatestNotice(projectId).orElse(null));
+        mav.addObject(
+                "latestNotice",
+                boardService.getLatestNotice(projectId).orElse(null)
+        );
 
         return mav;
+    }
+
+    @GetMapping("/search")
+    @ResponseBody
+    public List<BoardListResponse> search(
+            @PathVariable Long projectId,
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String category,
+            @RequestParam(defaultValue = "latest") String sort
+    ) {
+        Pageable pageable = PageRequest.of(0, 1000);
+
+        return boardService.searchBoards(
+                projectId,
+                keyword,
+                category,
+                sort,
+                pageable
+        ).getContent();
     }
 
 

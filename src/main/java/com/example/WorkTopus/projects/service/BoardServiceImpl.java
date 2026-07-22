@@ -13,7 +13,9 @@ import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,12 +54,14 @@ public class BoardServiceImpl implements BoardService {
                         )
                 );
 
+        boolean notice = "NOTICE".equals(request.category());
+
         Board board = new Board(
                 projectId,
                 request.title(),
                 request.content(),
                 member.getUserName(),
-                request.notice(),
+                notice,
                 request.category(),
                 request.tag()
         );
@@ -115,6 +119,64 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
+    @Override
+    @Transactional(readOnly = true)
+    public Page<BoardListResponse> searchBoards(
+            Long projectId,
+            String keyword,
+            String category,
+            String sort,
+            Pageable pageable
+    ) {
+        String normalizedKeyword =
+                keyword == null || keyword.isBlank()
+                        ? null
+                        : keyword.trim();
+
+        String normalizedCategory =
+                category == null || category.isBlank()
+                        ? null
+                        : category.trim();
+
+        Pageable searchPageable = PageRequest.of(
+                pageable.getPageNumber(),
+                pageable.getPageSize(),
+                createSearchSort(sort)
+        );
+
+
+        Page<Board> boards = boardRepository.searchBoards(
+                projectId,
+                normalizedKeyword,
+                normalizedCategory,
+                searchPageable
+        );
+
+        Map<Long, Long> commentCountMap =
+                getCommentCountMap(boards.getContent());
+
+        return boards.map(board ->
+                BoardListResponse.from(
+                        board,
+                        commentCountMap.getOrDefault(board.getId(), 0L)
+                )
+        );
+    }
+    private Sort createSearchSort(String sort) {
+        if ("views".equals(sort)) {
+            return Sort.by(
+                    Sort.Order.desc("noticeYn"),
+                    Sort.Order.desc("viewCount"),
+                    Sort.Order.desc("createdAt")
+            );
+        }
+
+        return Sort.by(
+                Sort.Order.desc("noticeYn"),
+                Sort.Order.desc("createdAt")
+        );
+    }
+
     @Override
     public BoardDetailResponse findDetail(Long projectId, Long boardId) {
         Board board = getBoard(projectId, boardId);
@@ -278,10 +340,12 @@ public class BoardServiceImpl implements BoardService {
                         "N"
                 );
 
+        boolean notice = "NOTICE".equals(request.category());
+
         board.update(
                 request.title(),
                 request.content(),
-                request.notice(),
+                notice,
                 request.category(),
                 request.tag()
         );
@@ -366,27 +430,6 @@ public class BoardServiceImpl implements BoardService {
                 ));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public Page<BoardListResponse> searchBoards(
-            Long projectId,
-            String keyword,
-            Pageable pageable
-    ) {
-
-        Page<Board> boards =
-                boardRepository.searchBoards(projectId, keyword, pageable);
-
-        Map<Long, Long> commentCountMap =
-                getCommentCountMap(boards.getContent());
-
-        return boards.map(board ->
-                BoardListResponse.from(
-                        board,
-                        commentCountMap.getOrDefault(board.getId(), 0L)
-                )
-        );
-    }
 
     public Optional<NoticeResponse> getLatestNotice(Long projectId) {
         return boardRepository

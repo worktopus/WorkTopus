@@ -21,8 +21,6 @@ public record BoardCreateRequest(
         @Size(max = 200)
         String tag,
 
-        boolean notice,
-
         List<MultipartFile> files
 ) {
 
@@ -32,7 +30,6 @@ public record BoardCreateRequest(
                 content,
                 category,
                 tag != null ? tag : this.tag,
-                notice,
                 files
         );
     }
