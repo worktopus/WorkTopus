@@ -2,10 +2,13 @@ package com.example.WorkTopus.Notification.controller;
 
 import com.example.WorkTopus.Notification.entity.Notification;
 import com.example.WorkTopus.Notification.service.NotificationService;
+import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.repository.UserRepository; // 💡 UserRepository 경로 확인 필요
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -14,21 +17,36 @@ import java.util.List;
 public class NotificationApiController {
 
     private final NotificationService notificationService;
+    private final UserRepository userRepository;
 
-    // 1. 내 알림 목록 조회 API (마이페이지 알림 탭용)
+    // 1. 내 알림 목록 조회 API
     @GetMapping
-    public ResponseEntity<List<Notification>> getMyNotifications(/* @AuthenticationPrincipal 또는 Session 유저정보 */) {
-        // 로그인한 유저의 userNum을 가져옵니다. (예: Long userNum = loginUser.getUserNum();)
-        Long userNum = 1L; // 테스트용 임시 userNum
-        List<Notification> notifications = notificationService.getNotifications(userNum);
+    public ResponseEntity<List<Notification>> getMyNotifications(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        // 시큐리티 로그인 ID(이메일 또는 아이디)로 Users 엔티티 조회
+        Users loginUser = userRepository.findByUserId(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("로그인 유저 정보가 없습니다."));
+
+        List<Notification> notifications = notificationService.getNotifications(loginUser.getUserNum());
         return ResponseEntity.ok(notifications);
     }
 
-    // 2. 안 읽은 알림 개수 조회 API (헤더 종 모양 뱃지)
+    // 2. 안 읽은 알림 개수 조회 API
     @GetMapping("/unread-count")
-    public ResponseEntity<Long> getUnreadCount() {
-        Long userNum = 1L; // 테스트용 임시 userNum
-        long count = notificationService.getUnreadCount(userNum);
+    public ResponseEntity<Long> getUnreadCount(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.ok(0L);
+        }
+
+        Users loginUser = userRepository.findByUserId(principal.getName()).orElse(null);
+        if (loginUser == null) {
+            return ResponseEntity.ok(0L);
+        }
+
+        long count = notificationService.getUnreadCount(loginUser.getUserNum());
         return ResponseEntity.ok(count);
     }
 

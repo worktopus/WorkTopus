@@ -35,4 +35,5 @@ public interface UserRepository extends JpaRepository<Users, Long> {
             "ORDER BY c.createdAt DESC")
     List<BoardComment> findByWriterIdWithBoard(@Param("userNum") Long userNum);
 
+    Optional<Users> findByName(String name);
 }

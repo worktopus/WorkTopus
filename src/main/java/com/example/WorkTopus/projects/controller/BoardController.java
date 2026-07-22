@@ -1,6 +1,7 @@
 package com.example.WorkTopus.projects.controller;
 
 import com.example.WorkTopus.common.dto.PageResponse;
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.BoardDetailModalResponse;
@@ -9,6 +10,7 @@ import com.example.WorkTopus.projects.dto.response.BoardListResponse;
 import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.service.BoardService;
 import com.example.WorkTopus.projects.service.CommentService;
+import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,6 +18,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -29,6 +33,8 @@ public class BoardController {
 
     private final BoardService boardService;
     private final CommentService commentService;
+
+    private final UserService UserService;
 
     @GetMapping
     public ModelAndView list(
@@ -70,10 +76,17 @@ public class BoardController {
     public ModelAndView create(
             @PathVariable Long projectId,
             @RequestParam(required = false) String tag,
-            @Valid @ModelAttribute BoardCreateRequest request
+            @Valid @ModelAttribute BoardCreateRequest request,
+            @AuthenticationPrincipal User user
     ) {
         request = request.withTag(tag);
-        Long boardId = boardService.create(projectId, request);
+
+        Users loginUser = null;
+        if (user != null) {
+            loginUser = UserService.findByUserId(user.getUsername());
+        }
+
+        Long boardId = boardService.create(projectId, request, loginUser);
 
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId
