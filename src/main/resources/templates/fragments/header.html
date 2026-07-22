@@ -30,8 +30,22 @@
             </button>
 
             <!-- 채팅 버튼 -->
-            <button id="chatButton" class="header__icon" type="button" onclick="openChat()" aria-label="채팅 열기">
+            <button id="chatButton"
+                    class="header__icon chat-button"
+                    type="button"
+                    onclick="openChat()"
+                    aria-label="채팅 열기">
+
+                <!-- 채팅 아이콘 -->
                 <span th:insert="~{fragments/icons :: chat}"></span>
+
+                <!-- 전체 안 읽은 메시지 숫자 -->
+                <span class="header__badge chat-unread-badge"
+                      aria-label="안 읽은 메시지"
+                      style="display: none;">
+                    0
+                </span>
+
             </button>
 
             <!-- 프로필 영역 (실시간 데이터 바인딩 연동) -->
