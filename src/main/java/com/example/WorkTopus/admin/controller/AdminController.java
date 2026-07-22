@@ -25,6 +25,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
+
     public ModelAndView userList(
             @RequestParam(required = false, defaultValue = "") String keyword,
             @RequestParam(required = false, defaultValue = "") String status,
@@ -89,19 +90,23 @@ public class AdminController {
         return "redirect:/admin/users";
     }
 
+
     @GetMapping("/projects")
     public ModelAndView projectList() {
 
         ModelAndView mv = new ModelAndView();
+
         mv.setViewName("admin/project-list");
 
         return mv;
     }
 
     @GetMapping("/reports")
+
     public ModelAndView reportList() {
 
         ModelAndView mv = new ModelAndView();
+
         mv.setViewName("admin/report-list");
 
         return mv;

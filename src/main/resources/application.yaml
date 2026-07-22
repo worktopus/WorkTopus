@@ -12,12 +12,27 @@ spring:
     livereload:
       enabled: true
 
+<<<<<<< HEAD
   # oracle 설정
   datasource:
     driver-class-name: oracle.jdbc.OracleDriver
     url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
     username: ADMIN
     password: 'WorkTopus1234!'
+=======
+
+
+# oracle 설정
+  datasource:
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@worktopus_high?TNS_ADMIN=src/main/resources/wallet
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
+      url: jdbc:h2:mem:worktopus
+      driver-class-name: org.h2.Driver
+      username: sa
+      password:
+>>>>>>> origin/feature/admin
 
   # oracle 설정 (docker)
 #  datasource:
@@ -45,8 +60,13 @@ spring:
 #    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
     hibernate:
+<<<<<<< HEAD
       ddl-auto: update
       #ddl-auto: validate
+=======
+      #ddl-auto: update
+      ddl-auto: none
+>>>>>>> origin/feature/admin
 
     show-sql: true
     properties:

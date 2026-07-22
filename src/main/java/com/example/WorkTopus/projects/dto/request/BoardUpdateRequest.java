@@ -2,9 +2,12 @@ package com.example.WorkTopus.projects.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+<<<<<<< HEAD
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+=======
+>>>>>>> origin/feature/admin
 
 public record BoardUpdateRequest(
 
@@ -17,6 +20,7 @@ public record BoardUpdateRequest(
         @NotBlank
         String category,
 
+<<<<<<< HEAD
         @Size(max = 200)
         String tag,
 
@@ -36,3 +40,8 @@ public record BoardUpdateRequest(
         );
     }
 }
+=======
+        boolean notice
+) {
+}
+>>>>>>> origin/feature/admin

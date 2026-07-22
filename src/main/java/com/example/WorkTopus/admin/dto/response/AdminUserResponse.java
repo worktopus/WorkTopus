@@ -15,6 +15,7 @@ public record AdminUserResponse(
         boolean enabled,
         LocalDateTime createdAt,
         LocalDateTime deleteAt,
+
         String picture
 
 ) {
@@ -33,4 +34,5 @@ public record AdminUserResponse(
                 user.getPicture()
         );
     }
+
 }
