@@ -29,7 +29,8 @@
 
                 <div class="assignment-overlay__profile">
                     <div class="dashboard__avatar">
-                        <img th:src="@{/img/circle-user-round.svg}" class="user_icon" >
+                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                             title="프로필 사진" onerror="this.src='/images/logo.png';">
                     </div>
                 </div>
 

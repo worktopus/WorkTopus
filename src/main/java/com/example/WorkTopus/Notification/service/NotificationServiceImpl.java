@@ -58,4 +58,13 @@ public class NotificationServiceImpl implements NotificationService {
         notificationRepository.deleteById(id);
     }
 
+    // 전체 알림 일괄 읽음 처리
+    @Override
+    public void markAllAsRead(Long userNum) {
+        List<Notification> unreadNotifications = notificationRepository.findByUser_UserNumAndReadYn(userNum, "N");
+        for (Notification notification : unreadNotifications) {
+            notification.markAsRead(); // 엔티티의 readYn = "Y" 변경
+        }
+    }
+
 }
