@@ -16,17 +16,19 @@ function toggleNotifModal(event) {
     const isActive = notifModal.classList.contains('active');
 
     if (!isActive) {
-        // 다른 모달(프로필, 메모 등) 닫기 함수가 있다면 호출
         if (typeof closeAllModalsExcept === 'function') {
             closeAllModalsExcept('notif');
         }
         notifModal.classList.add('active');
 
-        // 팝업 열림 상태 기록 및 뱃지 숨기기
-        isNotificationModalOpened = true;
+        // 🎯 1. 종을 연 '시각'을 브라우저에 저장 (새로고침해도 배지 안 떠오름)
+        localStorage.setItem('lastNotifCheckedTime', new Date().toISOString());
+
+        // 🎯 2. 화면의 빨간 배지 즉시 숨김
         const badge = document.getElementById("header-notif-badge");
         if (badge) badge.style.display = "none";
 
+        // 3. 알림 목록 로드 (초록색 배경은 유지됨)
         loadHeaderNotifications();
     } else {
         notifModal.classList.remove('active');
@@ -63,6 +65,7 @@ function renderHeaderNotifications(notifications) {
 
     let html = "";
     notifications.forEach(notif => {
+        // DB의 readYn 기준 (클릭해서 들어가지 않은 알림은 계속 초록색!)
         const isUnread = notif.readYn === 'N';
         const bgStyle = isUnread
             ? 'background-color: #f0fdf4; border: 1px solid #bbf7d0;'
@@ -82,7 +85,7 @@ function renderHeaderNotifications(notifications) {
 
                 <!-- 2. 알림 삭제 버튼 -->
                 <button type="button" 
-                        onclick="deleteNotification(event, ${notif.id})"
+                        onclick="deleteHeaderNotification(event, ${notif.id})"
                         style="border: none; background: transparent; color: #94a3b8; font-size: 14px; font-weight: bold; cursor: pointer; padding: 4px 6px; margin-left: 8px; border-radius: 4px;"
                         onmouseover="this.style.color='#ef4444'" 
                         onmouseout="this.style.color='#94a3b8'"
@@ -96,7 +99,7 @@ function renderHeaderNotifications(notifications) {
     listContainer.innerHTML = html;
 }
 
-// 알림 클릭 시 읽음 처리 API 호출
+// 알림 클릭 시 읽음 처리 API 호출 (클릭 시 해당 알림 초록불 끄기)
 function onClickHeaderNotification(id, targetUrl) {
     const token = document.querySelector("meta[name='_csrf']")?.getAttribute("content");
     const header = document.querySelector("meta[name='_csrf_header']")?.getAttribute("content");
@@ -120,19 +123,24 @@ function onClickHeaderNotification(id, targetUrl) {
         .catch(err => console.error(err));
 }
 
-// 안 읽은 알림 뱃지 업데이트
+// 🎯 안 읽은 알림 뱃지 카운트 단일화 (중복 제거)
 function updateBadgeCount(notifications) {
     const badge = document.getElementById("header-notif-badge");
     if (!badge) return;
 
-    if (isNotificationModalOpened) {
-        badge.style.display = "none";
-        return;
-    }
+    const lastChecked = localStorage.getItem('lastNotifCheckedTime');
 
-    const unreadCount = notifications.filter(n => n.readYn === 'N').length;
-    if (unreadCount > 0) {
-        badge.innerText = unreadCount > 99 ? '99+' : unreadCount;
+    // 'N' 상태이면서 + 종을 열었던 시각 이후에 새로 들어온 알림만 배지 숫자로 표시
+    const newUnreadCount = notifications.filter(n => {
+        if (n.readYn !== 'N') return false;
+        if (!lastChecked) return true;
+
+        // 알림 생성 시간이 종을 마지막으로 누른 시간보다 뒤인 경우에만 뱃지 카운트
+        return new Date(n.createdAt) > new Date(lastChecked);
+    }).length;
+
+    if (newUnreadCount > 0) {
+        badge.innerText = newUnreadCount > 99 ? '99+' : newUnreadCount;
         badge.style.display = "inline-block";
     } else {
         badge.style.display = "none";
@@ -164,9 +172,8 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// 알림 삭제 함수
-function deleteNotification(event, id) {
-    //  알림 클릭 이벤트(페이지 이동 등)가 실행되지 않도록 차단
+// 헤더 알림 삭제 함수
+function deleteHeaderNotification(event, id) {
     if (event) event.stopPropagation();
 
     const targetLi = event.currentTarget.closest('li');
@@ -188,11 +195,13 @@ function deleteNotification(event, id) {
     })
         .then(response => {
             if (!response.ok) throw new Error("삭제 실패");
-
+            loadHeaderNotifications();
+            if (typeof loadNotifications === 'function') {
+                loadNotifications();
+            }
         })
         .catch(err => {
             console.error("알림 삭제 중 오류:", err);
-            // 에러 발생 시에만 안전하게 재조회
             loadHeaderNotifications();
         });
 }

@@ -63,4 +63,18 @@ public class NotificationApiController {
         notificationService.deleteNotification(id); // NotificationService에 delete 메서드 호출
         return ResponseEntity.ok().build();
     }
+
+    // 5. 알림 전체 일괄 읽음 처리 API
+    @PatchMapping("/read-all")
+    public ResponseEntity<Void> markAllAsRead(Principal principal) {
+        if (principal == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        Users loginUser = userRepository.findByUserId(principal.getName())
+                .orElseThrow(() -> new IllegalArgumentException("로그인 유저 정보가 없습니다."));
+
+        notificationService.markAllAsRead(loginUser.getUserNum());
+        return ResponseEntity.ok().build();
+    }
 }

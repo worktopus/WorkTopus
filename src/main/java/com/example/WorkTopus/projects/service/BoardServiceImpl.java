@@ -90,26 +90,34 @@ public class BoardServiceImpl implements BoardService {
         // 1) 해당 프로젝트의 팀원 목록 조회
         List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
 
-        // 2) 카테고리 한글 명칭 매핑
+        // 작성자 본인을 제외한 실제 수신 대상자만 필터링
+        List<ProjectMember> targetMembers = members.stream()
+                .filter(m -> currentUserId != null && !currentUserId.equals(m.getUser().getUserId()))
+                .toList();
+
+        // 수신할 팀원이 아무도 없다면 (혼자 프로젝트를 진행 중이라면) 알림 생성을 안 하고 건너뜁니다.
+        if (targetMembers.isEmpty()) {
+            return savedBoard.getId();
+        }
+
+        // 2) 카테고리 한글 명칭 매핑 (공지사항 -> 공지로 변경)
         String categoryName = switch (request.category()) {
-            case "NOTICE" -> "공지사항";
-            case "FREE" -> "자유게시판";
+            case "NOTICE" -> "공지";
+            case "MEETING" -> "회의";
+            case "WORK" -> "업무";
+            case "RESOURCE" -> "자료";
             case "IDEA" -> "아이디어";
-            case "QUESTION" -> "질문게시판";
+            case "ETC" -> "기타";
             default -> "게시판";
         };
 
-        // 3) 전체 팀원에게 알림 발송 (본인 제외)
-        for (ProjectMember projectMember : members) {
+        // 알림 메시지 포맷 (공통 변수 1회만 정의)
+        String message = "[" + categoryName + "] " + savedBoard.getTitle() + " 글이 등록되었습니다.";
+        String url = "/projects/" + projectId + "/boards/" + savedBoard.getId();
+
+        // 3) 실제 수신 대상 팀원들에게만 알림 발송
+        for (ProjectMember projectMember : targetMembers) {
             Users targetUser = projectMember.getUser();
-
-            // 작성자 본인이면 알림 발송 대상에서 제외
-            if (currentUserId != null && currentUserId.equals(targetUser.getUserId())) {
-                continue;
-            }
-
-            String message = "[" + categoryName + "] " + savedBoard.getTitle() + " 글이 등록되었습니다.";
-            String url = "/projects/" + projectId + "/boards/" + savedBoard.getId();
 
             notificationService.createNotification(
                     targetUser,
