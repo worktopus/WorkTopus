@@ -25,12 +25,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error('팀원 목록을 불러오는 데 실패했습니다.');
             })
             .then(members => {
-                console.log("백엔드에서 넘어온 데이터 전체보기:", members); // 🔍 이 로그를 추가해서 F12 콘솔을 확인하세요!
+                console.log("백엔드에서 넘어온 데이터 전체보기:", members);
                 renderMemberList(members);
             })
             .catch(error => { console.error('Fetch Members Error:', error); });
     }
-
 
     // 기능 2 : 수집된 DB 인자로 팀원 테이블 마크업 동적 드로잉 (현재 직급 삭제 반영 완료)
     function renderMemberList(members) {
@@ -59,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const isMember = (currentRole === 'MEMBER') ? 'selected' : '';
 
             // [수정/삭제] 기존 현재 직급 배지 td 열을 제거하고 4개 컬럼 체계로 재편성
+            // [수정] 담당 역할 칸에 이전에 드린 HTML 규격에 맞춰 '저장 버튼' 동적 생성 추가
             tr.innerHTML = `
                 <td style="padding: 16px;">
                     <div style="font-weight: 600; color: var(--text-main);">${member.userName || '이름 없음'}</div>
@@ -73,7 +73,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     </select>
                 </td>
                 <td style="padding: 16px;">
-                    <input type="text" class="form-input task-input" data-id="${member.id}" value="${member.assignedRole || ''}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 80%; border: 1px solid var(--border); border-radius: 4px;">
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <input type="text" id="task-input-${member.id}" class="form-input task-input" data-id="${member.id}" value="${member.assignedRole || ''}" placeholder="예: UI 디자인, QA" style="padding: 6px 12px; font-size: 0.85rem; width: 70%; border: 1px solid var(--border); border-radius: 4px;">
+                        <button class="btn btn-primary btn-save-task" data-id="${member.id}" style="padding: 6px 10px; font-size: 0.8rem; cursor: pointer; background: var(--primary, #4a90e2); color: #fff; border: none; border-radius: 4px;">저장</button>
+                    </div>
                 </td>
                 <td style="padding: 16px; text-align: center;">
                     <!-- [수정] OWNER 또는 LEADER 권한일 때 제외 버튼 숨김 처리 -->
@@ -102,14 +105,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     })
                     .then(data => {
                         alert(data.message || '직급이 변경되었습니다.');
-                        // [참고] 배지 열이 삭제되었으므로 배지 텍스트 갱신 구문 생략 처리 자동 마감
                     })
                     .catch(error => { alert('직급 변경 실패: ' + error.message); });
             }
         });
 
-        // 기능 4 : 팀원 공간 강제 제외(추방) 비동기 통신
+        // 기능 4 : 팀원 공간 강제 제외(추방) 및 담당 역할 개별 저장 버튼 클릭 비동기 통신
         container.addEventListener('click', function (e) {
+            // [추방 버튼 처리]
             if (e.target && e.target.classList.contains('kick-btn')) {
                 const kickBtn = e.target;
                 const memberId = kickBtn.getAttribute('data-id');
@@ -126,6 +129,50 @@ document.addEventListener('DOMContentLoaded', function () {
                             if (targetRow) targetRow.remove();
                         })
                         .catch(error => { alert('제외 처리 실패: ' + error.message); });
+                }
+            }
+
+            // [새로 추가됨] 담당 역할 저장 버튼 클릭 처리 핸들러
+            if (e.target && e.target.classList.contains('btn-save-task')) {
+                const saveBtn = e.target;
+                const memberId = saveBtn.getAttribute('data-id');
+                const inputField = document.getElementById(`task-input-${memberId}`);
+
+                if (inputField) {
+                    const assignedRoleValue = inputField.value.trim();
+
+                    fetch('/api/manage/member/task-update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                        body: JSON.stringify({ memberId: parseInt(memberId), assignedRole: assignedRoleValue })
+                    })
+                        .then(response => {
+                            if (response.ok) {
+                                alert('담당 역할이 오라클 DB에 성공적으로 저장되었습니다.');
+
+                                // 성공 시 인풋창 배경 피드백 시각 효과
+                                inputField.style.backgroundColor = '#f6ffed';
+                                setTimeout(() => { inputField.style.backgroundColor = '#fff'; }, 500);
+
+                                // 상단 헤더 프로필 이름과 비교하여 즉시 동기화
+                                const currentRow = saveBtn.closest('tr');
+                                const rowUserName = currentRow.querySelector('td:first-child div:first-child')?.textContent.trim();
+                                const headerUserName = document.querySelector('#header-user-name')?.textContent.trim();
+
+                                if (headerUserName && rowUserName === headerUserName) {
+                                    const headerUserTask = document.querySelector('#header-user-task');
+                                    if (headerUserTask) {
+                                        headerUserTask.textContent = assignedRoleValue || 'Backend Developer';
+                                    }
+                                }
+                                return response.json();
+                            }
+                            throw new Error('역할 저장 실패');
+                        })
+                        .catch(error => {
+                            alert('역할 저장 중 오류가 발생했습니다.');
+                            console.error('Save Button Error:', error);
+                        });
                 }
             }
         });
@@ -152,14 +199,11 @@ document.addEventListener('DOMContentLoaded', function () {
                             // [교정] 이메일을 제외한 순수 유저 '이름'만 정밀 추출하여 헤더와 비교
                             // =========================================================
                             const currentRow = inputField.closest('tr');
-                            // 첫 번째 td 안의 첫 번째 div(이름 영역)의 텍스트만 정확하게 가져옵니다.
                             const rowUserName = currentRow.querySelector('td:first-child div:first-child')?.textContent.trim();
                             const headerUserName = document.querySelector('#header-user-name')?.textContent.trim();
 
-                            // 디버깅용 콘솔 로그 (동기화가 안 될 경우 브라우저 F12 콘솔에서 확인 가능)
                             console.log("화면 행 이름:", rowUserName, " | 헤더 이름:", headerUserName);
 
-                            // 이름이 완벽히 매칭될 경우에만 헤더 프로필 영역의 역할을 즉시 업데이트
                             if (headerUserName && rowUserName === headerUserName) {
                                 const headerUserTask = document.querySelector('#header-user-task');
                                 if (headerUserTask) {

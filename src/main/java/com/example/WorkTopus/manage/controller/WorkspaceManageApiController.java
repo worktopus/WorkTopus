@@ -14,41 +14,58 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class WorkspaceManageApiController {
+
     private final WorkspaceManageService workspaceManageService;
 
-    /**4-1 일반 관리 설정 데이터 저장 및 이미지 업로드 API */
-    @PostMapping("/api/manage/{workspaceId}/general-update")
-    public ResponseEntity<?> updateGeneralSettings(
+    /**
+     * [4-1 변경 사항] 프로젝트 이름 단독 비동기 수정 API
+     * 기존 general-update 주소를 이름 전용 파이프라인으로 매핑을 명확히 고정합니다.
+     */
+    @PostMapping("/api/manage/{workspaceId}/update-name")
+    public ResponseEntity<?> updateProjectName(
             @PathVariable("workspaceId") Long workspaceId,
             @ModelAttribute WorkspaceGeneralUpdateDto dto) {
         try {
             System.out.println("=========================================");
-            System.out.println("▶ [API 요청 수신] Workspace ID : " + workspaceId);
+            System.out.println("▶ [이름 수정 API 요청] Workspace ID : " + workspaceId);
             System.out.println("▶ [수신 데이터] 변경할 이름 : " + (dto != null ? dto.getWorkspaceName() : "null"));
             System.out.println("=========================================");
+
             Long currentUserId = 1L;
             workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
-            return ResponseEntity.ok().body(Map.of("message", "설정이 성공적으로 저장되었습니다."));
+            return ResponseEntity.ok().body(Map.of("message", "프로젝트 이름이 성공적으로 저장되었습니다."));
         } catch (Exception e) {
-            System.err.println("❌ [설정 저장 실패 서버 에러 로그]");
+            System.err.println("❌ [이름 저장 실패 서버 에러 로그]");
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /** 4-1 워크스페이스 전체 완전 삭제 API*/
-    @DeleteMapping("/api/manage/{workspaceId}")
-    public ResponseEntity<?> deleteWorkspace(@PathVariable("workspaceId") Long workspaceId) {
+    /**
+     * 📌  프로젝트 내용(설명) 단독 비동기 수정 API
+     * 말씀하신 대로 기존 워크스페이스 전체 완전 삭제(@DeleteMapping) 자리를 대체하여 깔끔하게 조립했습니다.
+     */
+    @PostMapping("/api/manage/{workspaceId}/update-description")
+    public ResponseEntity<?> updateProjectDescription(
+            @PathVariable("workspaceId") Long workspaceId,
+            @ModelAttribute WorkspaceGeneralUpdateDto dto) {
         try {
+            System.out.println("=========================================");
+            System.out.println("▶ [내용 수정 API 요청] Workspace ID : " + workspaceId);
+            System.out.println("▶ [수신 데이터] 변경할 내용 : " + (dto != null ? dto.getProjectDescription() : "null"));
+            System.out.println("=========================================");
+
             Long currentUserId = 1L;
-            workspaceManageService.deleteWorkspace(workspaceId, currentUserId);
-            return ResponseEntity.ok().body(Map.of("message", "완전 삭제 처리가 완료되었습니다."));
+            workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
+            return ResponseEntity.ok().body(Map.of("message", "프로젝트 내용이 성공적으로 저장되었습니다."));
         } catch (Exception e) {
+            System.err.println("❌ [내용 저장 실패 서버 에러 로그]");
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /**4-2-1 기존 비동기 JSON 수신용 초대 API 주소*/
+    /**  기존 비동기 JSON 수신용 초대 API 주소 (기존 유지) */
     @PostMapping("/api/manage/invite")
     public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {
         try {
@@ -60,7 +77,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**일반 HTML 폼 전송 방식 초대 기능*/
+    /** 일반 HTML 폼 전송 방식 초대 기능 (기존 유지) */
     @PostMapping("/project/manage/invite/send")
     public ResponseEntity<?> handleFormSubmitInvite(
             @RequestParam(value = "emails", required = false) List<String> emails) {
@@ -90,7 +107,8 @@ public class WorkspaceManageApiController {
             );
         }
     }
-    /**4-2. 팀원 직급(역할) 비동기 수정 API*/
+
+    /** 팀원 직급(역할) 비동기 수정 API (기존 유지) */
     @PostMapping("/api/manage/member/role-update")
     public ResponseEntity<?> updateMemberRole(@RequestBody com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto dto) {
         try {
@@ -101,7 +119,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 4-2-2. 팀원 워크스페이스 제외(추방) 비동기 API*/
+    /**   팀원 워크스페이스 제외(추방) 비동기 API (기존 유지) */
     @DeleteMapping("/api/manage/member/{memberId}")
     public ResponseEntity<?> kickMember(@PathVariable("memberId") Long memberId) {
         try {
@@ -112,7 +130,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**자바스크립트 렌더러용 실시간 팀원 목록 반환 API*/
+    /** 자바스크립트 렌더러용 실시간 팀원 목록 반환 API (기존 유지) */
     @GetMapping("/api/manage/{workspaceId}/members-data")
     public ResponseEntity<?> getMembersJsonData(
             @PathVariable("workspaceId") Long workspaceId) {
@@ -120,14 +138,13 @@ public class WorkspaceManageApiController {
         return ResponseEntity.ok(members);
     }
 
-    /** [게시판관리 - 이름 비동기 수정 연동 API] */
+    /** [게시판관리 - 이름 비동기 수정 연동 API] (기존 유지) */
     @PostMapping("/api/manage/board/update-name")
     public ResponseEntity<?> updateBoardName(@RequestBody Map<String, Object> payload) {
         try {
             Long boardId = Long.parseLong(payload.get("boardId").toString());
             String boardName = payload.get("boardName").toString();
 
-            // [참고] 팀원들이 작성해둘 서비스 메서드 호출 구역 확장부
             // workspaceManageService.updateBoardName(boardId, boardName);
 
             return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
@@ -136,15 +153,14 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** [게시판관리 - 안전 숨김 조치 및 후속 정책 연동 API] */
+    /** [게시판관리 - 안전 숨김 조치 및 후속 정책 연동 API] (기존 유지) */
     @DeleteMapping("/api/manage/board/{boardId}/hide-policy")
     public ResponseEntity<?> hideBoardWithPolicy(
             @PathVariable("boardId") Long boardId,
             @RequestBody Map<String, String> payload) {
         try {
-            String actionPolicy = payload.get("actionPolicy"); // "CHAT" 또는 "POPUP" 수집
+            String actionPolicy = payload.get("actionPolicy");
 
-            // [참고] 팀원들이 작성해둘 숨김 처리 및 워크챗 발송/경고 플래그 DB 동기화 로직 확장부
             // workspaceManageService.hideBoardWithPolicy(boardId, actionPolicy);
 
             return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
@@ -153,18 +169,35 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** [추가 요구사항 - 담당 역할 실시간 비동기 자동 저장 API] */
+    /**
+     * [보완 가동] 담당 역할 비동기 저장 API (자동 저장 + 버튼 클릭 공용 파이프라인)
+     * 자바스크립트에서 넘어오는 데이터의 Null 값 방지 처리를 추가하여 오라클 안정성을 제고했습니다.
+     */
     @PostMapping("/api/manage/member/task-update")
     public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
         try {
-            Long memberId = Long.parseLong(payload.get("memberId").toString());
-            String assignedRole = payload.get("assignedRole").toString();
+            if (payload == null || !payload.containsKey("memberId")) {
+                throw new IllegalArgumentException("필수 요청 데이터가 누락되었습니다.");
+            }
 
+            Long memberId = Long.parseLong(payload.get("memberId").toString());
+            // 역할 값이 공백이거나 없을 경우 오라클에 빈 값 처리가 정상 반영되도록 안전 필터링
+            String assignedRole = payload.get("assignedRole") != null ? payload.get("assignedRole").toString() : "";
+
+            System.out.println("=========================================");
+            System.out.println("▶ [담당 역할 저장 API 가동]");
+            System.out.println("▶ 대상 회원 ID (memberId) : " + memberId);
+            System.out.println("▶ 반영할 역할 (assignedRole) : '" + assignedRole + "'");
+            System.out.println("=========================================");
+
+            // 서비스 레이어 호출 (Dirty Checking 또는 MyBatis Mapper 연동 가동)
             workspaceManageService.updateMemberTask(memberId, assignedRole);
+
             return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
         } catch (Exception e) {
+            System.err.println("❌ [담당 역할 오라클 반영 실패 에러 로그]");
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
 }

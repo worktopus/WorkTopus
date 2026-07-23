@@ -1,85 +1,96 @@
-/** * 일반 관리 (프로젝트 이름 변경, 로고 이미지 관리, 공개범위 헤더 아이콘 실시간 연동) */
-document.addEventListener('DOMContentLoaded', function () {
-    // HTML 내부의 form.manage-form 요소를 정밀 탐색합니다.
-    const generalForm = document.querySelector('form.manage-form') || document.querySelector('#general-tab form');
+document.addEventListener("DOMContentLoaded", function () {
 
-    if (generalForm) {
-        generalForm.addEventListener('submit', function (e) {
-            // 브라우저 강제 이동 및 새로고침 차단
+    // 1. 현재 URL 주소창에서 정규식을 이용해 프로젝트 고유 숫자 ID만 완벽하게 추출
+    const currentPath = window.location.pathname; // 예: "/projects/manage/28"
+    const match = currentPath.match(/\/manage\/(\d+)/);
+
+    if (!match || !match[1]) {
+        console.error("❌ [오류] URL에서 프로젝트 고유 ID를 파싱할 수 없습니다.");
+        return;
+    }
+
+    // 📌 [교정 완료] match 객체가 아니라 match[1] 배열 요소를 정확히 꺼내야 "28"이 담깁니다.
+    const workspaceId = match[1];
+    console.log("▶ [안전 추출된 워크스페이스 ID 확인] :", workspaceId);
+
+    // Spring Security CSRF 검증 통과를 위한 메타 태그 실시간 수집
+    const csrfTokenMeta = document.querySelector('meta[name="_csrf"]');
+    const csrfHeaderMeta = document.querySelector('meta[name="_csrf_header"]');
+    const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute("content") : "";
+    const csrfHeader = csrfHeaderMeta ? csrfHeaderMeta.getAttribute("content") : "";
+
+    const nameForm = document.getElementById("updateNameForm");
+    const descForm = document.getElementById("updateDescForm");
+
+    // 2. 📌 프로젝트 이름 비동기 수정 처리 구역
+    if (nameForm) {
+        nameForm.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            // 입력창 텍스트 유효성 검사
-            const projectNameInput = document.getElementById('projectName');
-            const updatedName = projectNameInput ? projectNameInput.value.trim() : '';
+            const formData = new FormData(nameForm);
 
-            if (!updatedName) {
-                alert('프로젝트 이름을 입력해주세요.');
-                return;
-            }
-
-            // 브라우저 현재 주소창에서 workspaceId 추출
-            const pathSegments = window.location.pathname.split('/').filter(Boolean);
-            const workspaceId = pathSegments[pathSegments.length - 1] || 45;
-
-            // 폼 내부의 모든 바인딩 데이터 통합 수집
-            const formData = new FormData(generalForm);
-
-            // 스프링 시큐리티 CSRF 토큰 추출
-            const csrfTokenInput = document.querySelector('input[name="_csrf"]');
-            const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
-
-            // 서버 API 호출 가동
-            fetch(`/api/manage/${workspaceId}/general-update`, {
-                method: 'POST',
+            // 주소 맨 앞에 슬래시(/)를 명시하여 절대 경로 형태로 타겟 API 엔드포인트 강제 지정
+            fetch("/api/manage/" + workspaceId + "/update-name", {
+                method: "POST",
                 headers: {
-                    'X-CSRF-TOKEN': csrfToken
+                    [csrfHeader]: csrfToken
                 },
                 body: formData
             })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                    throw new Error('서버 바인딩 요청 실패');
+                .then(res => {
+                    if (!res.ok) throw new Error("서버 404/400 응답 실패 - 주소 오타 혹은 매핑 누락");
+                    return res.json();
                 })
                 .then(data => {
-                    alert(data.message || '설정이 성공적으로 저장되었습니다.');
+                    if (data.message) {
+                        alert("프로젝트 이름이 성공적으로 변경되었습니다. 🎉");
 
-                    // [핵심 기능] 상단 헤더 영역 요소를 탐색합니다.
-                    const headerProjectNameSpan = document.querySelector('.header__project-name');
-                    if (headerProjectNameSpan) {
-                        // 이모지 아이콘을 제거하고 입력된 이름만 즉시 실시간 교체합니다.
-                        headerProjectNameSpan.textContent = updatedName;
+                        // 우측 상단 헤더 텍스트 실시간 반영 변경
+                        const headerProjName = document.querySelector(".header__project-name");
+                        if (headerProjName) {
+                            headerProjName.textContent = document.getElementById("projectName").value;
+                        }
+                    } else if (data.error) {
+                        alert("수정 실패: " + data.error);
                     }
                 })
-                .catch(error => {
-                    console.error('Error details:', error);
-                    alert('설정 저장 중 오류가 발생했습니다.');
+                .catch(err => {
+                    console.error("이름 변경 처리 중 에러 발생:", err);
+                    alert("설정 저장 중 오류가 발생했습니다. 브라우저 콘솔 확인 필요");
                 });
         });
     }
 
-    // 워크스페이스 영구 삭제 버튼 비동기 연동 처리 구역
-    const deleteBtn = document.getElementById('deleteWorkspaceBtn');
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', function() {
-            if (confirm('정말로 이 워크스페이스를 영구적으로 완전 소멸시키겠습니까?')) {
-                const pathSegments = window.location.pathname.split('/').filter(Boolean);
-                const workspaceId = pathSegments[pathSegments.length - 1] || 45;
+    // 3. 📌 프로젝트 내용(설명) 비동기 수정 처리 구역
+    if (descForm) {
+        descForm.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-                fetch(`/api/manage/${workspaceId}`, {
-                    method: 'DELETE'
+            const formData = new FormData(descForm);
+
+            // 주소 맨 앞에 슬래시(/)를 명시하여 절대 경로 형태로 타겟 API 엔드포인트 강제 지정
+            fetch("/api/manage/" + workspaceId + "/update-description", {
+                method: "POST",
+                headers: {
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("서버 응답 실패");
+                    return res.json();
                 })
-                    .then(response => {
-                        if (response.ok) {
-                            alert('워크스페이스가 정상적으로 삭제되었습니다.');
-                            window.location.href = '/dashboard';
-                        } else {
-                            alert('삭제 권한이 없거나 처리에 실패했습니다.');
-                        }
-                    })
-                    .catch(err => console.error('Delete Error:', err));
-            }
+                .then(data => {
+                    if (data.message) {
+                        alert("프로젝트 내용이 성공적으로 변경되었습니다. 🎉");
+                    } else if (data.error) {
+                        alert("수정 실패: " + data.error);
+                    }
+                })
+                .catch(err => {
+                    console.error("내용 변경 처리 중 에러 발생:", err);
+                    alert("설정 저장 중 오류가 발생했습니다. 브라우저 콘솔 확인 필요");
+                });
         });
     }
 });

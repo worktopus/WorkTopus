@@ -30,14 +30,14 @@ public class WorkspaceManageService {
     private final EntityManager em;
 
     /**
-     * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회
+     * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회 (기존 원본 복구)
      */
     public List<ManageMember> getWorkspaceMembers(Long workspaceId) {
         return manageMemberRepository.findByWorkspaceId(workspaceId);
     }
 
     /**
-     * 팀원 직급 수정 비즈니스 로직
+     * 팀원 직급 수정 비즈니스 로직 (기존 원본 복구)
      */
     @Transactional
     public void updateMemberRole(ManageMemberRoleUpdateDto dto) {
@@ -52,7 +52,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 팀원 제외 비즈니스 로직
+     * 팀원 제외 비즈니스 로직 (기존 원본 복구)
      */
     @Transactional
     public void kickMember(Long memberId) {
@@ -67,7 +67,8 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-1 워크스페이스 일반 관리 설정 업데이트 (강제 삽입 구역 완전 제거 완료)
+     * 4-1 워크스페이스 일반 관리 설정 업데이트
+     * 📌 [개선 가동] 이름 변경 폼과 내용 변경 폼이 개별적으로 독립 요청될 때 각각 유연하게 필터링 업데이트합니다.
      */
     @Transactional
     public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
@@ -76,12 +77,23 @@ public class WorkspaceManageService {
             throw new SecurityException("팀장 권한이 없습니다.");
         }
 
-        // [교정] 오라클 데이터 독립성 유지를 위해 기존의 강제 네이티브 INSERT 구역을 완전히 들어냈습니다.
-
         Manage manage = manageRepository.findById(workspaceId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
 
-        manage.updateGeneralSettings(dto.getWorkspaceName(), dto.getVisibility(), dto.getArchiveStatus());
+        // 💡 1. 독립형 이름 수정 요청이 들어온 경우 처리
+        if (dto.getWorkspaceName() != null && !dto.getWorkspaceName().trim().isEmpty()) {
+            manage.setName(dto.getWorkspaceName());
+        }
+
+        // 💡 2. 독립형 내용(설명) 수정 요청이 들어온 경우 처리
+        if (dto.getProjectDescription() != null) {
+            manage.setDescription(dto.getProjectDescription());
+        }
+
+        // 💡 3. 기존 기타 데이터 업데이트 파이프라인 무손실 유지
+        if (dto.getVisibility() != null) {
+            manage.updateGeneralSettings(manage.getName(), dto.getVisibility(), dto.getArchiveStatus());
+        }
 
         if (dto.getNewLeaderId() != null) {
             manage.setOwnerId(dto.getNewLeaderId());
@@ -94,8 +106,9 @@ public class WorkspaceManageService {
             manage.updateLogoPath(originalFileName);
         }
     }
+
     /**
-     * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제
+     * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제 (기존 원본 복구)
      */
     @Transactional
     public void deleteWorkspace(Long workspaceId, Long currentUserId) {
@@ -111,7 +124,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-2-1 워크스페이스 팀원 초대 프로세스 (동적 문구 및 초대 코드 반영 완료)
+     * 4-2-1 워크스페이스 팀원 초대 프로세스 (기존 원본 복구)
      */
     @Transactional
     public void inviteTeamMembers(WorkspaceInviteRequestDto dto, Long currentUserId) {
@@ -161,7 +174,7 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [게시판관리 - 이름 수정 비즈니스 로직 확장부] */
+    /** [게시판관리 - 이름 수정 비즈니스 로직 확장부] (기존 원본 복구) */
     @Transactional
     public void updateBoardName(Long boardId, String boardName) {
         if (boardName == null || boardName.trim().isEmpty()) {
@@ -169,7 +182,7 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] */
+    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] (기존 원본 복구) */
     @Transactional
     public void hideBoardWithPolicy(Long boardId, String actionPolicy) {
         if (!"CHAT".equals(actionPolicy) && !"POPUP".equals(actionPolicy)) {
@@ -177,15 +190,12 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [추가 요구사항 - 담당 역할 Dirty Checking 자동 저장 서비스 로직] */
+    /** [추가 요구사항 - 담당 역할 Dirty Checking 자동 저장 서비스 로직] (기존 원본 복구) */
     @Transactional
     public void updateMemberTask(Long memberId, String assignedRole) {
         ManageMember member = manageMemberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
 
-        // 엔티티 필드에 세팅하여 JPA 변경 감지(Dirty Checking)로 오라클 DB 실시간 업데이트 수행
         member.setAssignedRole(assignedRole);
     }
-
 }
-

@@ -27,7 +27,7 @@
                 프로젝트 관리 (팀장 전용)
             </h1>
 
-            <!-- [일반관리 HTML - 상단 탭 바 동적 ID 파이프라인 전면 적용] -->
+            <!-- 상단 탭 바 동적 ID 파이프라인 -->
             <div class="manage-tabs">
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
@@ -35,43 +35,55 @@
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
             </div>
 
-
             <!-- [탭 1] 프로젝트 일반 관리 구역 -->
             <div id="general-tab" class="tab-content active" style="display: block;">
                 <div class="content-header">
                     <h3>🔧 프로젝트 일반 관리</h3>
-                    <p>프로젝트의 기본 정보를 수정하거나 저장소를 안전하게 관리합니다.</p>
+                    <p>프로젝트의 기본 정보(이름, 내용)를 개별적으로 수정하고 안전하게 반영합니다.</p>
                 </div>
 
-                <!-- 프로젝트 이름 변경 폼 -->
-                <form th:action="@{/api/manage/general-update}" method="post" class="manage-form">
-                    <input type="hidden" name="_csrf" th:value="${_csrf != null} ? ${_csrf.token} : ''"/>
-                    <div class="form-group">
-                        <label for="projectName" class="form-label">프로젝트 이름</label>
-                        <input type="text" id="projectName" name="workspaceName" class="form-input" placeholder="프로젝트명을 입력하세요" th:value="${project != null} ? ${project.name} : 'Worktopus'">
-                    </div>
-                    <div class="form-actions" style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary" style="background-color: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer;">변경 사항 저장</button>
-                    </div>
-                </form>
+                <!-- 1️⃣ [독립 폼] 프로젝트 이름 변경 구역 -->
+                <div class="manage-section" style="background-color: #fff; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm); margin-bottom: 24px;">
+                    <!-- 📌 비동기 JS 핸들링을 위해 id="updateNameForm"을 부여하고 action은 제거했습니다. -->
+                    <form id="updateNameForm" class="manage-form">
+                        <input type="hidden" name="_csrf" th:value="${_csrf != null} ? ${_csrf.token} : ''"/>
+                        <input type="hidden" name="projectId" th:value="${projectId}"/>
 
-                <!-- 위험 구역 (프로젝트 삭제) -->
-                <div class="danger-zone-wrapper" style="margin-top: 40px; border-top: 1px solid var(--border); padding-top: 20px;">
-                    <h4 style="color: var(--danger); font-weight: 600;">⚠️ 위험 구역</h4>
-                    <div class="danger-box" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--danger); border-radius: var(--radius-sm);">
-                        <div>
-                            <h5>프로젝트 삭제</h5>
-                            <p style="font-size: 0.85rem; color: var(--text-sub);">모든 데이터가 영구 복구 불가합니다.</p>
+                        <div class="form-group">
+                            <label for="projectName" class="form-label" style="font-weight: 600; display: block; margin-bottom: 8px;">프로젝트 이름 변경</label>
+                            <!-- 📌 DTO의 이름 매핑 필드와 일치하도록 name="workspaceName"으로 수정했습니다. -->
+                            <input type="text" id="projectName" name="workspaceName" class="form-input" placeholder="새로운 프로젝트명을 입력하세요" th:value="${project != null} ? ${project.name} : 'Worktopus'" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
                         </div>
-                        <button type="button" class="btn btn-danger" id="deleteWorkspaceBtn" style="background-color: var(--danger); color: #fff; border: none; padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer;">영구 삭제</button>
-                    </div>
+                        <div class="form-actions" style="margin-top: 16px; text-align: right;">
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;">이름 변경 저장</button>
+                        </div>
+                    </form>
                 </div>
+
+                <!-- 2️⃣ [독립 폼] 프로젝트 내용(설명) 변경 구역 -->
+                <div class="manage-section" style="background-color: #fff; padding: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm);">
+                    <!-- 📌 비동기 JS 핸들링을 위해 id="updateDescForm"을 부여하고 action은 제거했습니다. -->
+                    <form id="updateDescForm" class="manage-form">
+                        <input type="hidden" name="_csrf" th:value="${_csrf != null} ? ${_csrf.token} : ''"/>
+                        <input type="hidden" name="projectId" th:value="${projectId}"/>
+
+                        <div class="form-group">
+                            <label for="projectDescription" class="form-label" style="font-weight: 600; display: block; margin-bottom: 8px;">프로젝트 내용(설명) 변경</label>
+                            <!-- 📌 DTO의 내용 매핑 필드와 일치하도록 name="projectDescription"으로 수정했습니다. -->
+                            <textarea id="projectDescription" name="projectDescription" class="form-input" rows="5" placeholder="프로젝트에 대한 상세 설명을 입력하세요" th:text="${project != null} ? ${project.description} : ''" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); resize: vertical; font-family: inherit;"></textarea>
+                        </div>
+                        <div class="form-actions" style="margin-top: 16px; text-align: right;">
+                            <button type="submit" class="btn btn-primary" style="background-color: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; font-weight: 500;">내용 변경 저장</button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
         </main>
     </div>
 </div>
 
-<!-- 필요한 자바스크립트 스크립트만 로드 -->
+<!-- 필요한 자바스크립트 스크립트 모음 -->
 <script th:src="@{/js/manage/project-manage.js}"></script>
 <script th:src="@{/js/manage/manage-general.js}"></script>
 </body>
