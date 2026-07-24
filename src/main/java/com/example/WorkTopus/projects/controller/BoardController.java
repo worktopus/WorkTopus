@@ -24,6 +24,11 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
+/**
+ * 프로젝트 게시판 요청을 처리하는 컨트롤러
+ * 게시글 조회, 검색, 등록, 수정 및 삭제 기능을 제공한다.
+ */
+
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/boards")
@@ -34,21 +39,31 @@ public class BoardController {
     private final ProjectBoardAccessService projectBoardAccessService;
     private final UserService userService; // 변수명 소문자 카멜케이스로 수정
 
-    // 게시글 목록
+    /*
+     * 프로젝트 게시글 목록을 조회한다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param pageable 페이징 정보
+     * @param authentication 로그인 사용자 정보
+     * @return 게시글 목록 화면
+     */
     @GetMapping
     public ModelAndView list(
             @PathVariable Long projectId,
             @PageableDefault(size = 10) Pageable pageable,
             Authentication authentication
     ) {
+        // 프로젝트 접근 권한 검증
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 게시글 목록 및 최신 공지 조회
         Page<BoardListResponse> boardPage = boardService.findBoards(projectId, pageable);
         PageResponse<BoardListResponse> boards = PageResponse.from(boardPage);
 
+        // 화면에 데이터 전달
         ModelAndView mav = new ModelAndView("projects/board-list");
         mav.addObject("projectId", projectId);
         mav.addObject("boards", boards);
@@ -96,7 +111,14 @@ public class BoardController {
         return mav;
     }
 
-    // 게시글 작성 등록
+    /*
+     * 새로운 게시글을 등록한다.
+     *
+     * @param projectId 프로젝트 ID
+     * @param request 게시글 등록 정보
+     * @param authentication 로그인 사용자 정보
+     * @return 게시글 상세 화면으로 이동
+     */
     @PostMapping
     public ModelAndView create(
             @PathVariable Long projectId,
@@ -104,7 +126,7 @@ public class BoardController {
             @Valid @ModelAttribute BoardCreateRequest request,
             Authentication authentication
     ) {
-        // 1. 프로젝트 접근 권한 검증
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
@@ -112,30 +134,33 @@ public class BoardController {
 
         request = request.withTag(tag);
 
-        // 2. 게시글 생성 (develop 최신 서비스 규격 적용)
+        // 게시글 생성 (develop 최신 서비스 규격 적용)
         Long boardId = boardService.create(
                 projectId,
                 request,
                 authentication.getName()
         );
 
+        // 상세 페이지로 이동
         return new ModelAndView(
                 "redirect:/projects/" + projectId + "/boards/" + boardId
         );
     }
 
-    // 게시글 조회
+    // 게시글 상세 정보를 조회한다.
     @GetMapping("/{boardId}")
     public ModelAndView detail(
             @PathVariable Long projectId,
             @PathVariable Long boardId,
             Authentication authentication
     ) {
+        // 게시글 정보 조회
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 댓글 및 권한 정보 조회
         BoardDetailResponse board = boardService.findDetail(projectId, boardId);
 
         boolean isWriter = boardService.isWriter(
@@ -155,6 +180,7 @@ public class BoardController {
                 authentication.getName()
         );
 
+        // 화면에 데이터 전달
         ModelAndView mav = new ModelAndView("projects/board-detail");
         mav.addObject("projectId", projectId);
         mav.addObject("board", board);
@@ -166,7 +192,7 @@ public class BoardController {
         return mav;
     }
 
-    // 게시글 수정 폼
+    // 게시글 수정 화면을 조회한다.
     @GetMapping("/{boardId}/edit")
     public ModelAndView editForm(
             @PathVariable Long projectId,
@@ -174,11 +200,13 @@ public class BoardController {
             Authentication authentication,
             RedirectAttributes redirectAttributes
     ) {
+        // 수정 권한 검증
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 수정 화면 데이터 조회
         try {
             BoardDetailResponse board = boardService.findEditableBoard(
                     projectId,
@@ -192,6 +220,7 @@ public class BoardController {
 
             return mav;
 
+        // 권한이 없는 경우 상세 페이지로 이동
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute(
                     "errorMessage",

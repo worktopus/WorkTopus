@@ -1,6 +1,5 @@
 package com.example.WorkTopus.projects.service;
 
-import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.BoardUpdateRequest;
 import com.example.WorkTopus.projects.dto.response.BoardDetailResponse;

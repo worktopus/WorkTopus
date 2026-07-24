@@ -21,6 +21,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
+/**
+ * 프로젝트 캘린더 화면 및 일정 CRUD 요청을 처리하는 컨트롤러.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/boards/calendar")
@@ -33,11 +36,13 @@ public class CalendarController {
     public ModelAndView calendar(@PathVariable Long projectId,
                                  Authentication authentication) {
 
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 캘린더 화면에 프로젝트 정보 전달
         ModelAndView mav = new ModelAndView("projects/calendar");
         mav.addObject("projectId", projectId);
         return mav;
@@ -49,11 +54,13 @@ public class CalendarController {
             @PathVariable Long projectId,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 프로젝트 일정 목록 조회
         return calendarScheduleService.findProjectSchedules(projectId);
     }
     @PostMapping("/schedules")
@@ -63,11 +70,13 @@ public class CalendarController {
             @Valid @RequestBody CalendarScheduleCreateRequest request,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 일정 등록
         return calendarScheduleService.create(projectId, request);
     }
 
@@ -79,11 +88,13 @@ public class CalendarController {
             @Valid @RequestBody CalendarScheduleUpdateRequest request,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 일정 수정
         return calendarScheduleService.update(
                 projectId,
                 scheduleId,
@@ -98,11 +109,13 @@ public class CalendarController {
             @PathVariable Long scheduleId,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 일정 삭제
         calendarScheduleService.delete(projectId, scheduleId);
     }
 }

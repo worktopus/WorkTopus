@@ -24,6 +24,9 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
+/**
+ * 프로젝트 칸반보드 화면 및 카드 CRUD 요청을 처리하는 컨트롤러.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/boards/kanban")
@@ -36,13 +39,16 @@ public class KanbanController {
     public ModelAndView kanban(@PathVariable Long projectId,
                                Authentication authentication) {
 
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 프로젝트의 전체 칸반 카드 조회
         List<KanbanCardResponse> cards = kanbanCardService.findProjectCards(projectId);
 
+        // 칸반 화면에 상태별 카드 및 통계 데이터 전달
         ModelAndView mav = new ModelAndView("projects/kanban");
         mav.addObject("projectId", projectId);
         mav.addObject("todoCards", filterByStatus(cards, KanbanStatus.TODO));
@@ -56,7 +62,7 @@ public class KanbanController {
         return mav;
     }
 
-    //카드 목록 조회
+    // 프로젝트 칸반 카드 목록 조회
     @GetMapping("/cards")
     @ResponseBody
     public List<KanbanCardResponse> cards(
@@ -146,6 +152,7 @@ public class KanbanController {
         );
     }
 
+    // 상태별 카드 목록을 필터링하여 반환
     private List<KanbanCardResponse> filterByStatus(
             List<KanbanCardResponse> cards,
             KanbanStatus status

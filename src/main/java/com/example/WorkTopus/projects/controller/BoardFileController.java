@@ -22,7 +22,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.charset.StandardCharsets;
-
+/**
+ * 게시판 첨부파일 다운로드를 처리하는 컨트롤러.
+ * 프로젝트 멤버만 다운로드할 수 있도록 권한을 검증한다.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/files")
@@ -39,21 +42,24 @@ public class BoardFileController {
             @PathVariable Long fileId,
             Authentication authentication
     ) {
-
+        // 프로젝트 멤버 여부 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 삭제되지 않은 첨부파일 조회
         BoardFile boardFile = boardFileRepository.findById(fileId)
                 .filter(file -> "N".equals(file.getDeletedYn()))
                 .orElseThrow(this::fileNotFound);
 
+        // 해당 파일이 현재 프로젝트의 게시글에 속하는지 검증
         Board board = boardRepository.findById(boardFile.getBoardId())
                 .filter(foundBoard -> projectId.equals(foundBoard.getProjectId()))
                 .filter(foundBoard -> "N".equals(foundBoard.getDeletedYn()))
                 .orElseThrow(this::fileNotFound);
 
+        // 서버에 저장된 실제 파일 로드
         Resource resource;
 
         try {
@@ -62,6 +68,7 @@ public class BoardFileController {
             throw fileNotFound();
         }
 
+        // 다운로드 응답 생성
         ContentDisposition contentDisposition = ContentDisposition.attachment()
                 .filename(boardFile.getOriginalName(), StandardCharsets.UTF_8)
                 .build();
@@ -72,6 +79,7 @@ public class BoardFileController {
                 .body(resource);
     }
 
+    // Content-Type이 없거나 올바르지 않으면 기본 바이너리 타입을 반환
     private MediaType resolveContentType(String contentType) {
         if (contentType == null || contentType.isBlank()) {
             return MediaType.APPLICATION_OCTET_STREAM;
@@ -84,6 +92,7 @@ public class BoardFileController {
         }
     }
 
+    // 파일을 찾을 수 없을 때 공통 404 예외 반환
     private ResponseStatusException fileNotFound() {
         return new ResponseStatusException(
                 HttpStatus.NOT_FOUND,

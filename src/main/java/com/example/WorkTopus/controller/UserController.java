@@ -56,6 +56,7 @@ public class UserController {
             @Valid @ModelAttribute("userForm") UserUpdateForm userForm,
             BindingResult bindingResult,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            @RequestParam(value = "isDefaultProfile", defaultValue = "false") boolean isDefaultProfile,
             RedirectAttributes redirectAttributes) {
 
         ModelAndView mv = new ModelAndView();
@@ -83,7 +84,10 @@ public class UserController {
             }
 
             // 프사 변경
-            if (profilePicture != null && !profilePicture.isEmpty()) {
+            if (isDefaultProfile) {
+                // 기본 프로필로 초기화 요청이 온 경우
+                userService.updatePicture(userId, "/images/logo.png");
+            } else if (profilePicture != null && !profilePicture.isEmpty()) {
                 String originalFilename = profilePicture.getOriginalFilename();
                 String saveFileName = System.currentTimeMillis() + "_" + originalFilename;
 

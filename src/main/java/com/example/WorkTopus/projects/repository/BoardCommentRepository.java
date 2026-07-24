@@ -22,5 +22,4 @@ public interface BoardCommentRepository
 
     List<BoardComment> findByBoard_IdOrderByCreatedAtAsc(Long boardId);
 
-    long countByBoard_Id(Long boardId);
 }
