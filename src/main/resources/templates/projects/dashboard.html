@@ -56,7 +56,7 @@
                         </div>
 
                         <span class="assignment-overlay__badge">
-                완료 <span th:text="${dashboard.myCompletionRate}">0</span>%
+                완료 <span th:text="${dashboard.doneRate}">0</span>%
             </span>
                     </div>
 
@@ -78,7 +78,7 @@
                                  th:style="${'width:' + dashboard.completionRate + '%;'}">
 
                             <span class="assignment-progress__text">
-                                <span th:text="${dashboard.completionRate}">0</span>%
+                                <span th:text="${dashboard.myCompletionRate}">0</span>%
                             </span>
 
                             </div>

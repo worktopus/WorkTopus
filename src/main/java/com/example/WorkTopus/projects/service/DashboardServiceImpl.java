@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 프로젝트 대시보드에 필요한 정보를 조회하는 서비스 구현체.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -36,12 +39,14 @@ public class DashboardServiceImpl implements DashboardService {
 
     @Override
     public DashboardResponse getDashboard(Long projectId, String loginUserId) {
+        // 프로젝트 참여 정보 조회
         ManageMember member = manageMemberRepository
                 .findByWorkspaceIdAndUser_UserId(projectId, loginUserId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("프로젝트 참여 정보를 찾을 수 없습니다.")
                 );
 
+        // 프로젝트 전체 통계 조회
         long boardCount =
                 boardRepository.countByProjectIdAndDeletedYn(projectId, "N");
 
@@ -79,9 +84,11 @@ public class DashboardServiceImpl implements DashboardService {
                         "N"
                 );
 
+        // 프로젝트 진행률 계산
         int completionRate =
                 calculateCompletionRate(doneCount, kanbanCardCount);
 
+        // 칸반 카드 및 예정 일정 조회
         LocalDate today = LocalDate.now();
 
         List<KanbanCard> kanbanCards =
@@ -94,7 +101,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<DashboardScheduleResponse> upcomingSchedules =
                 findUpcomingSchedules(projectId, today);
 
-        // 개인 데이터는 로그인 사용자 연동 전 임시 값
+        // 로그인 사용자 개인 통계 조회
         Users user = userService.findByUserId(loginUserId);
         String userName = user.getName();
 
@@ -116,6 +123,7 @@ public class DashboardServiceImpl implements DashboardService {
         int myCompletionRate =
                 calculateRate(myDoneCount, myKanbanCardCount);
 
+        // 대시보드 응답 생성
         return new DashboardResponse(
                 boardCount,
                 fileCount,
@@ -147,6 +155,7 @@ public class DashboardServiceImpl implements DashboardService {
         );
     }
 
+    // 최근 게시글 조회
     private List<DashboardBoardResponse> findRecentBoards(Long projectId) {
         return boardRepository
                 .findByProjectIdAndDeletedYnOrderByCreatedAtDesc(projectId, "N", PageRequest.of(0, 5))
@@ -155,6 +164,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .toList();
     }
 
+    // 최신 공지 조회
     private NoticeResponse findLatestNotice(Long projectId) {
         return boardRepository
                 .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(
@@ -166,10 +176,12 @@ public class DashboardServiceImpl implements DashboardService {
                 .orElse(null);
     }
 
+    // 최근 업로드 파일 조회
     private List<ProjectFileResponse> findRecentFiles(Long projectId) {
         return boardFileRepository.findRecentProjectFiles(projectId, PageRequest.of(0, 5));
     }
 
+    // 상태별 칸반 카드 최대 3건 조회
     private List<KanbanCardResponse> filterKanbanCards(
             List<KanbanCard> cards,
             KanbanStatus status
@@ -181,6 +193,7 @@ public class DashboardServiceImpl implements DashboardService {
                 .toList();
     }
 
+    // 캘린더 일정과 칸반 마감일을 통합하여 조회
     private List<DashboardScheduleResponse> findUpcomingSchedules(Long projectId, LocalDate today) {
         List<DashboardScheduleResponse> schedules = new ArrayList<>();
 
@@ -206,12 +219,14 @@ public class DashboardServiceImpl implements DashboardService {
                 .map(DashboardScheduleResponse::from)
                 .toList());
 
+        // 날짜순으로 정렬 후 최대 5건 반환
         return schedules.stream()
                 .sorted(Comparator.comparing(DashboardScheduleResponse::date))
                 .limit(5)
                 .toList();
     }
 
+    // 2주간 달력 데이터를 생성
     private List<DashboardDayResponse> createCalendarDays(
             LocalDate today,
             List<DashboardScheduleResponse> upcomingSchedules
@@ -234,6 +249,7 @@ public class DashboardServiceImpl implements DashboardService {
         return calculateRate(doneCount, totalCount);
     }
 
+    // 백분율 계산 (0~100%)
     private int calculateRate(long count, long totalCount) {
         if (totalCount <= 0) {
             return 0;

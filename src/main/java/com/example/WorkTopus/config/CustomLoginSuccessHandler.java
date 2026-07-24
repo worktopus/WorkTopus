@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/**
+ * 로그인 성공 후 사용자 권한에 따라 이동 경로를 결정하는 핸들러.
+ */
 @Component
 public class CustomLoginSuccessHandler
         implements AuthenticationSuccessHandler {
@@ -21,6 +24,7 @@ public class CustomLoginSuccessHandler
             Authentication authentication
     ) throws IOException, ServletException {
 
+        // 관리자와 일반 사용자의 로그인 후 이동 경로 분기
         boolean isAdmin = authentication.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)

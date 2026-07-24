@@ -125,14 +125,10 @@
                          th:each="board : ${boards.content}">
 
                     <div class="board_card-top">
-            <span class="board_badge board_badge-notice"
-                  th:if="${board.notice}">
-                공지
-            </span>
-
-                        <span class="board_priority board_priority-normal">
-                보통
-            </span>
+                    <span class="board_badge board_badge-notice"
+                          th:if="${board.notice}">
+                        공지
+                    </span>
                     </div>
 
                     <a th:href="@{/projects/{projectId}/boards/{boardId}
