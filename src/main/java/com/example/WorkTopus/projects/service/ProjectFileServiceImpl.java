@@ -15,6 +15,7 @@ public class ProjectFileServiceImpl implements ProjectFileService {
 
     private final BoardFileRepository boardFileRepository;
 
+    // 프로젝트 파일 목록 조회
     @Override
     public List<ProjectFileResponse> findProjectFiles(Long projectId) {
         return boardFileRepository.findProjectFiles(projectId);
