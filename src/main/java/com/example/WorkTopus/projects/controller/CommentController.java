@@ -9,6 +9,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 게시글 댓글 등록, 수정, 삭제 요청을 처리하는 컨트롤러.
+ */
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/projects/{projectId}/boards/{boardId}/comments")
@@ -24,11 +27,13 @@ public class CommentController {
             @Valid @ModelAttribute CommentCreateRequest request,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 댓글 등록
         commentService.create(
                 projectId,
                 boardId,
@@ -47,11 +52,13 @@ public class CommentController {
             @PathVariable Long commentId,
             Authentication authentication
     ) {
+        // 프로젝트 멤버 권한 확인
         projectBoardAccessService.validateMember(
                 projectId,
                 authentication.getName()
         );
 
+        // 댓글 삭제
         commentService.delete(
                 projectId,
                 boardId,
@@ -76,6 +83,7 @@ public class CommentController {
                 authentication.getName()
         );
 
+        // 댓글 수정
         commentService.update(
                 projectId,
                 boardId,

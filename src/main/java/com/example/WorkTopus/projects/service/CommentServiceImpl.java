@@ -17,6 +17,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * 게시글 댓글에 대한 비즈니스 로직을 처리하는 서비스 구현체.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -29,6 +32,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public List<CommentResponse> findAll(Long boardId, String loginUserId) {
+        // 댓글 목록을 조회하여 응답 객체로 변환
         return commentRepository
                 .findByBoard_IdOrderByCreatedAtAsc(boardId)
                 .stream()
@@ -53,6 +57,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public void create(Long projectId, Long boardId, String userId, String content) {
+        // 게시글 및 작성자 조회
         Board board = boardRepository
                 .findByIdAndProjectId(boardId, projectId)
                 .orElseThrow(() -> new IllegalArgumentException("게시글이 없습니다."));
@@ -60,6 +65,7 @@ public class CommentServiceImpl implements CommentService {
         Users writer = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new IllegalArgumentException("사용자가 없습니다."));
 
+        // 댓글 저장
         commentRepository.save(
                 BoardComment.create(board, writer, content.trim())
         );
@@ -90,9 +96,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public void delete(Long projectId, Long boardId, Long commentId, String userId) {
+        // 삭제 대상 댓글 조회
         BoardComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("댓글이 없습니다."));
 
+        // 프로젝트 및 게시글 권한 검증
         if (!comment.getBoard().getProjectId().equals(projectId)) {
             throw new IllegalArgumentException("잘못된 프로젝트입니다.");
         }
@@ -105,6 +113,7 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalStateException("본인이 작성한 댓글만 삭제할 수 있습니다.");
         }
 
+        // 댓글 삭제
         commentRepository.delete(comment);
     }
 
@@ -112,11 +121,13 @@ public class CommentServiceImpl implements CommentService {
     public void update(Long projectId, Long boardId, Long commentId, String userId, String content
     ) {
 
+        // 수정 대상 댓글 조회
         BoardComment comment = commentRepository.findById(commentId)
                 .orElseThrow(() ->
                         new IllegalArgumentException("댓글이 없습니다.")
                 );
 
+        // 프로젝트 및 게시글 권한 검증
         if (!comment.getBoard().getProjectId().equals(projectId)) {
             throw new IllegalArgumentException("잘못된 프로젝트입니다.");
         }
@@ -129,6 +140,7 @@ public class CommentServiceImpl implements CommentService {
             throw new IllegalStateException("본인 댓글만 수정 가능합니다.");
         }
 
+        // 댓글 수정
         comment.update(content);
     }
 }

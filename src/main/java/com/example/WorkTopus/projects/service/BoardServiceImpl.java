@@ -53,7 +53,7 @@ public class BoardServiceImpl implements BoardService {
             BoardCreateRequest request,
             String loginUserId
     ) {
-        // 1. 프로젝트 멤버 여부 확인
+        // 프로젝트 멤버 여부 확인
         ManageMember member = manageMemberRepository
                 .findByWorkspaceIdAndUser_UserId(
                         projectId,
@@ -67,7 +67,7 @@ public class BoardServiceImpl implements BoardService {
 
         boolean notice = "NOTICE".equals(request.category());
 
-        // 2. 게시글 생성 및 저장
+        // 게시글 생성 및 저장
         Board board = new Board(
                 projectId,
                 request.title(),
@@ -80,7 +80,7 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard = boardRepository.save(board);
 
-        // 3. 첨부파일 저장
+        // 첨부파일 저장
         saveAttachments(savedBoard.getId(), request.files());
 
         // ================= [게시글 등록 알림 처리] =================
@@ -132,15 +132,18 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private void saveAttachments(Long boardId, List<MultipartFile> files) {
+        // 첨부파일이 없으면 저장 로직을 수행하지 않음
         if (files == null || files.isEmpty()) {
             return;
         }
 
         for (MultipartFile file : files) {
+            // 비어 있는 파일은 저장 대상에서 제외
             if (file == null || file.isEmpty()) {
                 continue;
             }
 
+            // 실제 파일 저장 후 반환된 정보를 게시글 첨부파일 엔티티로 변환
             StoredFileResponse storedFile = fileStorageService.store(file);
             BoardFile boardFile = new BoardFile(
                     boardId,
@@ -159,6 +162,7 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
+        // 공지사항을 우선 배치하고 최신순으로 게시글 조회
         Page<Board> boards = boardRepository
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
@@ -166,6 +170,7 @@ public class BoardServiceImpl implements BoardService {
                         pageable
                 );
 
+        // 게시글별 댓글 수를 한 번에 조회해 응답 DTO에 포함
         Map<Long, Long> commentCountMap =
                 getCommentCountMap(boards.getContent());
 
@@ -186,6 +191,7 @@ public class BoardServiceImpl implements BoardService {
             String sort,
             Pageable pageable
     ) {
+        // 빈 검색 조건은 null로 정규화하여 선택 조건으로 처리
         String normalizedKeyword =
                 keyword == null || keyword.isBlank()
                         ? null
@@ -196,12 +202,14 @@ public class BoardServiceImpl implements BoardService {
                         ? null
                         : category.trim();
 
+        // 요청된 정렬 기준을 적용한 검색용 Pageable 생성
         Pageable searchPageable = PageRequest.of(
                 pageable.getPageNumber(),
                 pageable.getPageSize(),
                 createSearchSort(sort)
         );
 
+        // 정규화된 검색 조건으로 게시글 조회
         Page<Board> boards = boardRepository.searchBoards(
                 projectId,
                 normalizedKeyword,
@@ -221,6 +229,7 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private Sort createSearchSort(String sort) {
+        // 공지사항을 우선 배치한 뒤 조회수 또는 최신순으로 정렬
         if ("views".equals(sort)) {
             return Sort.by(
                     Sort.Order.desc("noticeYn"),
@@ -238,8 +247,10 @@ public class BoardServiceImpl implements BoardService {
     @Override
     public BoardDetailResponse findDetail(Long projectId, Long boardId) {
         Board board = getBoard(projectId, boardId);
+        // 상세 조회 시 게시글 조회수 증가
         board.increaseViewCount();
 
+        // 삭제되지 않은 첨부파일만 조회
         List<FileResponse> files = boardFileRepository
                 .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(boardId, "N")
                 .stream()
@@ -251,6 +262,7 @@ public class BoardServiceImpl implements BoardService {
                         .build())
                 .toList();
 
+        // 게시글 작성자의 프로젝트 담당 역할 조회
         String writerAssignedRole = manageMemberRepository
                 .findByWorkspaceIdAndUser_Name(
                         projectId,
@@ -286,6 +298,7 @@ public class BoardServiceImpl implements BoardService {
                         )
                 );
 
+        // 작성자 본인만 수정 화면에 접근 가능
         if (!board.getWriterName().equals(member.getUserName())) {
             throw new IllegalArgumentException(
                     "작성자 본인만 수정할 수 있습니다."
@@ -359,6 +372,7 @@ public class BoardServiceImpl implements BoardService {
         boolean isProjectOwner =
                 "OWNER".equals(member.getProjectRole());
 
+        // 게시글 작성자 또는 프로젝트 팀장에게 삭제 권한 부여
         return isWriter || isProjectOwner;
     }
 
@@ -385,12 +399,14 @@ public class BoardServiceImpl implements BoardService {
         boolean isWriter =
                 board.getWriterName().equals(member.getUserName());
 
+        // 게시글 작성자만 수정 가능
         if (!isWriter) {
             throw new IllegalArgumentException(
                     "작성자 본인만 수정할 수 있습니다."
             );
         }
 
+        // 삭제 요청된 첨부파일을 확인하기 위해 기존 파일 조회
         List<BoardFile> existingFiles = boardFileRepository
                 .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(
                         boardId,
@@ -407,6 +423,7 @@ public class BoardServiceImpl implements BoardService {
                 request.tag()
         );
 
+        // 사용자가 삭제 대상으로 선택한 첨부파일을 논리 삭제
         if (request.deleteFileIds() != null
                 && !request.deleteFileIds().isEmpty()) {
 
@@ -417,6 +434,7 @@ public class BoardServiceImpl implements BoardService {
                     .forEach(BoardFile::delete);
         }
 
+        // 새로 추가된 첨부파일 저장
         saveAttachments(boardId, request.files());
     }
 
@@ -445,14 +463,17 @@ public class BoardServiceImpl implements BoardService {
         boolean isProjectOwner =
                 "OWNER".equals(member.getProjectRole());
 
+        // 작성자 또는 프로젝트 팀장만 게시글 삭제 가능
         if (!isWriter && !isProjectOwner) {
             throw new IllegalArgumentException(
                     "작성자 또는 프로젝트 팀장만 삭제할 수 있습니다."
             );
         }
 
+        // 게시글 논리 삭제
         board.delete();
 
+        // 게시글에 연결된 첨부파일도 함께 논리 삭제
         List<BoardFile> files = boardFileRepository
                 .findByBoardIdAndDeletedYnOrderByCreatedAtAsc(
                         boardId,
@@ -473,10 +494,12 @@ public class BoardServiceImpl implements BoardService {
             return Collections.emptyMap();
         }
 
+        // 댓글 수를 일괄 조회하기 위해 게시글 ID 목록 추출
         List<Long> boardIds = boards.stream()
                 .map(Board::getId)
                 .toList();
 
+        // 조회 결과를 게시글 ID와 댓글 수 형태의 Map으로 변환
         return boardCommentRepository
                 .countCommentsByBoardIds(boardIds)
                 .stream()
