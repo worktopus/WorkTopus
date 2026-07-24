@@ -1,24 +1,20 @@
-// [manage-board.js 상단부 : 아코디언 및 토글 상태 변경 제어]
+// [manage-board.js] 1단계 : 오라클 DB 실시간 통계 연동 및 초기화 구역
 document.addEventListener('DOMContentLoaded', function () {
     const boardTabContainer = document.getElementById('board-tab');
 
-    // DB 연동 전 화면을 채워줄 모의 게시글 데이터셋
-    const mockBoardContents = {
-        NOTICE: [
-            { title: "🚀 7월 service 정기 패치 완료 안내", writer: "김여진", date: "2026-07-15", views: 42 },
-            { title: "⚠️ 오라클 DB 계정 비밀번호 정기 변경 권고", writer: "김경규", date: "2026-07-14", views: 89 },
-            { title: "🎉 협업 공간 오픈!", writer: "김여진", date: "2026-07-01", views: 156 }
-        ],
-        FREE: [
-            { title: "오늘 점심 메뉴 추천받습니다", writer: "신승민", date: "2026-07-15", views: 12 },
-            { title: "자바스크립트 fetch 에러 나는데 도와주실 분 ㅠㅠ", writer: "노희진", date: "2026-07-15", views: 24 },
-            { title: "이번 주말에 다들 뭐 하시나요?", writer: "석가경", date: "2026-07-13", views: 8 },
-            { title: "드디어 아코디언 연동 기능 끝냈네요 깔끔함", writer: "신승민", date: "2026-07-12", views: 55 }
-        ]
-    };
-
     if (boardTabContainer) {
-        // CSRF 보안 토큰 정보 파싱
+        // 📊 현재 브라우저 주소창(URL) 경로에서 현재 워크스페이스 ID(예: 26)를 유연하게 정제해냅니다.
+        const uri = window.location.pathname; // /projects/manage/26/boards
+        const segments = uri.split('/');
+        let workspaceId = null;
+        for (let i = 0; i < segments.length; i++) {
+            if (segments[i] === 'manage' && i + 1 < segments.length) {
+                workspaceId = segments[i + 1];
+                break;
+            }
+        }
+
+        // CSRF 보안 토큰 정보 파싱 (스프링부트 시큐리티 방어막 연동)
         const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content') || '';
         const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content') || 'X-CSRF-TOKEN';
 
@@ -28,33 +24,46 @@ document.addEventListener('DOMContentLoaded', function () {
             return headers;
         };
 
-        // 하단 모달 주입 함수 호출
+        // 하단 이름수정/안전숨김 모달 주입 함수 호출
         injectManagementModals(csrfToken, csrfHeader, getHeaders);
 
-        // 기능 1 : 토글 스위치 상태 업데이트 API 통신
-        boardTabContainer.addEventListener('change', function (e) {
-            if (e.target && e.target.classList.contains('board-toggle-switch')) {
-                const switchInput = e.target;
-                const boardId = switchInput.getAttribute('data-board-id');
-                const isActivated = switchInput.checked;
+        // 📊 [오라클 연동 실현] 페이지 로드 즉시 대시보드의 '전체 누적 게시글 수'를 DB에서 실시간 카운트해옵니다.
+        if (workspaceId) {
+            fetch(`/api/manage/${workspaceId}/board-stats`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.totalPosts !== undefined) {
+                        document.getElementById('totalPostsCount').textContent = data.totalPosts;
+                    }
+                })
+                .catch(err => console.error("오라클 통계 데이터 수집 실패:", err));
+        }
 
-                fetch('/api/manage/board/status-update', {
+        // 📌 기능 1 : 아래로 위치 조정(▼) 버튼 이벤트 처리
+        boardTabContainer.addEventListener('click', function (e) {
+            const target = e.target;
+            if (target.classList.contains('btn-move-down')) {
+                const row = target.closest('tr');
+                const tbody = row.parentNode;
+                const boardId = row.getAttribute('data-board-id');
+
+                const currentDetail = document.getElementById(`details-${row.querySelector('.inspect-board-btn').getAttribute('data-board-type')}`);
+                const nextRow = currentDetail ? currentDetail.nextElementSibling : row.nextElementSibling;
+
+                if (nextRow && !nextRow.id.startsWith('details-')) {
+                    const nextNextRow = nextRow.nextElementSibling && nextRow.nextElementSibling.id.startsWith('details-') ? nextRow.nextElementSibling.nextElementSibling : nextRow.nextElementSibling;
+                    tbody.insertBefore(row, nextNextRow);
+                    if (currentDetail) tbody.insertBefore(currentDetail, row.nextSibling);
+                }
+
+                fetch('/api/manage/board/sequence-update', {
                     method: 'POST',
                     headers: getHeaders(),
-                    body: JSON.stringify({ boardId: parseInt(boardId), activated: isActivated })
-                })
-                    .then(response => {
-                        if (response.ok) return response.json();
-                        throw new Error('게시판 상태 변경에 실패했습니다.');
-                    })
-                    .catch(error => {
-                        console.error('Board Update Error:', error);
-                        switchInput.checked = !isActivated;
-                    });
+                    body: JSON.stringify({ boardId: parseInt(boardId), direction: 'DOWN' })
+                }).catch(err => console.error('Sequence Save Fail:', err));
             }
         });
-
-        // 기능 2 : 글 목록 Row 아코디언 토글 제어
+        // 📌 [오라클 연동 실현] 글 목록 아코디언 토글 시 진짜 오라클 DB 데이터를 Fetch하여 렌더링
         boardTabContainer.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('inspect-board-btn')) {
                 const button = e.target;
@@ -80,26 +89,52 @@ document.addEventListener('DOMContentLoaded', function () {
                     btn.style.color = 'var(--text-sub)';
                 });
 
-                listWrapper.innerHTML = '';
-                const listData = mockBoardContents[boardType] || [];
+                listWrapper.innerHTML = '<p style="text-align:left; color:var(--text-sub); font-size:0.85rem; margin:0; padding:8px 0;">오라클 DB에서 게시글 수집 중...</p>';
 
-                if (listData.length === 0) {
-                    listWrapper.innerHTML = '<p style="text-align:left; color:var(--text-sub); font-size:0.85rem; margin:0; padding:8px 0;">작성된 게시글이 존재하지 않습니다.</p>';
-                } else {
-                    listData.forEach(post => {
-                        const postItem = document.createElement('div');
-                        postItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; border: 1px solid #eef0f2; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);';
-                        postItem.innerHTML = `
-                            <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%;">${post.title}</div>
-                            <div style="display: flex; gap: 16px; font-size: 0.8rem; color: var(--text-sub); white-space: nowrap;">
-                                <span>✍️ <span style="font-weight:600; color:#555;">${post.writer}</span></span>
-                                <span>📅 ${post.date}</span>
-                                <span style="color: var(--primary);">👀 ${post.views}회</span>
-                            </div>
-                        `;
-                        listWrapper.appendChild(postItem);
+                // 💡 [핵심 연동 주소] 백엔드 컨트롤러 단으로 오라클 DB 실제 글 목록 요청 수행
+                fetch(`/api/manage/${workspaceId}/board-contents?category=${boardType}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error("오라클 데이터 조회 실패");
+                        return res.json();
+                    })
+                    .then(listData => {
+                        listWrapper.innerHTML = '';
+
+                        if (!listData || listData.length === 0) {
+                            listWrapper.innerHTML = '<p style="text-align:left; color:var(--text-sub); font-size:0.85rem; margin:0; padding:8px 0;">작성된 게시글이 존재하지 않습니다.</p>';
+                            return;
+                        }
+
+                        // SQL Alias 규격 배열(id, title, writer, date, views, isPinned) 수신 루프 실행
+                        listData.forEach(post => {
+                            const postItem = document.createElement('div');
+                            postItem.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; border: 1px solid #eef0f2; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);';
+
+                            // IS_NOTICE 가 'Y' 면 필독 상태로 취급하여 노란색 핀 활성화
+                            const isPinned = post.isPinned === 'Y';
+
+                            const pinBtnHtml = isPinned
+                                ? `<button type="button" class="btn-toggle-pin pinned" data-post-id="${post.id}" data-board-type="${boardType}" style="padding:4px 8px; background:#ffc107; color:#000; border:none; border-radius:3px; font-size:0.75rem; cursor:pointer; font-weight:600;">📌 고정 해제</button>`
+                                : `<button type="button" class="btn-toggle-pin" data-post-id="${post.id}" data-board-type="${boardType}" style="padding:4px 8px; background:#eef0f2; border:none; border-radius:3px; font-size:0.75rem; cursor:pointer; color:#555;">📍 상단 고정</button>`;
+
+                            postItem.innerHTML = `
+                                <div style="font-weight: 600; font-size: 0.9rem; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 50%;">
+                                    ${isPinned ? '<span style="color:#ffc107; margin-right:4px;">[필독]</span>' : ''}${post.title}
+                                </div>
+                                <div style="display: flex; gap: 16px; font-size: 0.8rem; color: var(--text-sub); white-space: nowrap; align-items:center;">
+                                    <span>✍️ <span style="font-weight:600; color:#555;">${post.writer}</span></span>
+                                    <span>📅 ${post.date}</span>
+                                    <span style="color: var(--primary); margin-right:8px;">👀 ${post.views}회</span>
+                                    ${pinBtnHtml}
+                                </div>
+                            `;
+                            listWrapper.appendChild(postItem);
+                        });
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        listWrapper.innerHTML = '<p style="text-align:left; color:#dc3545; font-size:0.85rem; margin:0; padding:8px 0;">오라클 실시간 연동 중 에러가 발생했습니다.</p>';
                     });
-                }
 
                 targetDetailRow.style.display = 'table-row';
                 button.textContent = '글 목록 닫기';
@@ -108,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // 기능 3 : 이름 수정 모달 팝업 연결
+        // 이름 수정 모달 팝업 트리거 연결
         boardTabContainer.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('btn-edit')) {
                 const row = e.target.closest('tr');
@@ -121,7 +156,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // 기능 4 : 삭제(숨김) 정책 모달 팝업 연결
+        // 삭제(숨김) 정책 모달 팝업 연결
         boardTabContainer.addEventListener('click', function (e) {
             if (e.target && e.target.classList.contains('btn-delete-board')) {
                 const boardId = e.target.getAttribute('data-board-id');
@@ -133,8 +168,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 deleteModal.style.display = 'flex';
             }
         });
+
+        // 아코디언 내부 [📍 상단 고정 / 📌 고정 해제] 버튼 클릭 처리 핸들러 (오라클 실시간 플래그 스왑 연동)
+        boardTabContainer.addEventListener('click', function (e) {
+            if (e.target && e.target.classList.contains('btn-toggle-pin')) {
+                const button = e.target;
+                const postId = button.getAttribute('data-post-id');
+                const boardType = button.getAttribute('data-board-type');
+                const isCurrentlyPinned = button.classList.contains('pinned');
+
+                fetch('/api/manage/board/post/toggle-pin', {
+                    method: 'POST',
+                    headers: getHeaders(),
+                    body: JSON.stringify({ postId: parseInt(postId), pinned: !isCurrentlyPinned })
+                })
+                    .then(res => {
+                        if (res.ok) {
+                            const inspectBtn = boardTabContainer.querySelector(`.inspect-board-btn[data-board-type="${boardType}"]`);
+                            if (inspectBtn) {
+                                inspectBtn.click(); // 한 번 닫고
+                                inspectBtn.click(); // 다시 열어서 오라클 DB에서 정렬 배치를 실시간 새로고침
+                            }
+                        } else {
+                            alert("상단 고정 정책 오라클 업데이트에 실패했습니다.");
+                        }
+                    })
+                    .catch(err => console.error("Error toggling post pin:", err));
+            }
+        });
     }
-    // 기능 5 : 화면 하단에 수정/삭제 팝업 모달 HTML 주입 및 전송 엔진
+    // 화면 하단에 수정/삭제 팝업 모달 HTML 주입 및 전송 엔진 (기존 유지)
     function injectManagementModals(csrfToken, csrfHeader, getHeaders) {
         if (document.getElementById('editBoardModal')) return;
 
@@ -179,7 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('closeEditModalBtn').addEventListener('click', () => { document.getElementById('editBoardModal').style.display = 'none'; });
         document.getElementById('closeDeleteModalBtn').addEventListener('click', () => { document.getElementById('deleteBoardModal').style.display = 'none'; });
 
-        // 기능 6 : 게시판 명칭 수정 비동기 전송
+        // 게시판 명칭 수정 비동기 전송
         document.getElementById('submitEditModalBtn').addEventListener('click', function() {
             const boardId = document.getElementById('editBoardId').value;
             const updatedName = document.getElementById('editBoardNameInput').value.trim();
@@ -198,7 +261,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 .catch(err => console.error("Error updating board name:", err));
         });
 
-        // 기능 7 : 게시판 안전 숨김(삭제) 및 정책 연동 비동기 전송
+        // 게시판 안전 숨김(삭제) 및 정책 연동 비동기 전송
         document.getElementById('submitDeleteModalBtn').addEventListener('click', function() {
             const boardId = document.getElementById('deleteTargetBoardId').value;
             const policy = document.getElementById('deletePolicySelect').value;

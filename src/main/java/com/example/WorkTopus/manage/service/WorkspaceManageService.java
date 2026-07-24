@@ -7,6 +7,7 @@ import com.example.WorkTopus.manage.dto.WorkspaceInviteRequestDto;
 import com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto;
 import com.example.WorkTopus.manage.repository.ManageRepository;
 import com.example.WorkTopus.manage.repository.ManageMemberRepository;
+import com.example.WorkTopus.manage.repository.ManageBoardRepository; // 📌 신규 추가한 레포지토리 임포트
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.mail.SimpleMailMessage;
@@ -16,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +27,7 @@ public class WorkspaceManageService {
     private final JavaMailSender mailSender;
     private final ManageRepository manageRepository;
     private final ManageMemberRepository manageMemberRepository;
+    private final ManageBoardRepository manageBoardRepository; // 📌 생성자 자동 주입 완결
 
     @PersistenceContext
     private final EntityManager em;
@@ -68,7 +71,7 @@ public class WorkspaceManageService {
 
     /**
      * 4-1 워크스페이스 일반 관리 설정 업데이트
-     * 📌 [개선 가동] 이름 변경 폼과 내용 변경 폼이 개별적으로 독립 요청될 때 각각 유연하게 필터링 업데이트합니다.
+     * 이름 변경 폼과 내용 변경 폼이 개별적으로 독립 요청될 때 각각 유연하게 필터링 업데이트합니다.
      */
     @Transactional
     public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
@@ -80,17 +83,14 @@ public class WorkspaceManageService {
         Manage manage = manageRepository.findById(workspaceId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
 
-        // 💡 1. 독립형 이름 수정 요청이 들어온 경우 처리
         if (dto.getWorkspaceName() != null && !dto.getWorkspaceName().trim().isEmpty()) {
             manage.setName(dto.getWorkspaceName());
         }
 
-        // 💡 2. 독립형 내용(설명) 수정 요청이 들어온 경우 처리
         if (dto.getProjectDescription() != null) {
             manage.setDescription(dto.getProjectDescription());
         }
 
-        // 💡 3. 기존 기타 데이터 업데이트 파이프라인 무손실 유지
         if (dto.getVisibility() != null) {
             manage.updateGeneralSettings(manage.getName(), dto.getVisibility(), dto.getArchiveStatus());
         }
@@ -106,7 +106,6 @@ public class WorkspaceManageService {
             manage.updateLogoPath(originalFileName);
         }
     }
-
     /**
      * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제 (기존 원본 복구)
      */
@@ -197,5 +196,51 @@ public class WorkspaceManageService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
 
         member.setAssignedRole(assignedRole);
+    }
+
+    // ===============================================================================
+    // 📌 [오라클 DB 연결 연동 완료] PROJECT_BOARD 테이블 통계 및 콘텐츠 추출 서비스 로직
+    // ===============================================================================
+
+    /**
+     * 📊 [오라클 연동 실시간 실현] 특정 워크스페이스 번호의 전체 누적 게시글 수 반환
+     */
+    public int getTotalPostsCount(Long workspaceId) {
+        // 새로 추가된 ManageBoardRepository를 통해 오라클 Native COUNT 쿼리를 직접 수행하여 리턴합니다.
+        return manageBoardRepository.countTotalPostsByWorkspaceId(workspaceId);
+    }
+
+    /**
+     * 📂 [오라클 연동 실시간 실현] 카테고리(NOTICE / FREE)별 정렬된 오라클 DB 실제 데이터 명단 사출
+     */
+    public List<Map<String, Object>> getRealBoardContents(Long workspaceId, String category) {
+        // 오라클 PROJECT_BOARD 테이블의 로우 데이터를 긁어와 자바스크립트 매핑용 규격 배열로 전송합니다.
+        return manageBoardRepository.findBoardContentsByWorkspaceIdAndCategory(workspaceId, category);
+    }
+
+    /**
+     * 기능 3: 중요 게시글 필독 상단 고정 제어 (오라클 PROJECT_BOARD 테이블 실시간 갱신)
+     */
+    @Transactional
+    public void togglePostPin(Long postId, boolean isPinned) {
+        System.out.println("====== [오라클 DB 연동] PROJECT_BOARD 테이블 데이터 갱신 가동 ======");
+
+        String noticeValue = isPinned ? "Y" : "N";
+
+        System.out.println("▶ 대상 게시글 번호(BOARD_ID): " + postId);
+        System.out.println("▶ 반영할 필독 고정 플래그(IS_NOTICE): " + noticeValue);
+
+        String sql = "UPDATE PROJECT_BOARD SET IS_NOTICE = :noticeValue WHERE BOARD_ID = :postId";
+
+        int updatedCount = em.createNativeQuery(sql)
+                .setParameter("noticeValue", noticeValue)
+                .setParameter("postId", postId)
+                .executeUpdate();
+
+        System.out.println("▶ 오라클 업데이트 처리 완료 결과 레코드 수: " + updatedCount + "건");
+
+        if (updatedCount == 0) {
+            throw new IllegalArgumentException("오라클 DB 내에 해당 게시글 데이터가 존재하지 않습니다. ID: " + postId);
+        }
     }
 }

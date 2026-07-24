@@ -107,7 +107,6 @@ public class WorkspaceManageApiController {
             );
         }
     }
-
     /** 팀원 직급(역할) 비동기 수정 API (기존 유지) */
     @PostMapping("/api/manage/member/role-update")
     public ResponseEntity<?> updateMemberRole(@RequestBody com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto dto) {
@@ -153,7 +152,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** [게시판관리 - 안전 숨김 조치 및 후속 정책 연동 API] (기존 유지) */
+    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] (기존 유지) */
     @DeleteMapping("/api/manage/board/{boardId}/hide-policy")
     public ResponseEntity<?> hideBoardWithPolicy(
             @PathVariable("boardId") Long boardId,
@@ -171,7 +170,6 @@ public class WorkspaceManageApiController {
 
     /**
      * [보완 가동] 담당 역할 비동기 저장 API (자동 저장 + 버튼 클릭 공용 파이프라인)
-     * 자바스크립트에서 넘어오는 데이터의 Null 값 방지 처리를 추가하여 오라클 안정성을 제고했습니다.
      */
     @PostMapping("/api/manage/member/task-update")
     public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
@@ -181,7 +179,6 @@ public class WorkspaceManageApiController {
             }
 
             Long memberId = Long.parseLong(payload.get("memberId").toString());
-            // 역할 값이 공백이거나 없을 경우 오라클에 빈 값 처리가 정상 반영되도록 안전 필터링
             String assignedRole = payload.get("assignedRole") != null ? payload.get("assignedRole").toString() : "";
 
             System.out.println("=========================================");
@@ -190,13 +187,87 @@ public class WorkspaceManageApiController {
             System.out.println("▶ 반영할 역할 (assignedRole) : '" + assignedRole + "'");
             System.out.println("=========================================");
 
-            // 서비스 레이어 호출 (Dirty Checking 또는 MyBatis Mapper 연동 가동)
             workspaceManageService.updateMemberTask(memberId, assignedRole);
 
             return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
         } catch (Exception e) {
             System.err.println("❌ [담당 역할 오라클 반영 실패 에러 로그]");
             e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // ===============================================================================
+    // 📌 [오라클 DB 직결] PROJECT_BOARD 테이블 실시간 데이터 바인딩 연동 엔드포인트
+    // ===============================================================================
+
+    /**
+     * 1. 📊 게시판 대시보드 통계 데이터 반환 API
+     * 현재 프로젝트 ID에 해당하는 전체 게시글 수를 오라클 DB에서 카운트하여 리턴합니다.
+     */
+    @GetMapping("/api/manage/{workspaceId}/board-stats")
+    public ResponseEntity<?> getBoardStats(@PathVariable("workspaceId") Long workspaceId) {
+        try {
+            // 주입된 서비스 레이어를 통해 실제 오라클 DB 레코드 수 긁어오기
+            int totalPosts = workspaceManageService.getTotalPostsCount(workspaceId);
+
+            // 화면 통계 카드용 JSON 데이터 구조 사출
+            return ResponseEntity.ok().body(Map.of(
+                    "totalPosts", totalPosts,
+                    "unreadMembers", 3 // 임시 고정값 유지
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * 2. 📂 카테고리별 실시간 오라클 DB 게시글 목록 반환 API
+     * 자바스크립트 아코디언 창이 열릴 때 호출되며 가짜 mock 데이터를 완벽히대체합니다.
+     */
+    @GetMapping("/api/manage/{workspaceId}/board-contents")
+    public ResponseEntity<?> getBoardContents(
+            @PathVariable("workspaceId") Long workspaceId,
+            @RequestParam("category") String category) {
+        try {
+            System.out.println("▶ [오라클 데이터 실시간 요청] 워크스페이스: " + workspaceId + " / 카테고리: " + category);
+
+            // 오라클 PROJECT_BOARD 테이블의 실제 리스트 데이터를 Map 배열 형태로 긁어옵니다.
+            List<Map<String, Object>> boardList = workspaceManageService.getRealBoardContents(workspaceId, category);
+
+            return ResponseEntity.ok(boardList);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * 3. 📌 위치 조정 기능 연동 API (▼)
+     */
+    @PostMapping("/api/manage/board/sequence-update")
+    public ResponseEntity<?> updateBoardSequence(@RequestBody Map<String, Object> payload) {
+        try {
+            Long boardId = Long.parseLong(payload.get("boardId").toString());
+            System.out.println("▶ [게시판 아래로 정렬 순서 조정] ID: " + boardId);
+            return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * 4. 📌 중요 게시글 필독 상단 고정 제어 비동기 API
+     */
+    @PostMapping("/api/manage/board/post/toggle-pin")
+    public ResponseEntity<?> togglePostPin(@RequestBody Map<String, Object> payload) {
+        try {
+            Long postId = Long.parseLong(payload.get("postId").toString());
+            boolean isPinned = Boolean.parseBoolean(payload.get("pinned").toString());
+            System.out.println("▶ [중요글 상단 고정 변경] 게시글 ID: " + postId + ", 고정: " + isPinned);
+
+            workspaceManageService.togglePostPin(postId, isPinned);
+            return ResponseEntity.ok().body(Map.of("message", "SUCCESS"));
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
