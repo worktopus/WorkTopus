@@ -23,10 +23,10 @@
         <!-- 오른쪽 영역 (알림, 채팅, 프로필) -->
         <div class="header__right">
 
-            <!-- 알림 -->
-            <button class="header__icon" type="button" aria-label="알림" id="header-notif-btn" onclick="toggleNotifModal(event)">
+            <!-- 알림 버튼 -->
+            <button class="header__icon" type="button" aria-label="알림">
                 <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}"></span>
-                <span class="header__badge" id="header-notif-badge" style="display: none;">0</span>
+                <span class="header__badge">3</span>
             </button>
 
             <!-- 채팅 버튼 -->
@@ -35,10 +35,8 @@
                     type="button"
                     onclick="openChat()"
                     aria-label="채팅 열기">
-
                 <!-- 채팅 아이콘 -->
                 <span th:insert="~{fragments/icons :: chat}"></span>
-
                 <!-- 전체 안 읽은 메시지 숫자 -->
                 <span class="header__badge chat-unread-badge"
                       aria-label="안 읽은 메시지"
@@ -53,37 +51,24 @@
                 <span th:replace="~{fragments/icons :: memo}"></span>
             </button>
 
-            <!-- 프로필 -->
-            <div class="header__profile-container">
-                <div class="header__profile" id="header-profile-trigger" onclick="toggleProfileDropdown(event)">
-                    <img th:src="${user?.picture} ?: '/images/logo.png'" alt="프로필" onerror="this.src='/images/logo.png';">
-
-                    <div class="header__info">
-                        <p class="header__name" th:text="${user?.name} ?: '게스트'"></p>
-                    </div>
-                </div>
-
-                <!-- 프로필 클릭 시 나타날 드롭다운 메뉴 -->
-                <div class="profile-dropdown" id="profile-dropdown-menu">
-                    <!-- 마이페이지 사이드 항목들 -->
-                    <a href="/user/mypage?tab=info" class="dropdown-item">내 정보</a>
-                    <a href="/user/mypage?tab=posts" class="dropdown-item">내가 쓴 글</a>
-                    <a href="/user/mypage?tab=comments" class="dropdown-item">내가 쓴 댓글</a>
-                    <a href="/user/mypage?tab=notif" class="dropdown-item">알림</a>
-
-                    <div class="dropdown-divider"></div>
-
-                    <!-- 로그아웃 -->
-                    <form th:action="@{/logout}" method="post" style="margin: 0;">
-                        <button type="submit" class="dropdown-item logout">로그아웃</button>
-                    </form>
+            <!-- 프로필 영역 (실시간 데이터 바인딩 연동) -->
+            <div class="header__profile">
+                <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
+                <div class="header__info">
+                    <!-- [교정] 로그인한 사용자의 실제 name 매핑 및 JS 연동용 ID 부여 -->
+                    <p id="header-user-name" class="header__name" th:text="${user != null ? user.name : '김여린'}">
+                        김여린
+                    </p>
+                    <!-- [교정] 실시간 담당 역할 변환을 추적하기 위한 고유 ID 추가 부여 -->
+                    <span id="header-user-task" class="header__role">
+                        Backend Developer
+                    </span>
                 </div>
             </div>
 
         </div>
     </header>
 
-    <!-----------------------------------------팝업-------------------------------------------->
     <!-- 신승민: 실시간 채팅 팝업 -->
     <link rel="stylesheet" th:href="@{/css/chat.css}">
 
@@ -168,38 +153,6 @@
 
     </div>
 
-    <!-- 팝업 형태의 독립된 투두리스트 -->
-    <div class="todo-modal" id="todo-popup-modal">
-        <div class="todo-modal-header">
-            <span class="todo-modal-title">MEMO</span>
-            <button class="todo-modal-close" onclick="toggleTodoModal(event)">×</button>
-        </div>
-        <div class="todo-modal-body">
-            <!-- 자유로운 메모 입력을 위한 Textarea -->
-            <textarea id="popup-memo-textarea"
-                      placeholder="여기에 자유롭게 메모를 작성하세요..."
-                      oninput="triggerAutoSave()"></textarea>
-
-            <div class="memo-status-container">
-                <!-- 수동 저장 버튼을 없애고 자동 저장 상태만 표시 -->
-                <span id="memo-save-status">저장됨</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- 알림 팝업 -->
-    <div class="todo-modal" id="notif-popup-modal">
-        <div class="todo-modal-header">
-            <span class="todo-modal-title">알림</span>
-            <button class="todo-modal-close" onclick="toggleNotifModal(event)">×</button>
-        </div>
-        <div class="todo-modal-body">
-            <ul id="popup-notif-list">
-            </ul>
-        </div>
-    </div>
-
-            <!------------------------script------------------------->
     <!-- 실제 로그인 사용자 → 채팅 JavaScript 전달 (기존 유지) -->
     <script th:inline="javascript">
         window.loginUser = {
@@ -214,12 +167,6 @@
         );
     </script>
 
-    <!-- 홈 헤더 추후 헤더와 통합? -->
-    <script th:src="@{/js/homeHeader.js}"></script>
-
-    <!-- notification 추가 -->
-    <script th:src="@{/js/notification/notification.js}"></script>
-
     <!-- 외부 라이브러리 및 채팅 관련 스크립트 모음 (기존 유지) -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
@@ -232,12 +179,10 @@
     <script th:src="@{/js/chat/history.js}"></script>
     <script th:src="@{/js/chat/chatList.js}"></script>
     <script th:src="@{/js/chat/chat.js}"></script>
+
     <!-- AI 회의요약 관련 스크립트 (기존 유지) -->
     <script th:src="@{/js/chat/meetingSummary.js}"></script>
     <script th:src="@{/js/chat/meetingHistory.js}"></script>
-
-    <!-- todo -->
-    <script th:src="@{/js/todo/todo.js}"></script>
 
 </th:block>
 </body>

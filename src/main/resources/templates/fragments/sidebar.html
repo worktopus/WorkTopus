@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 
 <body>
 
 <th:block th:fragment="sidebar">
+
     <aside class="sidebar" id="sidebar">
 
         <div class="sidebar__header">
@@ -12,6 +13,7 @@
                 <img th:src="@{/images/logo.png}"
                      alt="WorkTopus"
                      class="sidebar__logo-img">
+
                 <span class="sidebar__logo-text">WorkTopus</span>
             </a>
 
@@ -19,6 +21,7 @@
                     class="sidebar__toggle"
                     type="button"
                     aria-label="사이드바 접기">
+
                 <img th:src="@{/img/layout-grid.svg}" alt="">
             </button>
 
@@ -29,64 +32,93 @@
 
                 <li class="sidebar__item">
                     <a th:href="@{/projects/{projectId}/boards/dashboard(projectId=${projectId})}"
-                       class="sidebar__link sidebar__link--active">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: dashboard}">
+                       class="sidebar__link"
+                       data-menu="dashboard">
 
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: dashboard}">
                         </span>
+
                         <span class="sidebar__text">대시보드</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
                     <a th:href="@{/projects/{projectId}/boards(projectId=${projectId})}"
-                       class="sidebar__link">
-        <span class="sidebar__icon" th:insert="~{fragments/icons :: project}">
-        </span>
-                        <span class="sidebar__text">프로젝트</span>
+                       class="sidebar__link"
+                       data-menu="boards">
+
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: project}">
+                        </span>
+
+                        <span class="sidebar__text">게시판</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: kanban}">
+                    <a th:href="@{/projects/{projectId}/boards/kanban(projectId=${projectId})}"
+                       class="sidebar__link"
+                       data-menu="kanban">
+
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: kanban}">
                         </span>
+
                         <span class="sidebar__text">칸반보드</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: calender}">
+                    <a th:href="@{/projects/{projectId}/boards/calendar(projectId=${projectId})}"
+                       class="sidebar__link"
+                       data-menu="calendar">
+
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: calender}">
                         </span>
+
                         <span class="sidebar__text">캘린더</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <a th:href="@{/projects/{projectId}/files(projectId=${projectId})}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: file}">
+                    <a th:href="@{/projects/{projectId}/files(projectId=${projectId})}"
+                       class="sidebar__link"
+                       data-menu="files">
+
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: file}">
                         </span>
+
                         <span class="sidebar__text">파일</span>
                     </a>
                 </li>
 
                 <li class="sidebar__item">
-                    <!-- [수정] /manage/ 앞부분에 /projects 를 추가하여 매핑 주소를 일치시킵니다 -->
-                    <a th:href="@{/projects/manage/{id}(id=${projectId})}" class="sidebar__link">
-                        <span class="sidebar__icon" th:insert="~{fragments/icons :: setting}">
+                    <a th:href="@{/projects/manage/{id}(id=${projectId})}"
+                       class="sidebar__link"
+                       data-menu="settings">
+
+                        <span class="sidebar__icon"
+                              th:insert="~{fragments/icons :: setting}">
                         </span>
+
                         <span class="sidebar__text">설정</span>
                     </a>
                 </li>
-
 
             </ul>
         </nav>
 
         <div class="sidebar__footer">
 
-            <a th:href="@{/user/mypage}" class="sidebar__link" aria-label="내 정보">
-                <span class="sidebar__icon" th:insert="~{fragments/icons :: info}">
+            <a th:href="@{/user/mypage}"
+               class="sidebar__link"
+               aria-label="내 정보">
+
+                <span class="sidebar__icon"
+                      th:insert="~{fragments/icons :: info}">
                 </span>
             </a>
 
@@ -96,6 +128,7 @@
                 <button type="submit"
                         class="sidebar__link sidebar__logout"
                         aria-label="로그아웃">
+
                     <span class="sidebar__icon"
                           th:insert="~{fragments/icons :: logout}">
                     </span>
@@ -105,6 +138,46 @@
         </div>
 
     </aside>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const path = window.location.pathname;
+            let activeMenu = null;
+
+            if (path.includes("/boards/dashboard")) {
+                activeMenu = "dashboard";
+            } else if (path.includes("/boards/kanban")) {
+                activeMenu = "kanban";
+            } else if (path.includes("/boards/calendar")) {
+                activeMenu = "calendar";
+            } else if (path.includes("/files")) {
+                activeMenu = "files";
+            } else if (path.includes("/projects/manage/")) {
+                activeMenu = "settings";
+            } else if (/\/projects\/\d+\/boards\/?$/.test(path)) {
+                activeMenu = "boards";
+            }
+
+            const menuLinks = document.querySelectorAll(
+                ".sidebar__link[data-menu]"
+            );
+
+            menuLinks.forEach(function (link) {
+                link.classList.remove("sidebar__link--active");
+            });
+
+            if (activeMenu) {
+                const activeLink = document.querySelector(
+                    `.sidebar__link[data-menu="${activeMenu}"]`
+                );
+
+                if (activeLink) {
+                    activeLink.classList.add("sidebar__link--active");
+                }
+            }
+        });
+    </script>
+
 </th:block>
 
 </body>
