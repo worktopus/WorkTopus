@@ -84,18 +84,19 @@
 }
 
 .board-detail_badge-dev {
-    background: var(--primary-light);
-    color: var(--primary);
-}
+    background: color-mix(in srgb, var(--danger) 10%, var(--card));
+    color: var(--danger);
 
+}
+/*
 .board-detail_priority-high {
     background: color-mix(in srgb, var(--danger) 10%, var(--card));
     color: var(--danger);
 }
-
+*/
 .board-detail_status {
-    background: color-mix(in srgb, var(--success) 10%, var(--card));
-    color: var(--success);
+    background: var(--primary-light);
+    color: var(--primary);
 }
 
 /* =========================
