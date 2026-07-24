@@ -58,11 +58,23 @@
                             <div class="info-group-label">프로필 사진</div>
                             <div class="info-rows-container">
                                 <div class="info-data-row">
-                                    <label for="profile-file-input" class="profile-avatar-label">
-                                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
-                                             title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
-                                    </label>
+
+                                    <!-- 💡 감싸는 wrapper 적용 -->
+                                    <div class="profile-avatar-wrapper">
+                                        <label for="profile-file-input" class="profile-avatar-label">
+                                            <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                                                 title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
+                                        </label>
+
+                                        <!-- 동그란 X 버튼 -->
+                                        <button type="button" class="btn-avatar-remove" onclick="resetToDefaultProfile()" title="기본 이미지로 초기화">
+                                            ✕
+                                        </button>
+                                    </div>
+
                                     <input type="file" id="profile-file-input" name="profilePicture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                    <input type="hidden" id="isDefaultProfile" name="isDefaultProfile" value="false">
+
                                 </div>
                             </div>
                         </div>
