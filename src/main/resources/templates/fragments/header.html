@@ -35,10 +35,8 @@
                     type="button"
                     onclick="openChat()"
                     aria-label="채팅 열기">
-
                 <!-- 채팅 아이콘 -->
                 <span th:insert="~{fragments/icons :: chat}"></span>
-
                 <!-- 전체 안 읽은 메시지 숫자 -->
                 <span class="header__badge chat-unread-badge"
                       aria-label="안 읽은 메시지"
@@ -46,6 +44,11 @@
                     0
                 </span>
 
+            </button>
+
+            <!-- 메모 -->
+            <button class="header__icon" id="header-memo-btn" onclick="toggleTodoModal(event)">
+                <span th:replace="~{fragments/icons :: memo}"></span>
             </button>
 
             <!-- 프로필 영역 (실시간 데이터 바인딩 연동) -->
