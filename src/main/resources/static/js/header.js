@@ -1,3 +1,5 @@
+const csrfToken  = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
 document.addEventListener("DOMContentLoaded", function () {
 
     // 1️⃣ 기존 채팅 버튼 제어 로직 (기존 원본 기능 100% 보존)
@@ -17,9 +19,29 @@ document.addEventListener("DOMContentLoaded", function () {
         switcherBtn.addEventListener("click", function (e) {
             e.stopPropagation(); // 부모 레이아웃으로의 이벤트 전파 차단하여 레이아웃 꼬임 방지
 
+function toggleProfileDropdown(event) {
+    event.stopPropagation();
+    const dropdown = document.getElementById('profile-dropdown-menu');
+    dropdown.classList.toggle('active');
             // 드롭다운 박스가 닫혀있을 때만 서버에서 데이터를 실시간 조회 후 오픈
             if (dropdownList.style.display === "none" || dropdownList.style.display === "") {
 
+    closeAllModalsExcept('profile');
+}
+
+// 바깥 영역 클릭 시 프로필 및 메모 닫기
+document.addEventListener('click', function(e) {
+    const dropdown = document.getElementById('profile-dropdown-menu');
+    if (dropdown) dropdown.classList.remove('active');
+
+    const todoModal = document.getElementById('todo-popup-modal');
+    if (todoModal && todoModal.classList.contains('active')) {
+        if (!todoModal.contains(e.target)) {
+            if (typeof forceSaveCurrentMemo === 'function') forceSaveCurrentMemo();
+            todoModal.classList.remove('active');
+        }
+    }
+});
                 // 💡 맨 앞에 슬래시(/)를 붙여 절대 경로로 요청하므로 관리자 페이지에서도 주소가 깨지지 않습니다!
                 fetch('/api/projects/my-list')
                     .then(res => {
@@ -53,6 +75,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+// 공통 팝업 닫기 헬퍼
+function closeAllModalsExcept(current) {
+    if (current !== 'profile') {
+        const dropdown = document.getElementById('profile-dropdown-menu');
+        if (dropdown) dropdown.classList.remove('active');
+    }
+    if (current !== 'memo') {
+        const todoModal = document.getElementById('todo-popup-modal');
+        if (todoModal && todoModal.classList.contains('active')) {
+            if (typeof forceSaveCurrentMemo === 'function') forceSaveCurrentMemo();
+            todoModal.classList.remove('active');
+        }
         // 드롭다운이 열린 상태에서 드롭다운 영역 외 바깥 화면을 클릭하면 자동으로 숨김 처리
         document.addEventListener("click", function (e) {
             if (!switcherBtn.contains(e.target) && !dropdownList.contains(e.target)) {
@@ -60,4 +94,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-});
+    if (current !== 'notif') {
+        const notifModal = document.getElementById('notif-popup-modal');
+        if (notifModal) notifModal.classList.remove('active');
+    }
+}
