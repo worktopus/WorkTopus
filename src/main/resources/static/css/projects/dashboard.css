@@ -565,3 +565,34 @@
     font-size:13px;
     font-weight:700;
 }
+
+/****************************프로필 이미지 / 기본 SVG 공통 스타일 **************************/
+.profile-avatar-label {
+    display: inline-block;
+    cursor: pointer;
+}
+
+.profile-click-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #edf0ff;
+    box-shadow: 0 4px 12px rgba(114, 135, 244, 0.1);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* 기본 SVG 공용 백그라운드 박스 */
+.default-avatar-svg {
+    background: #f1f5f9;
+}
+
+.avatar-svg-icon {
+    width: 60px;
+    height: 60px;
+}

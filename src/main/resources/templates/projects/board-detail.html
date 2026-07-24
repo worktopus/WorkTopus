@@ -11,6 +11,9 @@
     <link rel="stylesheet" th:href="@{/css/projects/board-detail.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+
+    <!-- 추가 헤더 css-->
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
 </head>
 
 <body>
@@ -42,11 +45,22 @@
 
                             <div>
                                 <div class="board-detail_badges">
+                                    <!-- 공지 여부 -->
                                     <span class="board-detail_badge board-detail_badge-dev"
                                           th:if="${board.notice}">
                                         공지
                                     </span>
-                                    <span class="board-detail_status">게시글</span>
+                                    <!-- 카테고리 -->
+                                    <span class="board-detail_status"
+                                          th:if="${board.category != 'NOTICE'}"
+                                          th:switch="${board.category}">
+                                        <span th:case="'MEETING'">회의</span>
+                                        <span th:case="'WORK'">업무</span>
+                                        <span th:case="'RESOURCE'">자료</span>
+                                        <span th:case="'IDEA'">아이디어</span>
+                                        <span th:case="'ETC'">기타</span>
+                                        <span th:case="*">기타</span>
+                                    </span>
                                 </div>
 
                                 <h1 class="board-detail_title"

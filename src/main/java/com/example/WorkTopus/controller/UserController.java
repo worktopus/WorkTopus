@@ -1,10 +1,13 @@
 package com.example.WorkTopus.controller;
 
+import com.example.WorkTopus.dto.Comment;
+import com.example.WorkTopus.dto.Post;
 import com.example.WorkTopus.dto.UserUpdateForm;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/user")
@@ -51,6 +56,7 @@ public class UserController {
             @Valid @ModelAttribute("userForm") UserUpdateForm userForm,
             BindingResult bindingResult,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture,
+            @RequestParam(value = "isDefaultProfile", defaultValue = "false") boolean isDefaultProfile,
             RedirectAttributes redirectAttributes) {
 
         ModelAndView mv = new ModelAndView();
@@ -78,7 +84,10 @@ public class UserController {
             }
 
             // 프사 변경
-            if (profilePicture != null && !profilePicture.isEmpty()) {
+            if (isDefaultProfile) {
+                // 기본 프로필로 초기화 요청이 온 경우
+                userService.updatePicture(userId, "/images/logo.png");
+            } else if (profilePicture != null && !profilePicture.isEmpty()) {
                 String originalFilename = profilePicture.getOriginalFilename();
                 String saveFileName = System.currentTimeMillis() + "_" + originalFilename;
 
@@ -151,10 +160,10 @@ public class UserController {
     }
 
 // ------------------------------------------------------------------------------------------
-    // 3. 내가 쓴 글 목록 조회 (비동기 JSON 응답)
+    // 내가 쓴 글 목록 조회 (비동기 JSON 응답)
     @GetMapping("/mypage/post")
     @ResponseBody
-    public java.util.List<com.example.WorkTopus.dto.Post> getMyPosts(Authentication authentication) {
+    public java.util.List<Post> getMyPosts(Authentication authentication) {
 
         // 스프링 시큐리티 인증 객체에서 계정 ID(예: admin) 추출
         String userId = authentication.getName();
@@ -167,4 +176,15 @@ public class UserController {
         return userService.findPostsByWriterName(writerName);
     }
 
+    // ------------------------------------------------------------------------------------------
+    // 내가 쓴 댓글 목록 조회
+    @GetMapping("/mypage/comments")
+    @ResponseBody
+    public ResponseEntity<List<Comment>> getMyComments(Authentication authentication) {
+        String userId = authentication.getName();
+        Users user = userService.findByUserId(userId);
+
+        List<com.example.WorkTopus.dto.Comment> comments = userService.getMyComments(user.getUserNum());
+        return ResponseEntity.ok(comments);
+    }
 }

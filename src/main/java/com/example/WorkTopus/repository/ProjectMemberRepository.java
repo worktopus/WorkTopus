@@ -22,6 +22,11 @@ public interface ProjectMemberRepository
     );
 
     /*
+     * 알림 서비스 등에서 사용하는 기본 프로젝트 팀원 조회
+     */
+    List<ProjectMember> findByProject_Id(Long projectId);
+
+    /*
      * 로그인 사용자가 참여한 프로젝트 조회
      */
     @EntityGraph(attributePaths = {
@@ -33,9 +38,7 @@ public interface ProjectMemberRepository
 
     /*
      * 특정 프로젝트의 전체 참여자 조회
-     *
-     * user를 함께 조회해 DTO 변환 시
-     * USERS 정보를 사용할 수 있게 합니다.
+     * user를 함께 조회해 DTO 변환 시 USERS 정보를 사용할 수 있게 합니다.
      */
     @EntityGraph(attributePaths = {
             "user"
@@ -45,8 +48,7 @@ public interface ProjectMemberRepository
     );
 
     /*
-     * 프로젝트 번호와 사용자 번호로
-     * 참여자 한 명 조회
+     * 프로젝트 번호와 사용자 번호로 참여자 한 명 조회
      */
     @EntityGraph(attributePaths = {
             "user"

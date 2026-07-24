@@ -26,6 +26,15 @@ function switchTab(tabName) {
     // 현재 선택한 유효 탭 정보를 브라우저에 저장
     localStorage.setItem('mypageActiveTab', tabName);
 
-    if (tabName === 'posts') { loadMyPosts(); }
-    else if (tabName === 'comments') { loadMyComments(); }
+    if (tabName === 'posts') {
+        loadMyPosts();
+    }
+    else if (tabName === 'comments') {
+        loadMyComments();
+    }
+    else if (tabName === 'notif') {
+        if (typeof loadNotifications === 'function') {
+            loadNotifications();
+        }
+    }
 }

@@ -58,11 +58,23 @@
                             <div class="info-group-label">프로필 사진</div>
                             <div class="info-rows-container">
                                 <div class="info-data-row">
-                                    <label for="profile-file-input" class="profile-avatar-label">
-                                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
-                                             title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
-                                    </label>
+
+                                    <!-- 💡 감싸는 wrapper 적용 -->
+                                    <div class="profile-avatar-wrapper">
+                                        <label for="profile-file-input" class="profile-avatar-label">
+                                            <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                                                 title="사진을 클릭하여 변경" onerror="this.src='/images/logo.png';">
+                                        </label>
+
+                                        <!-- 동그란 X 버튼 -->
+                                        <button type="button" class="btn-avatar-remove" onclick="resetToDefaultProfile()" title="기본 이미지로 초기화">
+                                            ✕
+                                        </button>
+                                    </div>
+
                                     <input type="file" id="profile-file-input" name="profilePicture" accept="image/*" style="display: none;" onchange="previewImage(this)">
+                                    <input type="hidden" id="isDefaultProfile" name="isDefaultProfile" value="false">
+
                                 </div>
                             </div>
                         </div>
@@ -165,10 +177,30 @@
                     </table>
                 </div>
 
-                <!--알림-->
+                <!-- 알림 -->
                 <div id="section-notif" class="content-section">
-                    <h2 class="content-title">프로젝트 알림</h2>
-                    <ul id="notif-list" style="padding: 0; list-style: none; margin: 0;">
+                    <!-- 헤더 영역 -->
+                    <div style="margin-bottom: 15px;">
+                        <h2 class="content-title" style="margin: 0 0 12px 0;">프로젝트 알림</h2>
+
+                        <!-- 알림 수신 설정 (박스 형태 및 자동 줄바꿈 적용) -->
+                        <div class="notif-settings-box" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 12px 18px; align-items: center; font-size: 13px; color: #334155;">
+                            <span style="font-weight: 600; color: #1e293b; margin-right: 4px;">카테고리 필터:</span>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-notice" value="NOTICE" checked onchange="updateNotifSetting()"> 공지</label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-meeting" value="MEETING" checked onchange="updateNotifSetting()"> 회의</label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-work" value="WORK" checked onchange="updateNotifSetting()"> 업무</label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-resource" value="RESOURCE" checked onchange="updateNotifSetting()"> 자료</label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-idea" value="IDEA" checked onchange="updateNotifSetting()"> 아이디어</label>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-etc" value="ETC" checked onchange="updateNotifSetting()"> 기타</label>
+
+                            <span style="color: #cbd5e1; margin: 0 4px;">|</span>
+
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500;"><input type="checkbox" id="notif-comment" value="COMMENT" checked onchange="updateNotifSetting()"> 댓글 알림</label>
+                        </div>
+                    </div>
+
+                    <!-- 알림 목록 동적 삽입 구역 -->
+                    <ul id="notif-list" style="padding: 0; list-style: none; margin: 0; display: flex; flex-direction: column; gap: 10px; width: 100%;">
                         <li style="padding: 20px; border: 1px dashed #cbd5e1; border-radius: 8px; text-align: center; color: #64748b; font-size: 14px; background-color: #f8fafc;">
                             새로운 시스템 및 프로젝트 알림이 존재하지 않습니다.
                         </li>
@@ -193,6 +225,7 @@
 <script th:src="@{/js/mypage/mypage-info.js}"></script>
 <script th:src="@{/js/mypage/mypage-posts.js}"></script>
 <script th:src="@{/js/mypage/mypage-comments.js}"></script>
+<script th:src="@{/js/mypage/mypage-notif.js}"></script>
 
 </body>
 </html>

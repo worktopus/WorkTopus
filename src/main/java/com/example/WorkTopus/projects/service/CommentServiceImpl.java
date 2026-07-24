@@ -1,5 +1,7 @@
 package com.example.WorkTopus.projects.service;
 
+import com.example.WorkTopus.Notification.entity.NotificationType;
+import com.example.WorkTopus.Notification.service.NotificationService;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.response.CommentResponse;
 import com.example.WorkTopus.projects.entity.Board;
@@ -23,6 +25,7 @@ public class CommentServiceImpl implements CommentService {
     private final BoardRepository boardRepository;
     private final BoardCommentRepository commentRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Override
     public List<CommentResponse> findAll(Long boardId, String loginUserId) {
@@ -60,6 +63,28 @@ public class CommentServiceImpl implements CommentService {
         commentRepository.save(
                 BoardComment.create(board, writer, content.trim())
         );
+
+        // ================= [알림 생성 수정] =================
+        // userId(이메일)로 먼저 찾아보고, 없으면 name(실명)으로 찾아옵니다.
+        Users postWriter = userRepository.findByUserId(board.getWriterName())
+                .orElseGet(() -> userRepository.findByName(board.getWriterName()).orElse(null));
+
+        if (postWriter != null) {
+            // 본인이 쓴 글에 본인이 댓글을 단 경우는 알림 제외
+            if (!postWriter.getUserId().equals(writer.getUserId())) {
+                String message = writer.getName() + "님이 회원님의 게시글에 댓글을 남겼습니다.";
+                String url = "/projects/" + board.getProjectId() + "/boards/" + boardId;
+
+                notificationService.createNotification(
+                        postWriter,
+                        message,
+                        url,
+                        NotificationType.COMMENT
+                );
+            }
+        }
+        // ===================================================
+
     }
 
     @Override

@@ -1,5 +1,9 @@
 package com.example.WorkTopus.projects.service;
 
+import com.example.WorkTopus.Notification.entity.NotificationType;
+import com.example.WorkTopus.Notification.service.NotificationService;
+import com.example.WorkTopus.entity.ProjectMember;
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.manage.entity.ManageMember;
 import com.example.WorkTopus.manage.repository.ManageMemberRepository;
 import com.example.WorkTopus.projects.dto.request.BoardCreateRequest;
@@ -11,11 +15,14 @@ import com.example.WorkTopus.projects.exception.BoardNotFoundException;
 import com.example.WorkTopus.projects.repository.BoardCommentRepository;
 import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,12 +44,16 @@ public class BoardServiceImpl implements BoardService {
     private final FileStorageService fileStorageService;
     private final ManageMemberRepository manageMemberRepository;
 
+    private final NotificationService notificationService;
+    private final ProjectMemberRepository projectMemberRepository;
+
     @Override
     public Long create(
             Long projectId,
             BoardCreateRequest request,
             String loginUserId
     ) {
+        // 1. 프로젝트 멤버 여부 확인
         ManageMember member = manageMemberRepository
                 .findByWorkspaceIdAndUser_UserId(
                         projectId,
@@ -56,6 +67,7 @@ public class BoardServiceImpl implements BoardService {
 
         boolean notice = "NOTICE".equals(request.category());
 
+        // 2. 게시글 생성 및 저장
         Board board = new Board(
                 projectId,
                 request.title(),
@@ -68,7 +80,53 @@ public class BoardServiceImpl implements BoardService {
 
         Board savedBoard = boardRepository.save(board);
 
+        // 3. 첨부파일 저장
         saveAttachments(savedBoard.getId(), request.files());
+
+        // ================= [게시글 등록 알림 처리] =================
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserId = (authentication != null) ? authentication.getName() : loginUserId;
+
+        // 1) 해당 프로젝트의 팀원 목록 조회
+        List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
+
+        // 작성자 본인을 제외한 실제 수신 대상자만 필터링
+        List<ProjectMember> targetMembers = members.stream()
+                .filter(m -> currentUserId != null && !currentUserId.equals(m.getUser().getUserId()))
+                .toList();
+
+        // 수신할 팀원이 아무도 없다면 (혼자 프로젝트를 진행 중이라면) 알림 생성을 안 하고 건너뜁니다.
+        if (targetMembers.isEmpty()) {
+            return savedBoard.getId();
+        }
+
+        // 2) 카테고리 한글 명칭 매핑 (공지사항 -> 공지로 변경)
+        String categoryName = switch (request.category()) {
+            case "NOTICE" -> "공지";
+            case "MEETING" -> "회의";
+            case "WORK" -> "업무";
+            case "RESOURCE" -> "자료";
+            case "IDEA" -> "아이디어";
+            case "ETC" -> "기타";
+            default -> "게시판";
+        };
+
+        // 알림 메시지 포맷 (공통 변수 1회만 정의)
+        String message = "[" + categoryName + "] " + savedBoard.getTitle() + " 글이 등록되었습니다.";
+        String url = "/projects/" + projectId + "/boards/" + savedBoard.getId();
+
+        // 3) 실제 수신 대상 팀원들에게만 알림 발송
+        for (ProjectMember projectMember : targetMembers) {
+            Users targetUser = projectMember.getUser();
+
+            notificationService.createNotification(
+                    targetUser,
+                    message,
+                    url,
+                    NotificationType.NOTICE
+            );
+        }
+        // =======================================================
 
         return savedBoard.getId();
     }
@@ -101,7 +159,6 @@ public class BoardServiceImpl implements BoardService {
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> findBoards(Long projectId, Pageable pageable) {
-
         Page<Board> boards = boardRepository
                 .findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(
                         projectId,
@@ -119,6 +176,7 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<BoardListResponse> searchBoards(
@@ -144,7 +202,6 @@ public class BoardServiceImpl implements BoardService {
                 createSearchSort(sort)
         );
 
-
         Page<Board> boards = boardRepository.searchBoards(
                 projectId,
                 normalizedKeyword,
@@ -162,6 +219,7 @@ public class BoardServiceImpl implements BoardService {
                 )
         );
     }
+
     private Sort createSearchSort(String sort) {
         if ("views".equals(sort)) {
             return Sort.by(
@@ -192,7 +250,6 @@ public class BoardServiceImpl implements BoardService {
                         .fileUrl(file.getFileUrl())
                         .build())
                 .toList();
-
 
         String writerAssignedRole = manageMemberRepository
                 .findByWorkspaceIdAndUser_Name(
@@ -412,7 +469,6 @@ public class BoardServiceImpl implements BoardService {
     }
 
     private Map<Long, Long> getCommentCountMap(List<Board> boards) {
-
         if (boards == null || boards.isEmpty()) {
             return Collections.emptyMap();
         }
@@ -430,7 +486,8 @@ public class BoardServiceImpl implements BoardService {
                 ));
     }
 
-
+    @Override
+    @Transactional(readOnly = true)
     public Optional<NoticeResponse> getLatestNotice(Long projectId) {
         return boardRepository
                 .findFirstByProjectIdAndNoticeYnAndDeletedYnOrderByCreatedAtDesc(

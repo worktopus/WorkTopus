@@ -10,6 +10,9 @@
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/projects/dashboard.css}">
+
+    <!-- 추가 헤더 css-->
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
 </head>
 
 <body>
@@ -29,7 +32,8 @@
 
                 <div class="assignment-overlay__profile">
                     <div class="dashboard__avatar">
-                        <img th:src="@{/img/circle-user-round.svg}" class="user_icon" >
+                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
+                             title="프로필 사진" onerror="this.src='/images/logo.png';">
                     </div>
                 </div>
 
@@ -52,7 +56,7 @@
                         </div>
 
                         <span class="assignment-overlay__badge">
-                완료 <span th:text="${dashboard.myCompletionRate}">0</span>%
+                완료 <span th:text="${dashboard.doneRate}">0</span>%
             </span>
                     </div>
 
@@ -74,7 +78,7 @@
                                  th:style="${'width:' + dashboard.completionRate + '%;'}">
 
                             <span class="assignment-progress__text">
-                                <span th:text="${dashboard.completionRate}">0</span>%
+                                <span th:text="${dashboard.myCompletionRate}">0</span>%
                             </span>
 
                             </div>

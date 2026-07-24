@@ -208,7 +208,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (categoryInput) {
             categoryInput.value =
-                "FREE";
+                "MEETING";
         }
 
         if (tagInput) {
