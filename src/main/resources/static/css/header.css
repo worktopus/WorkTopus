@@ -280,8 +280,7 @@
     transition: transform .25s ease;
 }
 
-.header__project-switcher:hover
-.header__project-arrow {
+.header__left-container.active .header__project-arrow {
     transform: rotate(180deg);
 }
 
@@ -320,4 +319,35 @@
     padding: 10px 16px;
     color: #94a3b8;
     font-size: 13px;
+}
+
+/* ==========================================================
+   Project Switcher
+========================================================== */
+.header__left-container {
+    position: relative;
+}
+
+.project-dropdown {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    z-index: 9999;
+
+    min-width: 250px;
+    margin-top: 0px;
+    padding: 6px 0;
+
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+#projectDropdownList {
+    display: none;
+}
+
+.header__left-container.active #projectDropdownList {
+    display: block;
 }

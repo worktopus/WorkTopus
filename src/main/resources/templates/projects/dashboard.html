@@ -194,9 +194,9 @@
 
                         <ul class="chart-legend">
                             <li><span class="dot dot--blue"></span>해야 할 일 <strong th:text="${dashboard.todoRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--orange"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--purple"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--green"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--inProgress"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--review"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--done"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
 
                         </ul>
                     </div>
@@ -221,17 +221,39 @@
                 </div>
 
                 <div class="calendar">
-                    <div th:each="day : ${dashboard.calendarDays}"
+
+                    <div th:each="day, dayStat : ${dashboard.calendarDays}"
                          th:class="${day.dayClass()}">
+
                         <strong>
                             <span th:text="${#temporals.format(day.date, 'd')}">1</span>
                             <span th:text="${day.dayOfWeekLabel}">월</span>
                         </strong>
+
                         <p class="schedule"
-                           th:each="schedule : ${day.schedules}"
-                           th:classappend="${schedule.styleClass}"
-                           th:text="${schedule.title}">일정</p>
+                            th:each="schedule : ${day.schedules}"
+                            th:with="
+                               actualStart=${day.date.equals(schedule.startDate)},
+                               actualEnd=${day.date.equals(schedule.endDate)},
+                               visibleStart=${actualStart or (dayStat.first and schedule.startDate.isBefore(day.date))},
+                               visibleEnd=${actualEnd or (dayStat.last and schedule.endDate.isAfter(day.date))},
+                               single=${visibleStart and visibleEnd}
+                           "
+                            th:classappend="${schedule.styleClass
+                               + (single
+                               ? ' schedule--single'
+                               : (visibleStart
+                                ? ' schedule--start'
+                               : (visibleEnd
+                               ? ' schedule--end'
+                               : ' schedule--middle')))}"
+                            th:title="${schedule.title}">
+
+                        <span th:text="${visibleStart ? schedule.title : ''}"></span>
+                    </p>
+
                     </div>
+
                 </div>
 
                 <p class="calendar-card__help"
@@ -249,7 +271,6 @@
 
 <script th:src="@{/js/projects/dashboard.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
-<script src="/js/header.js"></script>
 
 </body>
 </html>
