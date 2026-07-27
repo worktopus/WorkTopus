@@ -83,8 +83,8 @@ tasks.named('test') {
 }
 
 bootJar{
-    archiveBaseName = "springedu2"
-    archiveFileName = "springedu2.jar"
+    archiveBaseName = "WorkTopus"
+    archiveFileName = "WorkTopus.jar"
     archiveVersion = "0.0.1"
 
 }
