@@ -27,8 +27,8 @@
 .assignment-overlay {
     position: relative;
     display: grid;
-    grid-template-columns: 150px 1fr;
-    gap: 36px;
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 28px;
     align-items: center;
     padding: 30px 34px;
     overflow: hidden;
@@ -56,6 +56,12 @@
     height: 220px;
 }
 */
+.assignment-overlay__profile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .assignment-overlay__profile,
 .assignment-overlay__content {
     position: relative;
@@ -63,8 +69,8 @@
 }
 
 .assignment-overlay__avatar {
-    width: 126px;
-    height: 126px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -73,8 +79,8 @@
 
 .assignment-overlay__avatar img,
 .user_icon {
-    width: 125px;
-    height: 125px;
+    width: 100px;
+    height: 100px;
     object-fit: cover;
 }
 
@@ -265,11 +271,14 @@
     display: inline-block;
 }
 
-.dot--blue { background: var(--primary-dark); }
+.dot--blue { background: #B8C2F7; }
 .dot--green { background: var(--success); }
 .dot--red { background: var(--danger); }
 .dot--purple { background: #6C50DE; }
 .dot--orange { background: var(--warning); }
+.dot--inProgress { background: var(--primary);}
+.dot--review { background: #dfeef7; }
+.dot--done { background: #5D72C9; }
 
 /* ==========================================================
    Chart
@@ -284,25 +293,16 @@
 
 .donut-chart {
     position: relative;
+    flex: 0 0 170px;
     width: 170px;
     height: 170px;
     border-radius: 50%;
-    background: conic-gradient(
-            var(--primary-dark) 0 25%,
-            #6C50DE 25% 55%,
-            var(--success) 55% 75%,
-            var(--warning) 75% 90%,
-            var(--danger) 90% 100%
-    );
 }
 
 .donut-chart::after {
     content: "";
     position: absolute;
-    inset: 0;
-    width: 76px;
-    height: 76px;
-    margin: auto;
+    inset: 46px;
     border-radius: 50%;
     background: var(--card);
 }
