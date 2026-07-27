@@ -358,15 +358,16 @@
 
 .calendar {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(7, minmax(0, 1fr));
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     overflow: hidden;
 }
 
 .calendar__day {
+    min-width: 0;
     min-height: 118px;
-    padding: 12px;
+    padding: 12px 0;
     border-right: 1px solid var(--border);
     border-bottom: 1px solid var(--border);
 }
@@ -382,6 +383,7 @@
 .calendar__day strong {
     display: block;
     margin-bottom: 12px;
+    padding: 0 12px;
     color: var(--text-main);
 }
 
@@ -398,11 +400,19 @@
 }
 
 .schedule {
-    padding: 7px 8px;
-    margin-bottom: 8px;
-    border-radius: 6px;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 30px;
+
+    margin: 0 0 8px;
+    padding: 6px 10px;
+
+    border-radius: 0;
+
     font-size: 12px;
     font-weight: 700;
+    line-height: 18px;
+
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -438,6 +448,34 @@
     text-align: center;
     color: var(--text-sub);
     font-size: 14px;
+}
+
+/* 하루짜리 일정 */
+.schedule--single {
+    margin-left: 8px;
+    margin-right: 8px;
+    border-radius: 6px;
+}
+
+/* 기간 일정 시작일 */
+.schedule--start {
+    margin-left: 8px;
+    margin-right: -1px;
+    border-radius: 6px 0 0 6px;
+}
+
+/* 기간 일정 중간일 */
+.schedule--middle {
+    margin-left: -1px;
+    margin-right: -1px;
+    border-radius: 0;
+}
+
+/* 기간 일정 종료일 */
+.schedule--end {
+    margin-left: -1px;
+    margin-right: 8px;
+    border-radius: 0 6px 6px 0;
 }
 
 /* ==========================================================

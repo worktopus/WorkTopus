@@ -7,7 +7,8 @@ import java.time.LocalDate;
 
 public record DashboardScheduleResponse(
         String title,
-        LocalDate date,
+        LocalDate startDate,
+        LocalDate endDate,
         String sourceType,
         String styleClass
 ) {
@@ -16,6 +17,7 @@ public record DashboardScheduleResponse(
         return new DashboardScheduleResponse(
                 schedule.getTitle(),
                 schedule.getStartDate(),
+                schedule.getEndDate(),
                 "CALENDAR",
                 "schedule--blue"
         );
@@ -24,6 +26,7 @@ public record DashboardScheduleResponse(
     public static DashboardScheduleResponse from(KanbanCard card) {
         return new DashboardScheduleResponse(
                 card.getTitle(),
+                card.getDueDate(),
                 card.getDueDate(),
                 "KANBAN",
                 "schedule--red"

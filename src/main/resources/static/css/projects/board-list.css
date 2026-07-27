@@ -27,6 +27,12 @@
     letter-spacing: 0.08em;
 }
 
+.board_card-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .board_title {
     margin: 0;
     font-size: 28px;
@@ -319,10 +325,6 @@
     font-size: 18px;
     font-weight: 800;
     text-decoration: none;
-}
-
-.board_card-title:hover {
-    color: var(--primary);
 }
 
 .board_card-desc {

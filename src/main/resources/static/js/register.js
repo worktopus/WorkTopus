@@ -10,6 +10,15 @@ const checkUserIdButton =
 const userIdResult =
     document.getElementById("userIdResult");
 
+const passwordInput =
+    document.getElementById("password");
+
+const passwordConfirmInput =
+    document.getElementById("passwordConfirm");
+
+const passwordConfirmResult =
+    document.getElementById("passwordConfirmResult");
+
 let checkedUserId = "";
 
 function showUserIdResult(message, success) {
@@ -26,6 +35,57 @@ function showUserIdResult(message, success) {
             : "register-result-error"
     );
 }
+
+function showPasswordResult(message, success) {
+    passwordConfirmResult.textContent = message;
+
+    passwordConfirmResult.classList.remove(
+        "register-result-success",
+        "register-result-error"
+    );
+
+    passwordConfirmResult.classList.add(
+        success
+            ? "register-result-success"
+            : "register-result-error"
+    );
+}
+
+function checkPasswordMatch() {
+    const password = passwordInput.value;
+    const passwordConfirm = passwordConfirmInput.value;
+
+    if (!passwordConfirm) {
+        passwordConfirmResult.textContent = "";
+        return false;
+    }
+
+    if (password === passwordConfirm) {
+        showPasswordResult(
+            "비밀번호가 일치합니다.",
+            true
+        );
+
+        return true;
+    }
+
+    showPasswordResult(
+        "비밀번호가 일치하지 않습니다.",
+        false
+    );
+
+    return false;
+}
+
+passwordInput.addEventListener(
+    "input",
+    checkPasswordMatch
+);
+
+passwordConfirmInput.addEventListener(
+    "input",
+    checkPasswordMatch
+);
 
 checkUserIdButton.addEventListener("click", async function () {
     const userId = userIdInput.value.trim();
@@ -98,20 +158,51 @@ userIdInput.addEventListener("input", function () {
     }
 });
 
-registerForm.addEventListener("submit", function (event) {
-    const currentUserId = userIdInput.value.trim();
+registerForm.addEventListener(
+    "submit",
+    function (event) {
+        const currentUserId =
+            userIdInput.value.trim();
 
-    if (checkedUserId !== currentUserId) {
-        event.preventDefault();
+        const currentEmail =
+            emailInput.value.trim();
 
-        showUserIdResult(
-            "아이디 중복확인을 완료하세요.",
-            false
-        );
+        if (checkedUserId !== currentUserId) {
+            event.preventDefault();
 
-        userIdInput.focus();
+            showUserIdResult(
+                "아이디 중복확인을 완료하세요.",
+                false
+            );
+
+            userIdInput.focus();
+            return;
+        }
+
+        if (!checkPasswordMatch()) {
+            event.preventDefault();
+
+            showPasswordResult(
+                "비밀번호가 일치하지 않습니다.",
+                false
+            );
+
+            passwordConfirmInput.focus();
+            return;
+        }
+
+        if (verifiedEmail !== currentEmail) {
+            event.preventDefault();
+
+            showEmailResult(
+                "이메일 인증을 완료하세요.",
+                false
+            );
+
+            emailInput.focus();
+        }
     }
-});
+);
 
 // 이메일 기능
 const emailInput =

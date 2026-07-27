@@ -284,3 +284,40 @@
 .header__project-arrow {
     transform: rotate(180deg);
 }
+
+/* ==========================================================
+   Project Dropdown
+========================================================== */
+
+.project-dropdown__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.project-dropdown__item {
+    padding: 0;
+}
+
+.project-dropdown__link {
+    display: block;
+    padding: 10px 16px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition:
+            background-color 0.2s,
+            color 0.2s;
+}
+
+.project-dropdown__link:hover {
+    color: var(--primary);
+    background: #f1f5f9;
+}
+
+.project-dropdown__empty {
+    padding: 10px 16px;
+    color: #94a3b8;
+    font-size: 13px;
+}
