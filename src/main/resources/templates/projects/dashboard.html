@@ -221,17 +221,39 @@
                 </div>
 
                 <div class="calendar">
-                    <div th:each="day : ${dashboard.calendarDays}"
+
+                    <div th:each="day, dayStat : ${dashboard.calendarDays}"
                          th:class="${day.dayClass()}">
+
                         <strong>
                             <span th:text="${#temporals.format(day.date, 'd')}">1</span>
                             <span th:text="${day.dayOfWeekLabel}">월</span>
                         </strong>
+
                         <p class="schedule"
-                           th:each="schedule : ${day.schedules}"
-                           th:classappend="${schedule.styleClass}"
-                           th:text="${schedule.title}">일정</p>
+                            th:each="schedule : ${day.schedules}"
+                            th:with="
+                               actualStart=${day.date.equals(schedule.startDate)},
+                               actualEnd=${day.date.equals(schedule.endDate)},
+                               visibleStart=${actualStart or (dayStat.first and schedule.startDate.isBefore(day.date))},
+                               visibleEnd=${actualEnd or (dayStat.last and schedule.endDate.isAfter(day.date))},
+                               single=${visibleStart and visibleEnd}
+                           "
+                            th:classappend="${schedule.styleClass
+                               + (single
+                               ? ' schedule--single'
+                               : (visibleStart
+                                ? ' schedule--start'
+                               : (visibleEnd
+                               ? ' schedule--end'
+                               : ' schedule--middle')))}"
+                            th:title="${schedule.title}">
+
+                        <span th:text="${visibleStart ? schedule.title : ''}"></span>
+                    </p>
+
                     </div>
+
                 </div>
 
                 <p class="calendar-card__help"
