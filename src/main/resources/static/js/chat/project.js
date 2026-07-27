@@ -224,11 +224,52 @@
             );
 
         if (selectedProject) {
+
             app.state.currentProjectName =
                 selectedProject.name;
 
-            app.state.currentRoomId =
-                selectedProject.roomId;
+            /*
+             * 현재 열려 있는 채팅방이
+             * 같은 프로젝트의 방이면 그대로 유지합니다.
+             *
+             * 그룹방:
+             * project_22_group
+             *
+             * 개인방:
+             * project_22_private_1_43
+             */
+            const currentRoomId =
+                String(
+                    app.state.currentRoomId ?? ""
+                );
+
+            const currentProjectRoomPrefix =
+                `project_${selectedProject.id}_`;
+
+            const currentRoomBelongsToProject =
+                currentRoomId.startsWith(
+                    currentProjectRoomPrefix
+                );
+
+            /*
+             * 현재 채팅방이 없거나
+             * 다른 프로젝트의 채팅방일 때만
+             * 해당 프로젝트의 그룹방으로 설정합니다.
+             */
+            if (!currentRoomBelongsToProject) {
+
+                app.state.currentRoomId =
+                    selectedProject.roomId;
+
+                app.state.currentPrivateUserNum =
+                    null;
+
+                app.state.currentPrivateMemberName =
+                    "";
+
+                app.state.chatMode =
+                    "group";
+            }
 
             openedProjectIds.add(
                 selectedProject.id
@@ -237,7 +278,8 @@
             return;
         }
 
-        const firstProject = projects[0];
+        const firstProject =
+            projects[0];
 
         app.state.currentProjectId =
             firstProject.id;
@@ -254,7 +296,8 @@
         app.state.currentPrivateMemberName =
             "";
 
-        app.state.chatMode = "group";
+        app.state.chatMode =
+            "group";
 
         openedProjectIds.add(
             firstProject.id
