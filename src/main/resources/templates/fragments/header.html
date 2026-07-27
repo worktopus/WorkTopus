@@ -3,19 +3,6 @@
 <body>
 
 <th:block th:fragment="header">
-    <!-- 📌 [교정 핵심] 드롭다운 토글이 스크립트 에러에 영향받지 않도록 CSS 스타일을 헤더 상단에 안전하게 내장합니다. -->
-    <style>
-        .header__left-container {
-            position: relative;
-            display: inline-block;
-        }
-        /* 드롭다운 버튼을 클릭하거나 활성화되었을 때, 혹은 자바스크립트 장애 시 마우스만 올려도(hover) 무조건 열리도록 이중 안전장치를 설계합니다. */
-        .header__left-container:hover #projectDropdownList,
-        .header__left-container.active #projectDropdownList {
-            display: block !important;
-        }
-    </style>
-
     <header class="header">
 
         <!-- 왼쪽 영역 (프로젝트 스위처 드롭다운 감싸는 컨테이너 추가) -->
@@ -23,7 +10,7 @@
             <div class="header__left">
                 <button class="header__project-switcher" id="projectSwitcherBtn" type="button">
                     <div class="header__project-bg">
-                        <span class="header__project-icon" th:block th:insert="~{fragments/icons :: prjopen}"></span>
+                        <span class="header__project-icon"  th:insert="~{fragments/icons :: prjopen}"></span>
                     </div>
                     <div class="header__project-info">
                         <span class="header__project-name" th:text="${project != null} ? ${project.name} : 'Worktopus'">
@@ -61,7 +48,7 @@
 
             <!-- 알림 -->
             <button class="header__icon" type="button" aria-label="알림" id="header-notif-btn" onclick="toggleNotifModal(event)">
-                <span class="header__icon" th:block th:insert="~{fragments/icons :: bell}"></span>
+                <span class="header__icon" th:insert="~{fragments/icons :: bell}"></span>
                 <span class="header__badge" id="header-notif-badge" style="display: none;">0</span>
             </button>
 
@@ -112,23 +99,10 @@
                     <form th:action="@{/logout}" method="post" style="margin: 0;">
                         <button type="submit" class="dropdown-item logout">로그아웃</button>
                     </form>
-            <!-- 프로필 영역 (실시간 데이터 바인딩 연동) -->
-            <div class="header__profile">
-                <img th:src="@{/img/circle-user-round.svg}" alt="프로필">
-                <div class="header__info">
-                    <p id="header-user-name" class="header__name" th:text="${user != null ? user.name : '김여린'}">
-                        김여린
-                    </p>
-
-                    <!-- PROJECT_MEMBER 테이블에서 조회된 실제 담당 역할(assignedRole) 동적 매핑 -->
-                    <span id="header-user-task" class="header__role"
-                          th:text="${projectMember != null && projectMember.assignedRole != null} ? ${projectMember.assignedRole} : '역할 미지정'">
-                        Backend Developer
-                    </span>
                 </div>
             </div>
-
         </div>
+
     </header>
 
     <!-- 신승민: 실시간 채팅 팝업 -->
@@ -246,65 +220,17 @@
         </div>
     </div>
 
-                <!------------------------script------------------------->
-    <!-- 실제 로그인 사용자 → 채팅 JavaScript 전달 (기존 유지) -->
-    <script th:inline="javascript">
-        window.loginUser = {
-            userNum: /*[[${user != null ? user.userNum : null}]]*/ null,
-            userId: /*[[${user != null ? user.userId : ''}]]*/ "",
-            name: /*[[${user != null ? user.name : ''}]]*/ ""
-        };
-        console.log("채팅 로그인 사용자:", window.loginUser);
-    </script>
-
-    <!-- 외부 인프라 라이브러리 및 서비스 스크립트 모음 (기존 원본 구조 100% 보존) -->
-    <script src="https://jsdelivr.net"></script>
-    <script src="https://cloudflare.com"></script>
-
-    <!-- 📌 [프론트엔드 전체 마비 방어막 탑재] -->
-    <!-- 외부 파일 로드 실패 및 내부 스크립트 결함이 드롭다운 버튼 토글을 멈추지 못하도록 전체를 try-catch로 격리합니다. -->
-    <script>
-        try {
-            const scripts = [
-                "/js/chat/project.js",
-                "/js/chat/websocket.js",
-                "/js/chat/member.js",
-                "/js/chat/groupChat.js",
-                "/js/chat/privateChat.js",
-                "/js/chat/history.js",
-                "/js/chat/chatList.js",
-                "/js/chat/chat.js",
-                "/js/chat/meetingSummary.js",
-                "/js/chat/meetingHistory.js"
-            ];
-
-            scripts.forEach(src => {
-                const script = document.createElement('script');
-                script.src = src;
-                script.async = false; // 동기 순서 보장 로드
-                script.onerror = function() {
-                    console.warn("채팅 전용 외부 파일 로드 실패 (드롭다운 기능은 정상 작동합니다): " + src);
-                };
-                document.body.appendChild(script);
-            });
-        } catch (e) {
-            console.error("채팅 로직 예외 처리 격리 성공:", e);
-        }
-    </script>
-
-    <!-- 헤더 반응형 -->
-    <script th:src="@{/js/header.js}"></script>
-
-    <!-- notification 추가 -->
-    <script th:src="@{/js/notification/notification.js}"></script>
-
-    <!-- todo -->
-    <script th:src="@{/js/todo/todo.js}"></script>
-
-    <!-- 외부 라이브러리 및 채팅 관련 스크립트 모음 (기존 유지) -->
+    <!------------------------script------------------------->
+    <!-- SockJS / STOMP -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
 
+    <!-- 공통 헤더 -->
+    <script th:src="@{/js/header.js}"></script>
+    <script th:src="@{/js/notification/notification.js}"></script>
+    <script th:src="@{/js/todo/todo.js}"></script>
+
+    <!-- 채팅 -->
     <script th:src="@{/js/chat/project.js}"></script>
     <script th:src="@{/js/chat/websocket.js}"></script>
     <script th:src="@{/js/chat/member.js}"></script>
@@ -313,51 +239,8 @@
     <script th:src="@{/js/chat/history.js}"></script>
     <script th:src="@{/js/chat/chatList.js}"></script>
     <script th:src="@{/js/chat/chat.js}"></script>
-
-    <!-- AI 회의요약 관련 스크립트 (기존 유지) -->
     <script th:src="@{/js/chat/meetingSummary.js}"></script>
     <script th:src="@{/js/chat/meetingHistory.js}"></script>
-    <!-- 내장형 프로젝트 스위처 드롭다운 핸들러 스크립트 (클릭 이중 안전장치) -->
-    <script>
-        (function () {
-            function initProjectSwitcher() {
-                const container = document.querySelector(".header__left-container");
-                const switcherBtn = document.getElementById("projectSwitcherBtn");
-                const dropdownList = document.getElementById("projectDropdownList");
-
-                if (!container || !switcherBtn || !dropdownList) {
-                    setTimeout(initProjectSwitcher, 100);
-                    return;
-                }
-
-                // 📌 클릭 이벤트를 명시적으로 바인딩하여 마우스 호버 외에 클릭 시에도 완벽하게 작동하도록 조치합니다.
-                switcherBtn.onclick = function (e) {
-                    e.stopPropagation();
-                    container.classList.toggle("active");
-
-                    if (container.classList.contains("active")) {
-                        dropdownList.style.display = "block";
-                    } else {
-                        dropdownList.style.display = "none";
-                    }
-                };
-
-                // 드롭다운 외부 영역 클릭 시 자동 닫힘
-                document.addEventListener("click", function (e) {
-                    if (!container.contains(e.target)) {
-                        container.classList.remove("active");
-                        dropdownList.style.display = "none";
-                    }
-                });
-            }
-
-            if (document.readyState === "loading") {
-                document.addEventListener("DOMContentLoaded", initProjectSwitcher);
-            } else {
-                initProjectSwitcher();
-            }
-        })();
-    </script>
 
 </th:block>
 </body>
