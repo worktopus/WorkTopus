@@ -1,10 +1,3 @@
-const csrfToken =
-    document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
-
-const csrfHeader =
-    document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
-
-
 document.addEventListener("DOMContentLoaded", function () {
     initProjectSwitcher();
     initHeaderOutsideClick();
@@ -20,26 +13,30 @@ document.addEventListener("DOMContentLoaded", function () {
  */
 function initProjectSwitcher() {
     const container = document.querySelector(".header__left-container");
-    const switcherBtn = document.getElementById("projectSwitcherBtn");
     const dropdownList = document.getElementById("projectDropdownList");
 
-    if (!container || !switcherBtn || !dropdownList) {
+    if (!container || !dropdownList) {
         return;
     }
 
-    switcherBtn.addEventListener("click", async function (event) {
-        event.stopPropagation();
+    let closeTimer = null;
+    let isLoaded = false;
 
-        const isOpen = container.classList.contains("active");
+    container.addEventListener("mouseenter", async function () {
+        clearTimeout(closeTimer);
 
-        if (isOpen) {
-            closeProjectDropdown(container);
-            return;
+        if (!isLoaded) {
+            await loadProjectDropdown(dropdownList);
+            isLoaded = true;
         }
 
-        closeAllModalsExcept("project");
-        await loadProjectDropdown(dropdownList);
         openProjectDropdown(container);
+    });
+
+    container.addEventListener("mouseleave", function () {
+        closeTimer = setTimeout(function () {
+            closeProjectDropdown(container);
+        }, 120);
     });
 }
 

@@ -16,11 +16,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const doneEnd = reviewEnd + doneRate;
 
     donutChart.style.background = `conic-gradient(
-        #5f72d9 0% ${todoEnd}%,
-        #f59e0b ${todoEnd}% ${progressEnd}%,
-        #6d4ce8 ${progressEnd}% ${reviewEnd}%,
-        #22c55e ${reviewEnd}% ${doneEnd}%,
-        #eef1ff ${doneEnd}% 100%
+    #7287F4 0% ${todoEnd}%,
+    #72D2FF ${todoEnd}% ${progressEnd}%,
+    #A78BFA ${progressEnd}% ${reviewEnd}%,
+    #66D19E ${reviewEnd}% ${doneEnd}%,
+    #EEF1FF ${doneEnd}% 100%
     )`;
 
     function getRate(value) {
