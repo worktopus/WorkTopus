@@ -142,12 +142,15 @@
 /*==================아이디 중복확인=============================*/
 .register-input-row {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     gap: 10px;
+    width: 100%;
 }
 
 .register-row-input {
     flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
 }
 
 .register-check-btn {
@@ -193,8 +196,13 @@
 
 .email-verification-box {
     padding: 18px;
-    margin: 4px 0 24px;
-    background: #f8f9ff;
-    border: 1px solid #edf0ff;
-    border-radius: 16px;
+}
+
+.email-verification-box .register-label {
+    display: block;
+}
+
+.email-verification-box .register-result {
+    margin: 8px 0 0;
+    min-height: 18px;
 }
