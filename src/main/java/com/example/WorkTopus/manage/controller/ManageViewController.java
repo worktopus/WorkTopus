@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.security.core.Authentication; // 📌 Spring Security 인증 처리를 위한 임포트 추가
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,17 +22,14 @@ public class ManageViewController {
     private final ManageRepository manageRepository;
     private final WorkspaceManageService workspaceManageService;
 
-    // [교정] 주소창 번호가 꼬여있을 때 오라클 DB 실시간 정합성을 보장하는 안전 조회 함수 (원본 보존)
-    private Manage getRealProjectData(Long workspaceId) {
-        // 1. 주소창 주소로 먼저 조회를 시도합니다.
-        return manageRepository.findById(workspaceId)
+    // [교정] 주소창 번호 안전 조회 함수 (프로젝트 ID 체계 매핑)
+    private Manage getRealProjectData(Long projectId) {
+        return manageRepository.findById(projectId)
                 .orElseGet(() -> {
-                    // 2. 만약 데이터 불일치가 감지되면 오라클 PROJECTS 테이블의 가장 최신 방 혹은 대체 타겟(예: 23번)을 폴백하여 세팅합니다.
-                    // 실제 운영 단계에서는 세션이나 컨텍스트 변수(현재 진입 ID)를 매핑해주는 구역입니다.
                     return manageRepository.findById(23L)
                             .orElseGet(() -> {
                                 Manage mock = new Manage();
-                                mock.setId(workspaceId);
+                                mock.setId(projectId);
                                 mock.setName("삭제");
                                 mock.setInviteCode("AJEJH2");
                                 return mock;
@@ -41,18 +38,13 @@ public class ManageViewController {
     }
 
     /**
-     * 📌 [신규 추가] 현재 로그인한 유저의 프로젝트 내 담당 역할을 찾아 헤더 템플릿용 모델에 주입합니다.
-     * Spring Security 환경에 따라 유저 ID(userId) 혹은 이름(name) 매칭 방식을 모두 안전하게 수용합니다.
+     * 현재 로그인한 유저의 프로젝트 내 담당 역할을 찾아 헤더 템플릿용 모델에 주입합니다.
      */
-    private void bindHeaderProjectMemberRole(Long workspaceId, Authentication authentication, Model model) {
+    private void bindHeaderProjectMemberRole(Long projectId, Authentication authentication, Model model) {
         if (authentication != null && authentication.isAuthenticated()) {
-            // Spring Security가 인증 컨텍스트에서 반환하는 현재 로그인 유저 식별값 수집
             String loginSecurityName = authentication.getName();
+            List<ManageMember> membersList = workspaceManageService.getWorkspaceMembers(projectId);
 
-            // 현재 워크스페이스에 속한 전체 참여 멤버 목록 조회
-            List<ManageMember> membersList = workspaceManageService.getWorkspaceMembers(workspaceId);
-
-            // 엔티티의 getUser() 객체가 들고 있는 userId나 name 중 하나라도 일치하는 '나 자신'을 정밀 필터링합니다.
             ManageMember currentLoggedInMember = membersList.stream()
                     .filter(m -> m.getUser() != null && (
                             loginSecurityName.equals(m.getUser().getUserId()) ||
@@ -61,91 +53,86 @@ public class ManageViewController {
                     .findFirst()
                     .orElse(null);
 
-            // fragments/header.html 템플릿이 수집해가는 "projectMember" 명칭으로 최신 객체 실시간 매핑 주입
             model.addAttribute("projectMember", currentLoggedInMember);
         }
     }
 
-    // 1. 일반 관리 탭 뷰 매핑
-    @GetMapping("/projects/manage/{workspaceId}")
-    public String showManagePage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
-        Manage manageData = getRealProjectData(workspaceId);
+    /**
+     * 1. 🛠️ 일반 관리 탭 뷰 매핑
+     * 변경된 주소창: /projects/{projectId}/manage
+     */
+    @GetMapping("/projects/{projectId}/manage")
+    public String showManagePage(@PathVariable("projectId") Long projectId, Model model, Authentication authentication) {
+        Manage manageData = getRealProjectData(projectId);
         model.addAttribute("project", manageData);
-        model.addAttribute("projectId", manageData.getId()); // 진짜 조회된 ID로 강제 고정
+        model.addAttribute("projectId", manageData.getId());
 
         List<ManageMember> membersList = workspaceManageService.getWorkspaceMembers(manageData.getId());
         model.addAttribute("members", membersList);
 
-        // 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
         bindHeaderProjectMemberRole(manageData.getId(), authentication, model);
 
         return "manage/manage";
     }
 
-    // 2. 팀원 관리 탭 뷰 매핑
-    @GetMapping("/projects/manage/{workspaceId}/members")
-    public String showMembersPage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
-        Manage manageData = getRealProjectData(workspaceId);
+    /**
+     * 2. 👥 팀원 관리 탭 뷰 매핑
+     * 변경된 주소창: /projects/{projectId}/manage/members
+     */
+    @GetMapping("/projects/{projectId}/manage/members")
+    public String showMembersPage(@PathVariable("projectId") Long projectId, Model model, Authentication authentication) {
+        Manage manageData = getRealProjectData(projectId);
         model.addAttribute("project", manageData);
         model.addAttribute("projectId", manageData.getId());
 
         List<ManageMember> membersList = workspaceManageService.getWorkspaceMembers(manageData.getId());
         model.addAttribute("members", membersList);
 
-        // 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
         bindHeaderProjectMemberRole(manageData.getId(), authentication, model);
 
         return "manage/members";
     }
-    // 3. 팀원 초대 탭 뷰 매핑
-    @GetMapping("/projects/manage/{workspaceId}/invite")
-    public String showInvitePage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
-        Manage manageData = getRealProjectData(workspaceId);
+
+    /**
+     * 3. ✉️ 팀원 초대 탭 뷰 매핑
+     * 변경된 주소창: /projects/{projectId}/manage/invite
+     */
+    @GetMapping("/projects/{projectId}/manage/invite")
+    public String showInvitePage(@PathVariable("projectId") Long projectId, Model model, Authentication authentication) {
+        Manage manageData = getRealProjectData(projectId);
         model.addAttribute("project", manageData);
         model.addAttribute("projectId", manageData.getId());
 
-        // 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
         bindHeaderProjectMemberRole(manageData.getId(), authentication, model);
 
         return "manage/invite";
     }
 
     /**
-     * 4. 📝 [버그 완벽 소멸] 게시판 관리 탭 뷰 매핑
-     * 타임리프 boards.html이 파싱에 필수적으로 요구하는 정식 'boards' 객체와 'projectId'를 모델에 안전하게 적재합니다.
+     * 4. 📝 게시판 관리 탭 뷰 매핑
+     * 변경된 주소창: /projects/{projectId}/manage/boards
      */
-    @GetMapping("/projects/manage/{workspaceId}/boards")
+    @GetMapping("/projects/{projectId}/manage/boards")
     public String showBoardsPage(
-            @PathVariable("workspaceId") Long workspaceId,
-            @PageableDefault(size = 10) Pageable pageable, // 📌 페이징 방어선을 위한 인자 추가
+            @PathVariable("projectId") Long projectId,
+            @PageableDefault(size = 10) Pageable pageable,
             Model model,
             Authentication authentication) {
 
-        // 1. 주소창 번호 정합성 검증 및 방어선 가동
-        Manage manageData = getRealProjectData(workspaceId);
+        Manage manageData = getRealProjectData(projectId);
         model.addAttribute("project", manageData);
-
-        // 2. 상단 탭 인디케이터 및 주소 연동에 핵심이 되는 진짜 조회된 ID 고정
         model.addAttribute("projectId", manageData.getId());
 
-        // 3. 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
         bindHeaderProjectMemberRole(manageData.getId(), authentication, model);
 
         try {
-            // 4. 📊 [핵심 보완] 기존 보드 리스트 로직처럼 Page 구조 데이터를 오라클 서비스단으로부터 유연하게 긁어옵니다.
-            // (만약 서비스단에 페이징 구현이 안되어 있다면 Page.empty()를 넘겨 렌더링 폭발을 원천 차단합니다)
             Page<?> boardPage = workspaceManageService.getIntegratedBoardPage(manageData.getId(), pageable);
             model.addAttribute("boards", boardPage);
-
         } catch (Exception e) {
-            System.err.println("❌ [방어선 작동] boards 데이터 바인딩 실패로 인해 빈 Page 객체를 사출합니다.");
             e.printStackTrace();
-
-            // 서비스단 함수 미작성 시 타임리프 예외 유발을 막기 위해 인터페이스 규격을 임시 주입해 둡니다.
             model.addAttribute("boards", Page.empty());
         }
 
-        // 5. templates/manage/boards.html 경로 포맷으로 가 정식 뷰 네임 리턴
         return "manage/boards";
     }
 }

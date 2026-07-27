@@ -96,7 +96,7 @@
                 </li>
 
                 <li class="sidebar__item" th:if="${isProjectOwner}">
-                    <a th:href="@{/projects/manage/{id}(id=${projectId})}"
+                    <a th:href="@{/projects/{projectId}/manage(projectId=${projectId})}"
                        class="sidebar__link"
                        data-menu="settings">
 
@@ -107,6 +107,7 @@
                         <span class="sidebar__text">설정</span>
                     </a>
                 </li>
+
 
             </ul>
         </nav>

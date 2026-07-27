@@ -28,10 +28,10 @@
 
             <!-- 상단 탭 메뉴 바 -->
             <div class="manage-tabs">
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
-                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage'|">일반 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/invite'|">팀원 초대</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/boards'|">게시판 관리</button>
             </div>
 
             <!-- 프로젝트 전역 통합 게시글 통제 관리 구역 -->
@@ -41,11 +41,19 @@
                     <p>작성자와 관계없이 현재 프로젝트 내부의 모든 게시글을 실시간 조회하고 수정 및 강제 소멸 조치를 제어합니다.</p>
                 </div>
 
-                <!-- 간이 통계 대시보드 구역 (타임리프 렌더링 무결점 처리 완료) -->
+                <!-- 간이 통계 대시보드 구역 -->
                 <div class="board-stats-wrapper">
                     <div class="stat-card">
                         <h4>전체 누적 게시글 수</h4>
                         <p id="totalPostsCount">0</p>
+                    </div>
+                </div>
+
+                <!-- 👥 팀원별 필터 조작 컨트롤러 구역 -->
+                <div class="member-filter-wrapper">
+                    <span class="filter-label">👥 팀원별 모아보기 :</span>
+                    <div id="memberFilterChips" class="member-chips-container" th:data-project-id="${projectId}">
+                        <!-- 자바스크립트에 의해 팀원 필터 칩 버튼들이 동적으로 드로잉됩니다 -->
                     </div>
                 </div>
 
@@ -56,11 +64,11 @@
                         <tr>
                             <th class="col-post-title">게시글 제목 / 본문 내용 요약</th>
                             <th class="col-post-info">작성자 / 등록일 (조회수)</th>
-                            <th class="col-post-action">보안 통제 제어 파이프라인</th>
+<!--                            <th class="col-post-action">보안 통제 제어 파이프라인</th>-->
                         </tr>
                         </thead>
                         <tbody id="integratedPostTbody">
-                        <!-- 💡 타임리프 루프를 걷어내고, 오라클 DB 실시간 성공 데이터인 자바스크립트가 로우(tr)를 전담하여 동적 조립합니다 -->
+                        <!-- 자바스크립트 동적 조립 렌더러 주입 구역 -->
                         </tbody>
                     </table>
                 </div>

@@ -19,19 +19,20 @@ public class WorkspaceManageApiController {
 
     /**
      * 프로젝트 이름 단독 비동기 수정 API
+     * 변경된 주소 체계 적용: /api/projects/{projectId}/manage/update-name
      */
-    @PostMapping("/api/manage/{workspaceId}/update-name")
+    @PostMapping("/api/projects/{projectId}/manage/update-name")
     public ResponseEntity<?> updateProjectName(
-            @PathVariable("workspaceId") Long workspaceId,
+            @PathVariable("projectId") Long projectId,
             @ModelAttribute WorkspaceGeneralUpdateDto dto) {
         try {
             System.out.println("=========================================");
-            System.out.println("▶ [이름 수정 API 요청] Workspace ID : " + workspaceId);
+            System.out.println("▶ [이름 수정 API 요청] Project ID : " + projectId);
             System.out.println("▶ [수신 데이터] 변경할 이름 : " + (dto != null ? dto.getWorkspaceName() : "null"));
             System.out.println("=========================================");
 
             Long currentUserId = 1L;
-            workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
+            workspaceManageService.updateGeneralSettings(projectId, dto, currentUserId);
             return ResponseEntity.ok().body(Map.of("message", "프로젝트 이름이 성공적으로 저장되었습니다."));
         } catch (Exception e) {
             System.err.println("❌ [이름 저장 실패 서버 에러 로그]");
@@ -42,19 +43,20 @@ public class WorkspaceManageApiController {
 
     /**
      * 프로젝트 내용(설명) 단독 비동기 수정 API
+     * 변경된 주소 체계 적용: /api/projects/{projectId}/manage/update-description
      */
-    @PostMapping("/api/manage/{workspaceId}/update-description")
+    @PostMapping("/api/projects/{projectId}/manage/update-description")
     public ResponseEntity<?> updateProjectDescription(
-            @PathVariable("workspaceId") Long workspaceId,
+            @PathVariable("projectId") Long projectId,
             @ModelAttribute WorkspaceGeneralUpdateDto dto) {
         try {
             System.out.println("=========================================");
-            System.out.println("▶ [내용 수정 API 요청] Workspace ID : " + workspaceId);
+            System.out.println("▶ [내용 수정 API 요청] Project ID : " + projectId);
             System.out.println("▶ [수신 데이터] 변경할 내용 : " + (dto != null ? dto.getProjectDescription() : "null"));
             System.out.println("=========================================");
 
             Long currentUserId = 1L;
-            workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
+            workspaceManageService.updateGeneralSettings(projectId, dto, currentUserId);
             return ResponseEntity.ok().body(Map.of("message", "프로젝트 내용이 성공적으로 저장되었습니다."));
         } catch (Exception e) {
             System.err.println("❌ [내용 저장 실패 서버 에러 로그]");
@@ -63,7 +65,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 기존 비동기 JSON 수신용 초대 API 주소 */
+    /** 기존 비동기 JSON 수신용 초대 API 주소 (동일 유지) */
     @PostMapping("/api/manage/invite")
     public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {
         try {
@@ -75,7 +77,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 일반 HTML 폼 전송 방식 초대 기능 */
+    /** 일반 HTML 폼 전송 방식 초대 기능 (동일 유지) */
     @PostMapping("/project/manage/invite/send")
     public ResponseEntity<?> handleFormSubmitInvite(
             @RequestParam(value = "emails", required = false) List<String> emails) {
@@ -106,7 +108,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 팀원 직급(역할) 비동기 수정 API */
+    /** 팀원 직급(역할) 비동기 수정 API (동일 유지) */
     @PostMapping("/api/manage/member/role-update")
     public ResponseEntity<?> updateMemberRole(@RequestBody com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto dto) {
         try {
@@ -117,7 +119,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 팀원 워크스페이스 제외(추방) 비동기 API */
+    /** 팀원 워크스페이스 제외(추방) 비동기 API (동일 유지) */
     @DeleteMapping("/api/manage/member/{memberId}")
     public ResponseEntity<?> kickMember(@PathVariable("memberId") Long memberId) {
         try {
@@ -127,15 +129,17 @@ public class WorkspaceManageApiController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-    /** 자바스크립트 렌더러용 실시간 팀원 목록 반환 API */
-    @GetMapping("/api/manage/{workspaceId}/members-data")
+    /** 자바스크립트 렌더러용 실시간 팀원 목록 반환 API
+     * 변경된 주소 체계 적용: /api/projects/{projectId}/manage/members-data
+     */
+    @GetMapping("/api/projects/{projectId}/manage/members-data")
     public ResponseEntity<?> getMembersJsonData(
-            @PathVariable("workspaceId") Long workspaceId) {
-        List<?> members = workspaceManageService.getWorkspaceMembers(workspaceId);
+            @PathVariable("projectId") Long projectId) {
+        List<?> members = workspaceManageService.getWorkspaceMembers(projectId);
         return ResponseEntity.ok(members);
     }
 
-    /** [게시판관리 - 이름 비동기 수정 연동 API] */
+    /** [게시판관리 - 이름 비동기 수정 연동 API] (기존 유지) */
     @PostMapping("/api/manage/board/update-name")
     public ResponseEntity<?> updateBoardName(@RequestBody Map<String, Object> payload) {
         try {
@@ -147,7 +151,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] */
+    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] (기존 유지) */
     @DeleteMapping("/api/manage/board/{boardId}/hide-policy")
     public ResponseEntity<?> hideBoardWithPolicy(
             @PathVariable("boardId") Long boardId,
@@ -160,7 +164,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 담당 역할 비동기 저장 API */
+    /** 담당 역할 비동기 저장 API (기존 유지) */
     @PostMapping("/api/manage/member/task-update")
     public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
         try {
@@ -193,12 +197,12 @@ public class WorkspaceManageApiController {
 
     /**
      * 1. 📊 게시판 대시보드 통계 데이터 반환 API
-     * [🚨 오타 완벽 파괴] 달러 기호($)를 지우고 스프링부트 표준 주소 매핑 규격으로 정밀 수정 완료했습니다.
+     * 변경된 주소 체계 적용: /api/projects/{projectId}/manage/board-stats
      */
-    @GetMapping("/api/manage/{workspaceId}/board-stats")
-    public ResponseEntity<?> getBoardStats(@PathVariable("workspaceId") Long workspaceId) {
+    @GetMapping("/api/projects/{projectId}/manage/board-stats")
+    public ResponseEntity<?> getBoardStats(@PathVariable("projectId") Long projectId) {
         try {
-            int totalPosts = workspaceManageService.getTotalPostsCount(workspaceId);
+            int totalPosts = workspaceManageService.getTotalPostsCount(projectId);
             return ResponseEntity.ok().body(Map.of(
                     "totalPosts", totalPosts,
                     "unreadMembers", 3
@@ -210,12 +214,13 @@ public class WorkspaceManageApiController {
 
     /**
      * 2. 📝 프로젝트 내부 전체 게시글 통합 반환 API
+     * 변경된 주소 체계 적용: /api/projects/{projectId}/manage/board-contents
      */
-    @GetMapping("/api/manage/{workspaceId}/board-contents")
-    public ResponseEntity<?> getBoardContents(@PathVariable("workspaceId") Long workspaceId) {
+    @GetMapping("/api/projects/{projectId}/manage/board-contents")
+    public ResponseEntity<?> getBoardContents(@PathVariable("projectId") Long projectId) {
         try {
-            System.out.println("▶ [오라클 통합 데이터 요청] 워크스페이스 내 전역 게시글 통합 수집 가동: " + workspaceId);
-            List<?> boardList = workspaceManageService.getRealBoardContents(workspaceId);
+            System.out.println("▶ [오라클 통합 데이터 요청] 프로젝트 내 전역 게시글 통합 수집 가동: " + projectId);
+            List<?> boardList = workspaceManageService.getRealBoardContents(projectId);
             return ResponseEntity.ok(boardList);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -223,7 +228,7 @@ public class WorkspaceManageApiController {
     }
 
     /**
-     * 3. 📌 위치 조정 기능 연동 API (▼)
+     * 3. 📌 위치 조정 기능 연동 API (▼) (기존 유지)
      */
     @PostMapping("/api/manage/board/sequence-update")
     public ResponseEntity<?> updateBoardSequence(@RequestBody Map<String, Object> payload) {
@@ -237,7 +242,7 @@ public class WorkspaceManageApiController {
     }
 
     /**
-     * 4. 📌 중요 게시글 필독 상단 고정 제어 비동기 API
+     * 4. 📌 중요 게시글 필독 상단 고정 제어 비동기 API (기존 유지)
      */
     @PostMapping("/api/manage/board/post/toggle-pin")
     public ResponseEntity<?> togglePostPin(@RequestBody Map<String, Object> payload) {

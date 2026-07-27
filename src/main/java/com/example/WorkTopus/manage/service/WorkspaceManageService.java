@@ -242,4 +242,42 @@ public class WorkspaceManageService {
             throw new IllegalArgumentException("오라클 DB 내에 해당 게시글 데이터가 존재하지 않습니다. ID: " + postId);
         }
     }
+
+    /**
+     * 👥 [오라클 DB 권한 조인 엔진]
+     * 로그인한 사용자의 ID(이메일)를 통해 USERS 테이블과 PROJECT_MEMBER 테이블을 조인하여
+     * 현재 프로젝트의 진짜 OWNER(팀장) 권한을 가진 유저인지 실시간으로 검증합니다.
+     */
+    public boolean checkIfProjectOwner(Long projectId, String loginUserId) {
+        System.out.println("====== [오라클 권한 체크] OWNER 여부 정밀 검증 가동 ======");
+        System.out.println("▶ 대상 프로젝트: " + projectId + " | 로그인 유저: " + loginUserId);
+
+        try {
+            // 💡 [정밀 SQL 조인 매커니즘 구현]
+            // 유저 테이블(USERS)의 USER_ID와 프로젝트 멤버 테이블(PROJECT_MEMBER)의 USER_NUM을 매칭하여 ROLE을 조회합니다.
+            String sql = "SELECT m.ROLE " +
+                    "FROM PROJECT_MEMBER m " +
+                    "JOIN USERS u ON m.USER_NUM = u.USER_NUM " +
+                    "WHERE m.PROJECT_ID = :projectId AND u.USER_ID = :loginUserId";
+
+            String role = (String) em.createNativeQuery(sql)
+                    .setParameter("projectId", projectId)
+                    .setParameter("loginUserId", loginUserId)
+                    .getSingleResult();
+
+            System.out.println("▶ 오라클 DB 실시간 조회 권한 결과 문자열: " + role);
+
+            // 💡 데이터베이스에 적재된 ROLE 값이 대문자 'OWNER'가 맞다면 true를 반환하여 권한을 강제 개방합니다.
+            return "OWNER".equalsIgnoreCase(role);
+
+        } catch (jakarta.persistence.NoResultException e) {
+            // 해당 프로젝트에 참여 멤버 데이터 자체가 없거나 매칭 실패 시 안전하게 false 사출
+            System.out.println("⚠ [권한 검증 결과] 해당 유저의 프로젝트 멤버 레코드가 존재하지 않습니다.");
+            return false;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

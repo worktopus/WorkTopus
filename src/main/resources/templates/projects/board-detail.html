@@ -95,21 +95,48 @@
 
                             <div class="board-detail_actions">
 
-                                <a      th:if="${isWriter}"
-                                        th:href="@{/projects/{projectId}/boards/{boardId}/edit(
-                                        projectId=${projectId},
-                                        boardId=${board.id}
-                                   )}"
-                                   class="board-detail_btn board-detail_btn-sub">
+                                <!-- 🚫 기존 일반 게시판 주소로 연결되던 수정 버튼 주석 처리 -->
+                                <!-- <a      th:if="${isWriter || (projectMember != null && projectMember.projectRole == 'LEADER')}" -->
+                                <!--         th:href="@{/projects/{projectId}/boards/{boardId}/edit( -->
+                                <!--         projectId=${projectId}, -->
+                                <!--         boardId=${board.id} -->
+                                <!--    )}" -->
+                                <!--    class="board-detail_btn board-detail_btn-sub"> -->
+                                <!--     수정 -->
+                                <!-- </a> -->
+
+                                <!-- ✨ [🚨 최종 해결 스위치] 팀장(OWNER) 권한일 때는 관리자 전용 수정 API 폼(Update)으로 다이렉트 주소 워프 -->
+                                <a      th:if="${isWriter || isProjectOwner || (projectMember != null && projectMember.projectRole == 'LEADER')}"
+                                        th:href="${isProjectOwner || (projectMember != null && projectMember.projectRole == 'LEADER')}
+                                                 ? @{/projects/{projectId}/manage/boards/{boardId}/edit(projectId=${projectId}, boardId=${board.id})}
+                                                 : @{/projects/{projectId}/boards/{boardId}/edit(projectId=${projectId}, boardId=${board.id})}"
+                                        class="board-detail_btn board-detail_btn-sub">
                                     수정
                                 </a>
 
-                                <form   th:if="${canDelete}"
+
+
+                                <!-- 🚫 이전 삭제 폼 주석 처리 -->
+                                <!-- <form   th:if="${canDelete || (projectMember != null && projectMember.projectRole == 'LEADER')}" -->
+                                <!--         th:action="@{/projects/{projectId}/boards/{boardId}/delete( -->
+                                <!--         projectId=${projectId}, -->
+                                <!--         boardId=${board.id} -->
+                                <!--       )}" -->
+                                <!--       method="post"> -->
+                                <!--     <button type="submit" -->
+                                <!--             class="board-detail_btn board-detail_btn-danger" -->
+                                <!--             onclick="return confirm('게시글을 삭제할까요?');"> -->
+                                <!--         삭제 -->
+                                <!--     </button> -->
+                                <!-- </form> -->
+
+                                <!-- ✨ [🚨 최종 동기화 완료] 오라클 DB 상 OWNER 권한(isProjectOwner) 검증 결합형 삭제 폼 -->
+                                <form   th:if="${canDelete || isProjectOwner}"
                                         th:action="@{/projects/{projectId}/boards/{boardId}/delete(
                                         projectId=${projectId},
                                         boardId=${board.id}
                                       )}"
-                                      method="post">
+                                        method="post">
 
                                     <button type="submit"
                                             class="board-detail_btn board-detail_btn-danger"
@@ -120,6 +147,7 @@
                                 </form>
 
                             </div>
+
 
                         </div>
 

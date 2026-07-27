@@ -127,7 +127,6 @@
     border-radius: var(--radius-sm);
     background-color: var(--bg);
 }
-
 /* 위험 구역 트랙 */
 .danger-box {
     display: flex;
@@ -227,7 +226,7 @@ input:checked + .slider:before {
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
-   📊 [신규 통합] 게시판 모니터링 대시보드 카드 및 데이터 테이블 고정 레이아웃
+   📊 게시판 모니터링 대시보드 카드 및 데이터 테이블 고정 레이아웃
    ────────────────────────────────────────────────────────────────────────── */
 .board-stats-wrapper {
     display: flex;
@@ -309,4 +308,148 @@ input:checked + .slider:before {
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   👥 팀원 필터 칩 가로 정렬 및 디자인 명세
+   ────────────────────────────────────────────────────────────────────────── */
+.member-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    background-color: var(--bg, #f8fafc);
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--border, #edf2f7);
+}
+
+.filter-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-main, #2d3748);
+    white-space: nowrap;
+}
+
+.member-chips-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.filter-chip-btn {
+    background-color: #fff;
+    border: 1px solid var(--border, #edf2f7);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    color: var(--text-sub, #718096);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filter-chip-btn:hover {
+    color: var(--primary, #4f46e5);
+    background-color: var(--primary-soft, #f5f3ff);
+    border-color: var(--primary, #4f46e5);
+}
+
+.filter-chip-btn.active {
+    color: #fff;
+    background-color: var(--primary, #4f46e5);
+    border-color: var(--primary, #4f46e5);
+    font-weight: 600;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   🏷️ 한 줄 목록 내 인라인 카테고리 식별 배지 스타일 명세
+   ────────────────────────────────────────────────────────────────────────── */
+.badge-cat {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    margin-right: 6px;
+}
+
+.badge-notice { background-color: #fee2e2; color: #ef4444; }
+.badge-meeting { background-color: #e0f2fe; color: #0369a1; }
+.badge-work { background-color: #e0f5e9; color: #10b981; }
+.badge-resource { background-color: #fef3c7; color: #d97706; }
+.badge-idea { background-color: #faf5ff; color: #8b5cf6; }
+.badge-etc { background-color: #f3f4f6; color: #4b5563; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   🚨 [중요 - 모달 전역 격리 조치] 팝업 레이어 강제 숨김 처리 구역
+   ────────────────────────────────────────────────────────────────────────── */
+#editBoardModal,
+#deleteBoardModal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+#editBoardModal > div,
+#deleteBoardModal > div {
+    background-color: #fff;
+    padding: 32px;
+    border-radius: var(--radius-md, 8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    max-width: 480px;
+    width: 100%;
+}
+/* ──────────────────────────────────────────────────────────────────────────
+   👥 [가로 스크롤 개편] 팀원 필터 칩 영역 무제한 가로 드래그 레이아웃
+   ────────────────────────────────────────────────────────────────────────── */
+.member-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 12px 16px;
+    background-color: var(--bg, #f8fafc);
+    border-radius: var(--radius-sm, 4px);
+    border: 1px solid var(--border, #edf2f7);
+    /* 💡 내부 요소가 삐져나가도 스크롤 처리되도록 통제 */
+    overflow: hidden;
+}
+
+.member-chips-container {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap; /* 🚨 줄바꿈을 절대 금지하고 한 줄로 강제 고정 */
+    overflow-x: auto;  /* 🚨 가로 방향으로 스크롤바(드레그) 영역 자동 생성 */
+    padding-bottom: 4px; /* 스크롤바 공간 미세 방어선 */
+    width: 100%;
+
+    /* 💡 매끄러운 모바일/노트북 패드 터치 스크롤 가속도 주입 */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   🎨 [선택 사항] 가로 스크롤바 디자인을 얇고 세련되게 다듬는 치트키
+   ────────────────────────────────────────────────────────────────────────── */
+.member-chips-container::-webkit-scrollbar {
+    height: 5px; /* 스크롤바 두께를 아주 얇게 5px로 축소 */
+}
+
+.member-chips-container::-webkit-scrollbar-track {
+    background: transparent; /* 스크롤바 배경 투명 처리 */
+}
+
+.member-chips-container::-webkit-scrollbar-thumb {
+    background: var(--border, #edf2f7); /* 스크롤바 바(Thumb) 색상 조율 */
+    border-radius: 4px;
+}
+
+.member-chips-container::-webkit-scrollbar-thumb:hover {
+    background: var(--text-sub, #718096); /* 마우스 올렸을 때 스크롤바 색상 강조 */
 }

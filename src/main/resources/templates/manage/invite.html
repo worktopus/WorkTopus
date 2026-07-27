@@ -30,11 +30,12 @@
 
             <!-- [일반관리 HTML - 상단 탭 바 동적 ID 파이프라인 전면 적용] -->
             <div class="manage-tabs">
-                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage'|">일반 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/invite'|">팀원 초대</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/' + ${projectId} + '/manage/boards'|">게시판 관리</button>
             </div>
+
 
 
             <!-- [팀원초대 - 입력 폼 마크업 구역] -->
