@@ -94,6 +94,23 @@
                   th:errors="*{password}">
             </span>
 
+            <!-- 비밀번호 확인 -->
+            <label class="register-label" for="passwordConfirm">
+                비밀번호 확인
+            </label>
+
+            <input class="register-input"
+                   type="password"
+                   id="passwordConfirm"
+                   name="passwordConfirm"
+                   placeholder="비밀번호를 다시 입력하세요"
+                   autocomplete="new-password"
+                   required>
+
+            <p class="register-result"
+               id="passwordConfirmResult">
+            </p>
+
             <!-- 이름 -->
             <label class="register-label" for="name">
                 이름

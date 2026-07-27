@@ -186,15 +186,33 @@ document.addEventListener("DOMContentLoaded", () => {
     function renderEvents(cell, dateString) {
         const eventBox = cell.querySelector(".calendar__events");
 
-        const daySchedules = schedules.filter((schedule) => {
-            return isDateWithinSchedule(dateString, schedule);
-        });
+        const daySchedules = schedules
+            .filter((schedule) => {
+                return isDateWithinSchedule(dateString, schedule);
+            })
+            .sort((a, b) => {
+                const aStart = a.startDate || a.date;
+                const bStart = b.startDate || b.date;
+
+                return aStart.localeCompare(bStart);
+            });
 
         daySchedules.forEach((schedule) => {
             const event = document.createElement("button");
 
+            const scheduleType = getScheduleTypeValue(schedule);
+            const positionClass = getEventPositionClass(
+                dateString,
+                schedule
+            );
+
             event.type = "button";
-            event.className = `calendar__event calendar__event--${getScheduleTypeValue(schedule)}`;
+            event.className = [
+                "calendar__event",
+                `calendar__event--${scheduleType}`,
+                positionClass
+            ].join(" ");
+
             event.textContent = schedule.title;
 
             event.addEventListener("click", (e) => {
@@ -209,6 +227,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
             eventBox.appendChild(event);
         });
+    }
+
+    function getEventPositionClass(dateString, schedule) {
+        const startDate = schedule.startDate || schedule.date;
+        const endDate = schedule.endDate || startDate;
+
+        const isStart = dateString === startDate;
+        const isEnd = dateString === endDate;
+
+        if (isStart && isEnd) {
+            return "calendar__event--single";
+        }
+
+        if (isStart) {
+            return "calendar__event--start";
+        }
+
+        if (isEnd) {
+            return "calendar__event--end";
+        }
+
+        return "calendar__event--middle";
     }
 
     function makeDateString(year, month, date) {

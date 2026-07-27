@@ -150,6 +150,7 @@
     border-bottom: 1px solid var(--border);
     background: var(--card);
     transition: var(--transition);
+    overflow: visible;
 }
 
 .calendar__cell:nth-child(7n) {
@@ -197,12 +198,14 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    margin-top: 10px;
+
+    /* 셀의 좌우 padding 12px을 상쇄 */
+    margin: 10px -12px 0;
 }
 
 .calendar__event {
     display: block;
-    width: 100%;
+    width: auto;
     border: none;
     padding: 6px 8px;
     border-radius: 8px;
@@ -234,6 +237,31 @@
 .calendar__event--release {
     background: rgba(34, 197, 94, 0.12);
     color: var(--success);
+}
+
+/* 하루 일정은 기존처럼 셀 안쪽에 표시 */
+.calendar__event--single {
+    margin: 0 12px;
+    border-radius: 8px;
+}
+
+/* 기간 일정 시작 */
+.calendar__event--start {
+    margin-left: 12px;
+    margin-right: -1px;
+    border-radius: 8px 0 0 8px;
+}
+
+/* 기간 일정 중간 */
+.calendar__event--middle {
+    margin-right: -1px;
+    border-radius: 0;
+}
+
+/* 기간 일정 마지막 */
+.calendar__event--end {
+    margin-right: 12px;
+    border-radius: 0 8px 8px 0;
 }
 
 /* ===========================
