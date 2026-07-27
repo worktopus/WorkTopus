@@ -270,6 +270,9 @@
 .dot--red { background: var(--danger); }
 .dot--purple { background: #6C50DE; }
 .dot--orange { background: var(--warning); }
+.dot--inProgress { background: #72D2FF;}
+.dot--review { background: #A78BFA; }
+.dot--done { background: #66D19E; }
 
 /* ==========================================================
    Chart
