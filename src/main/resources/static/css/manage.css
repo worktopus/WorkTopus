@@ -193,6 +193,7 @@ input:checked + .slider:before {
 .slider.round:before {
     border-radius: 50%;
 }
+
 /* ==========================================
    🚨 상단 레이아웃 공백 파괴 및 화면 밀착
    ========================================== */
@@ -214,11 +215,98 @@ input:checked + .slider:before {
     margin: 0 !important;
     width: 100% !important;
 }
+
 /* 슬라이드형 대시보드 드로어 활성화 클래스 */
 .board-drawer.open {
     display: block !important;
     right: 0 !important;
 }
+
 .board-item-row:hover {
     background-color: #fafafa;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   📊 [신규 통합] 게시판 모니터링 대시보드 카드 및 데이터 테이블 고정 레이아웃
+   ────────────────────────────────────────────────────────────────────────── */
+.board-stats-wrapper {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 24px;
+    width: 100%;
+}
+
+.stat-card {
+    flex: 1;
+    max-width: 320px;
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #edf2f7);
+    border-radius: var(--radius-md, 8px);
+    padding: 24px;
+    box-shadow: var(--shadow);
+}
+
+.stat-card h4 {
+    font-size: 0.9rem;
+    color: var(--text-sub, #718096);
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+.stat-card p {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary, #4f46e5);
+    margin: 0;
+}
+
+.boards-table-wrapper {
+    background: var(--card, #fff);
+    border: 1px solid var(--border, #edf2f7);
+    border-radius: var(--radius-md, 8px);
+    padding: 24px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+    width: 100%;
+}
+
+.boards-table-wrapper table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.9rem;
+}
+
+.boards-table-wrapper th {
+    padding: 14px 16px;
+    border-bottom: 2px solid var(--border, #edf2f7);
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.boards-table-wrapper td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border, #edf2f7);
+    color: var(--text-main);
+    vertical-align: middle;
+}
+
+.member-name-text {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 2px;
+}
+
+.member-email-text {
+    font-size: 0.8rem;
+    color: var(--text-sub, #718096);
+}
+
+.accordion-list-wrapper {
+    padding: 12px;
+    background-color: var(--bg, #f8fafc);
+    border-radius: var(--radius-sm, 4px);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }

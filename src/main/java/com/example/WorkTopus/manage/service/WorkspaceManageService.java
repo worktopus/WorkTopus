@@ -7,7 +7,7 @@ import com.example.WorkTopus.manage.dto.WorkspaceInviteRequestDto;
 import com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto;
 import com.example.WorkTopus.manage.repository.ManageRepository;
 import com.example.WorkTopus.manage.repository.ManageMemberRepository;
-import com.example.WorkTopus.manage.repository.ManageBoardRepository; // 📌 신규 추가한 레포지토리 임포트
+import com.example.WorkTopus.projects.repository.BoardRepository; // 📌 정식 게시판 레포지토리 임포트
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.mail.SimpleMailMessage;
@@ -15,7 +15,6 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -27,20 +26,20 @@ public class WorkspaceManageService {
     private final JavaMailSender mailSender;
     private final ManageRepository manageRepository;
     private final ManageMemberRepository manageMemberRepository;
-    private final ManageBoardRepository manageBoardRepository; // 📌 생성자 자동 주입 완결
+    private final BoardRepository boardRepository; // 📌 정식 오라클 게시판 레포지토리 자동 의존성 주입 완료
 
     @PersistenceContext
     private final EntityManager em;
 
     /**
-     * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회 (기존 원본 복구)
+     * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회
      */
     public List<ManageMember> getWorkspaceMembers(Long workspaceId) {
         return manageMemberRepository.findByWorkspaceId(workspaceId);
     }
 
     /**
-     * 팀원 직급 수정 비즈니스 로직 (기존 원본 복구)
+     * 팀원 직급 수정 비즈니스 로직
      */
     @Transactional
     public void updateMemberRole(ManageMemberRoleUpdateDto dto) {
@@ -55,7 +54,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 팀원 제외 비즈니스 로직 (기존 원본 복구)
+     * 팀원 제외 비즈니스 로직
      */
     @Transactional
     public void kickMember(Long memberId) {
@@ -70,8 +69,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-1 워크스페이스 일반 관리 설정 업데이트
-     * 이름 변경 폼과 내용 변경 폼이 개별적으로 독립 요청될 때 각각 유연하게 필터링 업데이트합니다.
+     * 워크스페이스 일반 관리 설정 업데이트
      */
     @Transactional
     public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
@@ -106,8 +104,9 @@ public class WorkspaceManageService {
             manage.updateLogoPath(originalFileName);
         }
     }
+
     /**
-     * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제 (기존 원본 복구)
+     * 워크스페이스 전체 데이터 영구 소멸 및 삭제
      */
     @Transactional
     public void deleteWorkspace(Long workspaceId, Long currentUserId) {
@@ -123,7 +122,7 @@ public class WorkspaceManageService {
     }
 
     /**
-     * 4-2-1 워크스페이스 팀원 초대 프로세스 (기존 원본 복구)
+     * 워크스페이스 팀원 초대 프로세스
      */
     @Transactional
     public void inviteTeamMembers(WorkspaceInviteRequestDto dto, Long currentUserId) {
@@ -173,7 +172,6 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [게시판관리 - 이름 수정 비즈니스 로직 확장부] (기존 원본 복구) */
     @Transactional
     public void updateBoardName(Long boardId, String boardName) {
         if (boardName == null || boardName.trim().isEmpty()) {
@@ -181,7 +179,6 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] (기존 원본 복구) */
     @Transactional
     public void hideBoardWithPolicy(Long boardId, String actionPolicy) {
         if (!"CHAT".equals(actionPolicy) && !"POPUP".equals(actionPolicy)) {
@@ -189,7 +186,6 @@ public class WorkspaceManageService {
         }
     }
 
-    /** [추가 요구사항 - 담당 역할 Dirty Checking 자동 저장 서비스 로직] (기존 원본 복구) */
     @Transactional
     public void updateMemberTask(Long memberId, String assignedRole) {
         ManageMember member = manageMemberRepository.findById(memberId)
@@ -199,38 +195,41 @@ public class WorkspaceManageService {
     }
 
     // ===============================================================================
-    // 📌 [오라클 DB 연결 연동 완료] PROJECT_BOARD 테이블 통계 및 콘텐츠 추출 서비스 로직
+    // 📌 [수정 완결] 정식 오라클 BoardRepository 테이블 통계 및 콘텐츠 추출 서비스 로직
     // ===============================================================================
 
     /**
-     * 📊 [오라클 연동 실시간 실현] 특정 워크스페이스 번호의 전체 누적 게시글 수 반환
+     * 📊 특정 프로젝트의 활성화된(N) 전체 누적 게시글 수 사출
      */
     public int getTotalPostsCount(Long workspaceId) {
-        // 새로 추가된 ManageBoardRepository를 통해 오라클 Native COUNT 쿼리를 직접 수행하여 리턴합니다.
-        return manageBoardRepository.countTotalPostsByWorkspaceId(workspaceId);
+        return (int) boardRepository.countByProjectIdAndDeletedYn(workspaceId, "N");
     }
 
     /**
-     * 📂 [오라클 연동 실시간 실현] 카테고리(NOTICE / FREE)별 정렬된 오라클 DB 실제 데이터 명단 사출
+     * 📝 타임리프 boards.html 파싱 전용 정식 Page 객체 공급 파이프라인
      */
-    public List<Map<String, Object>> getRealBoardContents(Long workspaceId, String category) {
-        // 오라클 PROJECT_BOARD 테이블의 로우 데이터를 긁어와 자바스크립트 매핑용 규격 배열로 전송합니다.
-        return manageBoardRepository.findBoardContentsByWorkspaceIdAndCategory(workspaceId, category);
+    public org.springframework.data.domain.Page<?> getIntegratedBoardPage(Long workspaceId, org.springframework.data.domain.Pageable pageable) {
+        return boardRepository.findByProjectIdAndDeletedYnOrderByNoticeYnDescCreatedAtDesc(workspaceId, "N", pageable);
     }
 
     /**
-     * 기능 3: 중요 게시글 필독 상단 고정 제어 (오라클 PROJECT_BOARD 테이블 실시간 갱신)
+     * 📂 자바스크립트 fetch 호출 시 오라클 실시간 리스트 명단을 List<Board> 형태로 사출
+     */
+    public List getRealBoardContents(Long workspaceId) {
+        org.springframework.data.domain.Page boardPage =
+                boardRepository.findByProjectIdAndDeletedYnOrderByCreatedAtDesc(workspaceId, "N", org.springframework.data.domain.PageRequest.of(0, 9999));
+        return boardPage.getContent();
+    }
+
+    /**
+     * 📌 중요 게시글 필독 상단 고정 제어 플래그 변환 (네이티브 쿼리 하이브리드 고정)
      */
     @Transactional
     public void togglePostPin(Long postId, boolean isPinned) {
-        System.out.println("====== [오라클 DB 연동] PROJECT_BOARD 테이블 데이터 갱신 가동 ======");
+        System.out.println("====== [오라클 DB 연동] BOARD 테이블 데이터 공지 플래그 갱신 가동 ======");
 
         String noticeValue = isPinned ? "Y" : "N";
-
-        System.out.println("▶ 대상 게시글 번호(BOARD_ID): " + postId);
-        System.out.println("▶ 반영할 필독 고정 플래그(IS_NOTICE): " + noticeValue);
-
-        String sql = "UPDATE PROJECT_BOARD SET IS_NOTICE = :noticeValue WHERE BOARD_ID = :postId";
+        String sql = "UPDATE BOARD SET NOTICE_YN = :noticeValue WHERE ID = :postId";
 
         int updatedCount = em.createNativeQuery(sql)
                 .setParameter("noticeValue", noticeValue)

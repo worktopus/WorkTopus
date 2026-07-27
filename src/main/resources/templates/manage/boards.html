@@ -4,14 +4,12 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Worktopus - 게시판 관리 및 통제</title>
+    <title>Worktopus - 게시판 통합 제어 관리</title>
     <link rel="stylesheet" th:href="@{/css/common.css}">
     <link rel="stylesheet" th:href="@{/css/layout.css}">
     <link rel="stylesheet" th:href="@{/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/css/header.css}">
     <link rel="stylesheet" th:href="@{/css/manage.css}">
-
-    <!-- 추가 헤더 css-->
     <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
 </head>
 <body>
@@ -25,10 +23,8 @@
         <div th:replace="~{fragments/header :: header}"></div>
 
         <!-- 실제 관리 폼 메인 페이지 -->
-        <main class="manage-container" style="padding: 40px; width: 100%;">
-            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
-                프로젝트 관리 (팀장 전용)
-            </h1>
+        <main class="manage-container">
+            <h1 class="manage-title">프로젝트 관리 (팀장 전용)</h1>
 
             <!-- 상단 탭 메뉴 바 -->
             <div class="manage-tabs">
@@ -38,90 +34,35 @@
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
             </div>
 
-            <!-- [탭 4] 프로젝트 게시판 관리 구역 -->
-            <div id="board-tab" class="tab-content active" style="display: block; margin-top: 24px;">
-                <div th:fragment="workspaceBoards">
-                    <div class="content-header" style="margin-bottom: 20px;">
-                        <h3>📊 게시판 보안 통제 및 모니터링</h3>
-                        <p style="font-size: 0.85rem; color: var(--text-sub);">프로젝트 내 카테고리의 순서 조정 및 필독 상단 고정 정책을 관리합니다.</p>
+            <!-- 프로젝트 전역 통합 게시글 통제 관리 구역 -->
+            <div id="board-tab" class="tab-content active">
+                <div class="content-header">
+                    <h3>📝 프로젝트 게시글 통합 모니터링 관리</h3>
+                    <p>작성자와 관계없이 현재 프로젝트 내부의 모든 게시글을 실시간 조회하고 수정 및 강제 소멸 조치를 제어합니다.</p>
+                </div>
+
+                <!-- 간이 통계 대시보드 구역 (타임리프 렌더링 무결점 처리 완료) -->
+                <div class="board-stats-wrapper">
+                    <div class="stat-card">
+                        <h4>전체 누적 게시글 수</h4>
+                        <p id="totalPostsCount">0</p>
                     </div>
+                </div>
 
-                    <!-- 간이 통계 대시보드 구역 (오라클 실시간 추적 연동) -->
-                    <div class="board-stats-wrapper" style="display: flex; gap: 20px; margin-bottom: 24px;">
-                        <div class="stat-card" style="flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
-                            <h4 style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px;">전체 누적 게시글 수</h4>
-                            <p style="font-size: 1.8rem; font-weight: 700; color: var(--primary);" id="totalPostsCount">7</p>
-                        </div>
-                        <div class="stat-card" style="flex: 1; background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
-                            <h4 style="font-size: 0.9rem; color: var(--text-sub); margin-bottom: 8px;">미확인 공지 대상 팀원 수</h4>
-                            <p style="font-size: 1.8rem; font-weight: 700; color: #dc3545;" id="unreadMembersCount">3</p>
-                        </div>
-                    </div>
-
-                    <!-- 게시판 목록 및 제어 테이블 -->
-                    <div class="boards-table-wrapper" style="background: #fff; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 20px;">
-                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                            <thead>
-                            <tr style="border-bottom: 2px solid var(--border); color: var(--text-sub); font-size: 0.9rem;">
-                                <th style="padding: 12px 8px; width: 12%; text-align: center;">배치 순서</th>
-                                <th style="padding: 12px 8px; width: 33%;">게시판 이름</th>
-                                <th style="padding: 12px 8px; width: 15%;">기본 성격</th>
-                                <th style="padding: 12px 8px; width: 40%; text-align: center;">보안 통제 관리 파이프라인</th>
-                            </tr>
-                            </thead>
-                            <tbody id="sortableBoardTbody">
-                            <!-- [공지사항 로우] -->
-                            <tr style="border-bottom: 1px solid var(--border);" data-board-id="1">
-                                <td style="padding: 12px 8px; text-align: center;">
-                                    <!-- 📌 위로 가기 버튼(▲) 제거, 아래로 가기 버튼만 깔끔하게 유지 -->
-                                    <button type="button" class="btn-move-down" style="border:1px solid #ccc; background:#fff; cursor:pointer; padding:4px 8px; border-radius:4px; font-weight:bold;">▼ 위치 조정</button>
-                                </td>
-                                <td style="padding: 12px 8px;">
-                                    <span style="font-weight: 600;" class="board-name-text">공지사항</span>
-                                </td>
-                                <td style="padding: 12px 8px; color:var(--text-sub); font-size:0.85rem;">기본 카테고리</td>
-                                <td style="padding: 12px 8px; text-align: center;">
-                                    <!-- 📌 팀원 쓰기 제한 체크박스 영역 완벽 삭제 -->
-                                    <button type="button" class="btn btn-edit" data-board-id="1" style="background: var(--border); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">수정</button>
-                                    <button type="button" class="btn btn-delete-board" data-board-id="1" style="background: var(--danger); color:#fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">삭제</button>
-                                    <button type="button" class="inspect-board-btn" data-board-type="NOTICE" style="background:transparent; color:var(--text-sub); border:1px solid var(--border); padding:6px 12px; border-radius:4px; cursor:pointer; margin-left:5px;">글 목록 열기</button>
-                                </td>
-                            </tr>
-                            <tr id="details-NOTICE" style="display: none; background: #fafbfc;">
-                                <td colspan="4" style="padding: 16px;">
-                                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                                </td>
-                            </tr>
-
-                            <!-- [자유게시판 로우] -->
-                            <tr style="border-bottom: 1px solid var(--border);" data-board-id="2">
-                                <td style="padding: 12px 8px; text-align: center;">
-                                    <!-- 📌 위로 가기 버튼(▲) 제거, 아래로 가기 버튼만 깔끔하게 유지 -->
-                                    <button type="button" class="btn-move-down" style="border:1px solid #ccc; background:#fff; cursor:pointer; padding:4px 8px; border-radius:4px; font-weight:bold;">▼ 위치 조정</button>
-                                </td>
-                                <td style="padding: 12px 8px;">
-                                    <span style="font-weight: 600;" class="board-name-text">자유게시판</span>
-                                </td>
-                                <td style="padding: 12px 8px; color:var(--text-sub); font-size:0.85rem;">팀원 카테고리</td>
-                                <td style="padding: 12px 8px; text-align: center;">
-                                    <!-- 📌 팀원 쓰기 제한 체크박스 영역 완벽 삭제 -->
-                                    <button type="button" class="btn btn-edit" data-board-id="2" style="background: var(--border); border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;">수정</button>
-                                    <button type="button" class="btn btn-delete-board" data-board-id="2" style="background: var(--danger); color:#fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;">삭제</button>
-                                    <button type="button" class="inspect-board-btn" data-board-type="FREE" style="background:transparent; color:var(--text-sub); border:1px solid var(--border); padding:6px 12px; border-radius:4px; cursor:pointer; margin-left:5px;">글 목록 열기</button>
-                                </td>
-                            </tr>
-                            <tr id="details-FREE" style="display: none; background: #fafbfc;">
-                                <td colspan="4" style="padding: 16px;">
-                                    <div class="accordion-list-wrapper" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                                </td>
-                            </tr>
-
-                            <tr th:if="${boards != null && #lists.isEmpty(boards)}" style="display: none;">
-                                <td colspan="4" style="text-align: center; padding: 40px; color: var(--text-sub);">생성된 게시판이 없습니다.</td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <!-- 통합 게시글 한 줄 리스트 데이터 테이블 구역 -->
+                <div class="boards-table-wrapper">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th class="col-post-title">게시글 제목 / 본문 내용 요약</th>
+                            <th class="col-post-info">작성자 / 등록일 (조회수)</th>
+                            <th class="col-post-action">보안 통제 제어 파이프라인</th>
+                        </tr>
+                        </thead>
+                        <tbody id="integratedPostTbody">
+                        <!-- 💡 타임리프 루프를 걷어내고, 오라클 DB 실시간 성공 데이터인 자바스크립트가 로우(tr)를 전담하여 동적 조립합니다 -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </main>

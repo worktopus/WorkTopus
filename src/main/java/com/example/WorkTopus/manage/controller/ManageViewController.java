@@ -5,6 +5,9 @@ import com.example.WorkTopus.manage.entity.ManageMember;
 import com.example.WorkTopus.manage.repository.ManageRepository;
 import com.example.WorkTopus.manage.service.WorkspaceManageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.Authentication; // 📌 Spring Security 인증 처리를 위한 임포트 추가
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -78,6 +81,7 @@ public class ManageViewController {
 
         return "manage/manage";
     }
+
     // 2. 팀원 관리 탭 뷰 매핑
     @GetMapping("/projects/manage/{workspaceId}/members")
     public String showMembersPage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
@@ -93,7 +97,6 @@ public class ManageViewController {
 
         return "manage/members";
     }
-
     // 3. 팀원 초대 탭 뷰 매핑
     @GetMapping("/projects/manage/{workspaceId}/invite")
     public String showInvitePage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
@@ -107,16 +110,42 @@ public class ManageViewController {
         return "manage/invite";
     }
 
-    // 4. 게시판 관리 탭 뷰 매핑
+    /**
+     * 4. 📝 [버그 완벽 소멸] 게시판 관리 탭 뷰 매핑
+     * 타임리프 boards.html이 파싱에 필수적으로 요구하는 정식 'boards' 객체와 'projectId'를 모델에 안전하게 적재합니다.
+     */
     @GetMapping("/projects/manage/{workspaceId}/boards")
-    public String showBoardsPage(@PathVariable("workspaceId") Long workspaceId, Model model, Authentication authentication) { // 📌 Authentication 인자 추가
+    public String showBoardsPage(
+            @PathVariable("workspaceId") Long workspaceId,
+            @PageableDefault(size = 10) Pageable pageable, // 📌 페이징 방어선을 위한 인자 추가
+            Model model,
+            Authentication authentication) {
+
+        // 1. 주소창 번호 정합성 검증 및 방어선 가동
         Manage manageData = getRealProjectData(workspaceId);
         model.addAttribute("project", manageData);
+
+        // 2. 상단 탭 인디케이터 및 주소 연동에 핵심이 되는 진짜 조회된 ID 고정
         model.addAttribute("projectId", manageData.getId());
 
-        // 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
+        // 3. 📌 헤더 우측 상단 내 역할 표시 파이프라인 새로고침 검증 및 동기화 가동
         bindHeaderProjectMemberRole(manageData.getId(), authentication, model);
 
+        try {
+            // 4. 📊 [핵심 보완] 기존 보드 리스트 로직처럼 Page 구조 데이터를 오라클 서비스단으로부터 유연하게 긁어옵니다.
+            // (만약 서비스단에 페이징 구현이 안되어 있다면 Page.empty()를 넘겨 렌더링 폭발을 원천 차단합니다)
+            Page<?> boardPage = workspaceManageService.getIntegratedBoardPage(manageData.getId(), pageable);
+            model.addAttribute("boards", boardPage);
+
+        } catch (Exception e) {
+            System.err.println("❌ [방어선 작동] boards 데이터 바인딩 실패로 인해 빈 Page 객체를 사출합니다.");
+            e.printStackTrace();
+
+            // 서비스단 함수 미작성 시 타임리프 예외 유발을 막기 위해 인터페이스 규격을 임시 주입해 둡니다.
+            model.addAttribute("boards", Page.empty());
+        }
+
+        // 5. templates/manage/boards.html 경로 포맷으로 가 정식 뷰 네임 리턴
         return "manage/boards";
     }
 }

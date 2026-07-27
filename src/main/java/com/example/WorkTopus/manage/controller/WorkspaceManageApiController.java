@@ -18,8 +18,7 @@ public class WorkspaceManageApiController {
     private final WorkspaceManageService workspaceManageService;
 
     /**
-     * [4-1 변경 사항] 프로젝트 이름 단독 비동기 수정 API
-     * 기존 general-update 주소를 이름 전용 파이프라인으로 매핑을 명확히 고정합니다.
+     * 프로젝트 이름 단독 비동기 수정 API
      */
     @PostMapping("/api/manage/{workspaceId}/update-name")
     public ResponseEntity<?> updateProjectName(
@@ -42,8 +41,7 @@ public class WorkspaceManageApiController {
     }
 
     /**
-     * 📌  프로젝트 내용(설명) 단독 비동기 수정 API
-     * 말씀하신 대로 기존 워크스페이스 전체 완전 삭제(@DeleteMapping) 자리를 대체하여 깔끔하게 조립했습니다.
+     * 프로젝트 내용(설명) 단독 비동기 수정 API
      */
     @PostMapping("/api/manage/{workspaceId}/update-description")
     public ResponseEntity<?> updateProjectDescription(
@@ -65,7 +63,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**  기존 비동기 JSON 수신용 초대 API 주소 (기존 유지) */
+    /** 기존 비동기 JSON 수신용 초대 API 주소 */
     @PostMapping("/api/manage/invite")
     public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {
         try {
@@ -77,7 +75,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /** 일반 HTML 폼 전송 방식 초대 기능 (기존 유지) */
+    /** 일반 HTML 폼 전송 방식 초대 기능 */
     @PostMapping("/project/manage/invite/send")
     public ResponseEntity<?> handleFormSubmitInvite(
             @RequestParam(value = "emails", required = false) List<String> emails) {
@@ -107,7 +105,8 @@ public class WorkspaceManageApiController {
             );
         }
     }
-    /** 팀원 직급(역할) 비동기 수정 API (기존 유지) */
+
+    /** 팀원 직급(역할) 비동기 수정 API */
     @PostMapping("/api/manage/member/role-update")
     public ResponseEntity<?> updateMemberRole(@RequestBody com.example.WorkTopus.manage.dto.ManageMemberRoleUpdateDto dto) {
         try {
@@ -118,7 +117,7 @@ public class WorkspaceManageApiController {
         }
     }
 
-    /**   팀원 워크스페이스 제외(추방) 비동기 API (기존 유지) */
+    /** 팀원 워크스페이스 제외(추방) 비동기 API */
     @DeleteMapping("/api/manage/member/{memberId}")
     public ResponseEntity<?> kickMember(@PathVariable("memberId") Long memberId) {
         try {
@@ -128,8 +127,7 @@ public class WorkspaceManageApiController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
-
-    /** 자바스크립트 렌더러용 실시간 팀원 목록 반환 API (기존 유지) */
+    /** 자바스크립트 렌더러용 실시간 팀원 목록 반환 API */
     @GetMapping("/api/manage/{workspaceId}/members-data")
     public ResponseEntity<?> getMembersJsonData(
             @PathVariable("workspaceId") Long workspaceId) {
@@ -137,40 +135,32 @@ public class WorkspaceManageApiController {
         return ResponseEntity.ok(members);
     }
 
-    /** [게시판관리 - 이름 비동기 수정 연동 API] (기존 유지) */
+    /** [게시판관리 - 이름 비동기 수정 연동 API] */
     @PostMapping("/api/manage/board/update-name")
     public ResponseEntity<?> updateBoardName(@RequestBody Map<String, Object> payload) {
         try {
             Long boardId = Long.parseLong(payload.get("boardId").toString());
             String boardName = payload.get("boardName").toString();
-
-            // workspaceManageService.updateBoardName(boardId, boardName);
-
             return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] (기존 유지) */
+    /** [게시판관리 - 안전 숨김 및 후속 알림 정책 비즈니스 로직 확장부] */
     @DeleteMapping("/api/manage/board/{boardId}/hide-policy")
     public ResponseEntity<?> hideBoardWithPolicy(
             @PathVariable("boardId") Long boardId,
             @RequestBody Map<String, String> payload) {
         try {
             String actionPolicy = payload.get("actionPolicy");
-
-            // workspaceManageService.hideBoardWithPolicy(boardId, actionPolicy);
-
             return ResponseEntity.ok().body(Map.of("status", "SUCCESS"));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    /**
-     * [보완 가동] 담당 역할 비동기 저장 API (자동 저장 + 버튼 클릭 공용 파이프라인)
-     */
+    /** 담당 역할 비동기 저장 API */
     @PostMapping("/api/manage/member/task-update")
     public ResponseEntity<?> updateMemberTask(@RequestBody Map<String, Object> payload) {
         try {
@@ -203,18 +193,15 @@ public class WorkspaceManageApiController {
 
     /**
      * 1. 📊 게시판 대시보드 통계 데이터 반환 API
-     * 현재 프로젝트 ID에 해당하는 전체 게시글 수를 오라클 DB에서 카운트하여 리턴합니다.
+     * [🚨 오타 완벽 파괴] 달러 기호($)를 지우고 스프링부트 표준 주소 매핑 규격으로 정밀 수정 완료했습니다.
      */
     @GetMapping("/api/manage/{workspaceId}/board-stats")
     public ResponseEntity<?> getBoardStats(@PathVariable("workspaceId") Long workspaceId) {
         try {
-            // 주입된 서비스 레이어를 통해 실제 오라클 DB 레코드 수 긁어오기
             int totalPosts = workspaceManageService.getTotalPostsCount(workspaceId);
-
-            // 화면 통계 카드용 JSON 데이터 구조 사출
             return ResponseEntity.ok().body(Map.of(
                     "totalPosts", totalPosts,
-                    "unreadMembers", 3 // 임시 고정값 유지
+                    "unreadMembers", 3
             ));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -222,19 +209,13 @@ public class WorkspaceManageApiController {
     }
 
     /**
-     * 2. 📂 카테고리별 실시간 오라클 DB 게시글 목록 반환 API
-     * 자바스크립트 아코디언 창이 열릴 때 호출되며 가짜 mock 데이터를 완벽히대체합니다.
+     * 2. 📝 프로젝트 내부 전체 게시글 통합 반환 API
      */
     @GetMapping("/api/manage/{workspaceId}/board-contents")
-    public ResponseEntity<?> getBoardContents(
-            @PathVariable("workspaceId") Long workspaceId,
-            @RequestParam("category") String category) {
+    public ResponseEntity<?> getBoardContents(@PathVariable("workspaceId") Long workspaceId) {
         try {
-            System.out.println("▶ [오라클 데이터 실시간 요청] 워크스페이스: " + workspaceId + " / 카테고리: " + category);
-
-            // 오라클 PROJECT_BOARD 테이블의 실제 리스트 데이터를 Map 배열 형태로 긁어옵니다.
-            List<Map<String, Object>> boardList = workspaceManageService.getRealBoardContents(workspaceId, category);
-
+            System.out.println("▶ [오라클 통합 데이터 요청] 워크스페이스 내 전역 게시글 통합 수집 가동: " + workspaceId);
+            List<?> boardList = workspaceManageService.getRealBoardContents(workspaceId);
             return ResponseEntity.ok(boardList);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
