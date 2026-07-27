@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="/css/common.css">
     <link rel="stylesheet" href="/css/index.css">
+    <link rel="stylesheet" th:href="@{/css/footer.css}">
 
     <title>WorkTopus</title>
 </head>
@@ -115,7 +116,25 @@
         </div>
     </section>
 
+    <section class="cta">
+
+        <span class="cta__logo">WorkTopus</span>
+
+        <h2>
+            여덟 다리처럼 유연하게,<br>
+            하나의 팀처럼 단단하게.
+        </h2>
+
+        <p>
+            프로젝트, 일정, 채팅, 문서를 하나의 공간에서.<br>
+            WorkTopus와 함께 더 효율적인 협업을 시작해 보세요.
+        </p>
+
+    </section>
+
 </main>
+
+<th:block th:replace="~{fragments/footer :: footer}"></th:block>
 
 </body>
 </html>
