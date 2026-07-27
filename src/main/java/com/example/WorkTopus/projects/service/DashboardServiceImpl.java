@@ -221,7 +221,7 @@ public class DashboardServiceImpl implements DashboardService {
 
         // 날짜순으로 정렬 후 최대 5건 반환
         return schedules.stream()
-                .sorted(Comparator.comparing(DashboardScheduleResponse::date))
+                .sorted(Comparator.comparing(DashboardScheduleResponse::startDate))
                 .limit(5)
                 .toList();
     }
@@ -239,7 +239,9 @@ public class DashboardServiceImpl implements DashboardService {
                         date.getDayOfWeek() == DayOfWeek.SATURDAY,
                         date.getDayOfWeek() == DayOfWeek.SUNDAY,
                         upcomingSchedules.stream()
-                                .filter(schedule -> date.equals(schedule.date()))
+                                .filter(schedule ->
+                                        !date.isBefore(schedule.startDate())
+                                                && !date.isAfter(schedule.endDate()))
                                 .toList()
                 ))
                 .toList();
