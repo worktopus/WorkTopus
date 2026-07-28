@@ -21,7 +21,7 @@
                 </button>
 
                 <!-- 오라클 DB에서 프로젝트 리스트 화면 방식 그대로 데이터를 긁어와 출력하는 레이어 박스 -->
-                <div id="projectDropdownList" style="display: none; position: absolute; top: 100%; left: 0; margin-top: 8px; width: 220px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 9999; padding: 6px 0;">
+                <div id="projectDropdownList" class="project-dropdown">
 
                     <!-- 오라클 DB 프로젝트 목록 바인딩 반복문 (프로젝트 목록 화면과 100% 동일 메커니즘) -->
                     <ul th:if="${!#lists.isEmpty(projects)}" style="list-style:none; padding:0; margin:0; font-family:sans-serif;">
@@ -99,7 +99,7 @@
                     <form th:action="@{/logout}" method="post" style="margin: 0;">
                         <button type="submit" class="dropdown-item logout">로그아웃</button>
                     </form>
-                    </div>
+                </div>
             </div>
         </div>
 
@@ -220,7 +220,7 @@
         </div>
     </div>
 
-                <!------------------------script------------------------->
+    <!------------------------script------------------------->
     <!-- SockJS / STOMP -->
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>

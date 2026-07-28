@@ -280,39 +280,58 @@
     ===================================================== */
 
     function isMyMessage(message) {
-        const loginUser =
-            getLoginUser();
+        const loginUser = getLoginUser();
 
-        const senderNum =
-            getSenderNum(
-                message
-            );
+        const senderNum = getSenderNum(message);
+
+        const senderUserId = String(
+            message.senderId ??
+            message.senderUserId ??
+            message.userId ??
+            ""
+        );
+
+        const senderName = getSenderName(message);
+
+        console.log("message:", message);
+        console.log("loginUser:", loginUser);
+        console.log("senderNum:", senderNum);
+        console.log("senderUserId:", senderUserId);
+        console.log("senderName:", senderName);
 
         if (
             senderNum !== null &&
-            loginUser.userNum !== null
+            loginUser.userNum !== null &&
+            senderNum === loginUser.userNum
         ) {
-            return (
-                senderNum ===
-                loginUser.userNum
-            );
+            return true;
         }
 
-        /*
-        이전 서버 응답처럼 senderNum이 없는 경우를 위한
-        임시 호환 처리입니다.
-        */
-        const senderName =
-            getSenderName(
-                message
-            );
+        if (
+            senderUserId &&
+            loginUser.userId &&
+            senderUserId === loginUser.userId
+        ) {
+            return true;
+        }
 
-        return Boolean(
+        if (
+            senderName &&
+            loginUser.userId &&
+            senderName === loginUser.userId
+        ) {
+            return true;
+        }
+
+        if (
             senderName &&
             loginUser.name &&
-            senderName ===
-            loginUser.name
-        );
+            senderName === loginUser.name
+        ) {
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -323,24 +342,22 @@
     function getLoginUser() {
         if (
             app.chat &&
-            typeof app.chat
-                .getLoginUser ===
-            "function"
+            typeof app.chat.getLoginUser === "function"
         ) {
-            const loginUser =
-                app.chat.getLoginUser();
+            const loginUser = app.chat.getLoginUser();
 
             return {
-                userNum:
-                    normalizeNumber(
-                        loginUser?.userNum
-                    ),
+                userNum: normalizeNumber(
+                    loginUser?.userNum
+                ),
 
-                name:
-                    String(
-                        loginUser?.name ??
-                        ""
-                    )
+                userId: String(
+                    loginUser?.userId ?? ""
+                ),
+
+                name: String(
+                    loginUser?.name ?? ""
+                )
             };
         }
 
@@ -349,38 +366,50 @@
             app.state.loginUser
         ) {
             return {
-                userNum:
-                    normalizeNumber(
-                        app.state
-                            .loginUser
-                            .userNum
-                    ),
+                userNum: normalizeNumber(
+                    app.state.loginUser.userNum
+                ),
 
-                name:
-                    String(
-                        app.state
-                            .loginUser
-                            .name ??
-                        ""
-                    )
+                userId: String(
+                    app.state.loginUser.userId ?? ""
+                ),
+
+                name: String(
+                    app.state.loginUser.name ?? ""
+                )
+            };
+        }
+
+        if (window.loginUser) {
+            return {
+                userNum: normalizeNumber(
+                    window.loginUser.userNum
+                ),
+
+                userId: String(
+                    window.loginUser.userId ?? ""
+                ),
+
+                name: String(
+                    window.loginUser.name ?? ""
+                )
             };
         }
 
         return {
-            userNum:
-                normalizeNumber(
-                    window.currentUserNum ??
-                    window.currentUserId
-                ),
+            userNum: normalizeNumber(
+                window.currentUserNum
+            ),
 
-            name:
-                String(
-                    window.currentUser ??
-                    ""
-                )
+            userId: String(
+                window.currentUserId ?? ""
+            ),
+
+            name: String(
+                window.currentUser ?? ""
+            )
         };
     }
-
 
     /* =====================================================
        메시지 ID 조회

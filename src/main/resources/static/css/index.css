@@ -372,3 +372,33 @@ header .buttons a:last-child:hover {
   font-size: 18px;
   font-weight: 600;
 }
+
+.cta {
+  padding: 140px 20px;
+  text-align: center;
+  background: #fff;
+}
+
+.cta span {
+  display: block;
+  margin-bottom: 18px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.cta h2 {
+  margin: 0;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -1.8px;
+  color: var(--text-main);
+}
+
+.cta p {
+  margin: 24px 0 0;
+  font-size: 17px;
+  line-height: 1.7;
+  color: var(--text-sub);
+}

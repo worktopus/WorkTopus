@@ -21,46 +21,35 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatController {
 
-    /*
-     * 채팅 메시지 최대 길이
-     */
+    /* 채팅 메시지 최대 길이  */
     private static final int MAX_MESSAGE_LENGTH =
             2000;
 
 
-    /*
-     * 채팅 메시지 저장과
-     * 이전 대화 조회를 처리합니다.
-     */
+    /* 채팅 메시지 저장과
+       이전 대화 조회를 처리합니다. */
     private final ChatService
             chatService;
 
 
-    /*
-     * 단체방과 개인방 접근 권한을
-     * 공통으로 검사합니다.
-     */
+    /* 단체방과 개인방 접근 권한을
+       공통으로 검사합니다.  */
     private final ChatRoomAccessService
             chatRoomAccessService;
 
 
-    /*
-     * 저장된 메시지를 해당 채팅방 구독자에게
-     * 실시간으로 전송합니다.
-     */
+    /* 저장된 메시지를 해당 채팅방 구독자에게
+       실시간으로 전송합니다.  */
     private final SimpMessagingTemplate
             messagingTemplate;
 
 
-    /*
-     * =====================================================
-     * 채팅 메시지 전송
-     * =====================================================
-     *
-     * 클라이언트 전송 주소:
-     *
-     * /app/chat.send
-     */
+    /* =====================================================
+       채팅 메시지 전송
+       =====================================================
+
+       클라이언트 전송 주소:
+       /app/chat.send  */
     @MessageMapping("/chat.send")
     public void send(
             ChatMessage message,

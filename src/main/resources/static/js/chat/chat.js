@@ -267,6 +267,15 @@
                     .refreshCurrentMembers();
             }
 
+            /*
+             * 프로젝트/팀원 자동 갱신 후에도
+             * 현재 열려 있는 그룹 또는 개인 채팅방의
+             * WebSocket 구독 상태를 다시 확인합니다.
+             */
+            if (app.state.currentRoomId) {
+                subscribeCurrentRoom();
+            }
+
         } catch (error) {
             /*
              * 자동 갱신 실패가 현재 채팅 기능 전체를

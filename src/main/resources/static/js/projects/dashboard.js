@@ -1,27 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const donutChart = document.querySelector(".donut-chart");
+    const donut = document.querySelector(".donut-chart");
 
-    if (!donutChart) {
-        return;
+    if (donut) {
+        const todoRate = Number(donut.dataset.todoRate) || 0;
+        const progressRate = Number(donut.dataset.progressRate) || 0;
+        const reviewRate = Number(donut.dataset.reviewRate) || 0;
+
+        const todoEnd = todoRate;
+        const progressEnd = todoEnd + progressRate;
+        const reviewEnd = progressEnd + reviewRate;
+
+        donut.style.background = `
+        conic-gradient(
+            #B8C2F7 0% ${todoEnd}%,
+            #7287F4 ${todoEnd}% ${progressEnd}%,
+            #DFEEF7 ${progressEnd}% ${reviewEnd}%,
+            #5D72C9 ${reviewEnd}% 100%
+        )
+    `;
     }
-
-    const todoRate = getRate(donutChart.dataset.todoRate);
-    const progressRate = getRate(donutChart.dataset.progressRate);
-    const reviewRate = getRate(donutChart.dataset.reviewRate);
-    const doneRate = getRate(donutChart.dataset.doneRate);
-
-    const todoEnd = todoRate;
-    const progressEnd = todoEnd + progressRate;
-    const reviewEnd = progressEnd + reviewRate;
-    const doneEnd = reviewEnd + doneRate;
-
-    donutChart.style.background = `conic-gradient(
-        #5f72d9 0% ${todoEnd}%,
-        #f59e0b ${todoEnd}% ${progressEnd}%,
-        #6d4ce8 ${progressEnd}% ${reviewEnd}%,
-        #22c55e ${reviewEnd}% ${doneEnd}%,
-        #eef1ff ${doneEnd}% 100%
-    )`;
 
     function getRate(value) {
         const number = Number(value);

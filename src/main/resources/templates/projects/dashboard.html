@@ -31,9 +31,13 @@
             <section class="assignment-overlay">
 
                 <div class="assignment-overlay__profile">
-                    <div class="dashboard__avatar">
-                        <img th:src="${user.picture}" alt="프로필 사진" id="profile-preview" class="profile-click-avatar"
-                             title="프로필 사진" onerror="this.src='/images/logo.png';">
+                    <div class="assignment-overlay__avatar">
+                        <img
+                                th:src="${user.picture}"
+                                class="profile-click-avatar"
+                                id="profile-preview"
+                                alt="프로필 사진"
+                                onerror="this.src='/images/logo.png';">
                     </div>
                 </div>
 
@@ -56,14 +60,14 @@
                         </div>
 
                         <span class="assignment-overlay__badge">
-                완료 <span th:text="${dashboard.doneRate}">0</span>%
+                프로젝트 완료 <span th:text="${dashboard.doneRate}">0</span>%
             </span>
                     </div>
 
                     <div class="assignment-progress">
 
                         <div class="assignment-progress__top">
-                            <span> 과제 진행도</span>
+                            <span> 내 과제 진행도</span>
                             <strong>
                                 <span th:text="${dashboard.myDoneCount}">0</span>
                                 /
@@ -75,7 +79,7 @@
 
                             <!-- width만 변경하면 된다 -->
                             <div class="assignment-progress__fill"
-                                 th:style="${'width:' + dashboard.completionRate + '%;'}">
+                                 th:style="${'width:' + dashboard.myCompletionRate + '%;'}">
 
                             <span class="assignment-progress__text">
                                 <span th:text="${dashboard.myCompletionRate}">0</span>%
@@ -134,9 +138,9 @@
                             <strong th:text="${card.assigneeInitial()}">담당</strong>
                         </li>
                         <li th:if="${dashboard.todoCards.isEmpty()}">
-                            <span class="dot dot--blue"></span>
+                            <span class="dot"></span>
                             <span>해야 할 일이 없습니다.</span>
-                            <strong>0</strong>
+                            <strong>&nbsp;</strong>
                         </li>
                     </ul>
                 </article>
@@ -149,14 +153,14 @@
 
                     <ul>
                         <li th:each="card : ${dashboard.inProgressCards}">
-                            <span class="dot dot--blue"></span>
+                            <span class="dot dot--inProgress"></span>
                             <span th:text="${card.title}">로그인 기능</span>
                             <strong th:text="${card.assigneeInitial()}">담당</strong>
                         </li>
                         <li th:if="${dashboard.inProgressCards.isEmpty()}">
-                            <span class="dot dot--blue"></span>
+                            <span class="dot"></span>
                             <span>진행 중인 일이 없습니다.</span>
-                            <strong>0</strong>
+                            <strong>&nbsp;</strong>
                         </li>
                     </ul>
                 </article>
@@ -169,14 +173,14 @@
 
                     <ul>
                         <li th:each="card : ${dashboard.reviewCards}">
-                            <span class="dot dot--green"></span>
+                            <span class="dot dot--review"></span>
                             <span th:text="${card.title}">PR 검토</span>
                             <strong th:text="${card.assigneeInitial()}">담당</strong>
                         </li>
                         <li th:if="${dashboard.reviewCards.isEmpty()}">
-                            <span class="dot dot--green"></span>
+                            <span class="dot"></span>
                             <span>검토 중인 일이 없습니다.</span>
-                            <strong>0</strong>
+                            <strong>&nbsp;</strong>
                         </li>
                     </ul>
                 </article>
@@ -194,9 +198,9 @@
 
                         <ul class="chart-legend">
                             <li><span class="dot dot--blue"></span>해야 할 일 <strong th:text="${dashboard.todoRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--orange"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--purple"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
-                            <li><span class="dot dot--green"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--inProgress"></span>진행 중 <strong th:text="${dashboard.inProgressRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--review"></span>검토 중 <strong th:text="${dashboard.reviewRate + '%'}">0%</strong></li>
+                            <li><span class="dot dot--done"></span>완료 <strong th:text="${dashboard.doneRate + '%'}">0%</strong></li>
 
                         </ul>
                     </div>
@@ -271,7 +275,6 @@
 
 <script th:src="@{/js/projects/dashboard.js}"></script>
 <script th:src="@{/js/sidebar.js}"></script>
-<script src="/js/header.js"></script>
 
 </body>
 </html>
