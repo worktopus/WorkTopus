@@ -65,6 +65,43 @@ public class WorkspaceManageApiController {
         }
     }
 
+    // 프로젝트 삭제
+    @DeleteMapping("/api/manage/{workspaceId}")
+    public ResponseEntity<?> deleteWorkspace(
+            @PathVariable("workspaceId") Long workspaceId
+    ) {
+        try {
+            Long currentUserId = 1L;
+
+            workspaceManageService.deleteWorkspace(
+                    workspaceId,
+                    currentUserId
+            );
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "프로젝트가 삭제되었습니다.",
+                    "redirectUrl", "/projects"
+            ));
+
+        } catch (SecurityException e) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", e.getMessage()));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            return ResponseEntity.internalServerError()
+                    .body(Map.of(
+                            "error",
+                            "프로젝트 삭제 중 오류가 발생했습니다."
+                    ));
+        }
+    }
+
     /**  기존 비동기 JSON 수신용 초대 API 주소 (기존 유지) */
     @PostMapping("/api/manage/invite")
     public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {

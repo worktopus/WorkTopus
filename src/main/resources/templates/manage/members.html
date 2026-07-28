@@ -26,22 +26,20 @@
 
         <!-- 실제 관리 폼 메인 페이지 -->
         <main class="manage-container" style="padding: 40px; width: 100%;">
-            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
-                프로젝트 관리 (팀장 전용)
-            </h1>
+            <h1 class="manage-title">프로젝트 관리</h1>
 
             <!-- 상단 탭 바 동적 ID 파이프라인 -->
             <div class="manage-tabs">
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/posts'|">게시글 관리</button>
             </div>
 
             <!-- [탭 2] 팀원 및 역할 관리 구역 -->
-            <div id="members-tab" class="tab-content active" style="display: block; padding: 20px 0;">
+            <div id="members-tab" class="tab-content active" style="display: block;">
                 <div class="content-header" style="margin-bottom: 24px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">👥 팀원 및 역할 관리</h3>
+                    <h3 style="font-size: 1.2rem; font-weight: 600; margin-bottom: 4px;">팀원 및 역할 관리</h3>
                     <p style="font-size: 0.9rem; color: var(--text-sub);">현재 프로젝트에 참여 중인 팀원들의 직급과 담당 역할을 실시간으로 지정하고 관리합니다.</p>
                 </div>
 

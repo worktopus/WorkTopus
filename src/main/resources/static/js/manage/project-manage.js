@@ -10,8 +10,8 @@ document.addEventListener("DOMContentLoaded", function () {
         setTabActive("팀원 관리");
     } else if (currentPath.endsWith("/invite")) {
         setTabActive("팀원 초대");
-    } else if (currentPath.endsWith("/boards")) {
-        setTabActive("게시판 관리");
+    } else if (currentPath.endsWith("/posts")) {
+        setTabActive("게시글 관리");
     } else {
         setTabActive("일반 관리");
     }

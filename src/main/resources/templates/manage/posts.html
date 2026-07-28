@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+    <title>WorkTopus - 게시글 관리</title>
+
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/layout.css}">
+    <link rel="stylesheet" th:href="@{/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" th:href="@{/css/manage.css}">
+    <link rel="stylesheet" th:href="@{/css/manage-post.css}">
+    <link rel="stylesheet" th:href="@{/css/homeHeader.css}">
+</head>
+<body>
+<div class="layout">
+    <div th:replace="~{fragments/sidebar :: sidebar}"></div>
+
+    <div class="layout__content">
+        <div th:replace="~{fragments/header :: header}"></div>
+
+        <main class="manage-container">
+            <h1 class="manage-title">프로젝트 관리</h1>
+
+            <div class="manage-tabs">
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/posts'|">게시글 관리</button>
+            </div>
+
+            <section class="tab-content active manage-post-page">
+                <header class="content-header manage-post-header">
+                    <div>
+                        <h3>게시글 관리</h3>
+                        <p>프로젝트 게시판의 게시글 현황을 조회하고 관리합니다.</p>
+                    </div>
+                </header>
+
+                <section class="manage-post-stats" aria-label="게시글 통계">
+                    <article class="manage-post-stat-card">
+                        <span>총 게시글</span>
+                        <strong th:text="${postStats.totalPosts}">0</strong>
+                    </article>
+                    <article class="manage-post-stat-card">
+                        <span>공지글</span>
+                        <strong th:text="${postStats.noticePosts}">0</strong>
+                    </article>
+                    <article class="manage-post-stat-card">
+                        <span>댓글 수</span>
+                        <strong th:text="${postStats.totalComments}">0</strong>
+                    </article>
+                    <article class="manage-post-stat-card">
+                        <span>첨부파일 수</span>
+                        <strong th:text="${postStats.totalFiles}">0</strong>
+                    </article>
+                </section>
+
+                <form class="manage-post-filter" method="get"
+                      th:action="@{/projects/manage/{projectId}/posts(projectId=${projectId})}">
+                    <label class="manage-post-select-wrap">
+                        <span class="sr-only">카테고리</span>
+                        <select name="category">
+                            <option value="ALL" th:selected="${selectedCategory == 'ALL'}">전체 카테고리</option>
+                            <option value="NOTICE" th:selected="${selectedCategory == 'NOTICE'}">공지</option>
+                            <option value="MEETING" th:selected="${selectedCategory == 'MEETING'}">회의</option>
+                            <option value="WORK" th:selected="${selectedCategory == 'WORK'}">업무</option>
+                            <option value="RESOURCE" th:selected="${selectedCategory == 'RESOURCE'}">자료</option>
+                            <option value="IDEA" th:selected="${selectedCategory == 'IDEA'}">아이디어</option>
+                            <option value="ETC" th:selected="${selectedCategory == 'ETC'}">기타</option>
+                        </select>
+                    </label>
+
+                    <label class="manage-post-search-wrap">
+                        <span class="sr-only">검색어</span>
+                        <input type="search" name="keyword" th:value="${keyword}"
+                               placeholder="제목 또는 작성자 검색">
+                    </label>
+
+                    <button type="submit" class="manage-post-search-btn">검색</button>
+                    <a class="manage-post-reset-btn"
+                       th:href="@{/projects/manage/{projectId}/posts(projectId=${projectId})}">초기화</a>
+                </form>
+
+                <div class="manage-post-table-wrap">
+                    <table class="manage-post-table">
+                        <thead>
+                        <tr>
+                            <th>제목</th>
+                            <th>카테고리</th>
+                            <th>작성자</th>
+                            <th>조회수</th>
+                            <th>작성일</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="post : ${postPage.content}">
+                            <td class="manage-post-title-cell">
+                                <span class="manage-post-notice" th:if="${post.notice}">공지</span>
+                                <a th:href="@{/projects/{projectId}/boards/{boardId}(projectId=${projectId},boardId=${post.boardId})}"
+                                   th:text="${post.title}">게시글 제목</a>
+                            </td>
+                            <td>
+                                <span class="manage-post-category"
+                                      th:classappend="| category-${#strings.toLowerCase(post.category)}|"
+                                      th:switch="${post.category}">
+                                    <span th:case="'NOTICE'">공지</span>
+                                    <span th:case="'MEETING'">회의</span>
+                                    <span th:case="'WORK'">업무</span>
+                                    <span th:case="'RESOURCE'">자료</span>
+                                    <span th:case="'IDEA'">아이디어</span>
+                                    <span th:case="'ETC'">기타</span>
+                                    <span th:case="*" th:text="${post.category}">기타</span>
+                                </span>
+                            </td>
+                            <td th:text="${post.writerName}">작성자</td>
+                            <td th:text="${post.viewCount}">0</td>
+                            <td th:text="${post.createdAt != null ? #temporals.format(post.createdAt, 'yyyy-MM-dd') : '-'}">-</td>
+                            <td>
+                                <a class="manage-post-view-btn"
+                                   th:href="@{/projects/{projectId}/boards/{boardId}(projectId=${projectId},boardId=${post.boardId})}">상세 보기</a>
+                            </td>
+                        </tr>
+
+                        <tr th:if="${#lists.isEmpty(postPage.content)}">
+                            <td colspan="6" class="manage-post-empty">조건에 맞는 게시글이 없습니다.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <nav class="manage-post-pagination" th:if="${postPage.totalPages > 0}" aria-label="게시글 페이지">
+                    <a th:if="${postPage.hasPrevious()}"
+                       th:href="@{/projects/manage/{projectId}/posts(projectId=${projectId},category=${selectedCategory},keyword=${keyword},page=${postPage.page - 1},size=${postPage.size})}">이전</a>
+
+                    <a th:each="pageNumber : ${pageNumbers}"
+                       th:text="${pageNumber + 1}"
+                       th:classappend="${pageNumber == postPage.page} ? ' active'"
+                       th:href="@{/projects/manage/{projectId}/posts(projectId=${projectId},category=${selectedCategory},keyword=${keyword},page=${pageNumber},size=${postPage.size})}">1</a>
+
+                    <a th:if="${postPage.hasNext()}"
+                       th:href="@{/projects/manage/{projectId}/posts(projectId=${projectId},category=${selectedCategory},keyword=${keyword},page=${postPage.page + 1},size=${postPage.size})}">다음</a>
+                </nav>
+            </section>
+        </main>
+    </div>
+</div>
+</body>
+</html>
