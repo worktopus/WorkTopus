@@ -59,18 +59,18 @@ spring:
 
   mail:
     host: smtp.gmail.com
-    port: 465
-    username: ${mail.username}
-    password: ${mail.password}
+    port: 587
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     default-encoding: UTF-8
 
     properties:
       mail:
         smtp:
           auth: true
-          ssl:
+          starttls:
             enable: true
-            trust: smtp.gmail.com
+            required: true
           connectiontimeout: 5000
           timeout: 5000
           writetimeout: 5000
