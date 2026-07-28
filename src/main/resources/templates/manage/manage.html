@@ -26,22 +26,20 @@
 
         <!-- 실제 관리 폼 메인 페이지 -->
         <main class="manage-container" style="padding: 40px; width: 100%;">
-            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
-                프로젝트 관리 (팀장 전용)
-            </h1>
+            <h1 class="manage-title">프로젝트 관리</h1>
 
             <!-- 상단 탭 바 동적 ID 파이프라인 -->
             <div class="manage-tabs">
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/posts'|">게시글 관리</button>
             </div>
 
             <!-- [탭 1] 프로젝트 일반 관리 구역 -->
             <div id="general-tab" class="tab-content active" style="display: block;">
                 <div class="content-header">
-                    <h3>🔧 프로젝트 일반 관리</h3>
+                    <h3>프로젝트 일반 관리</h3>
                     <p>프로젝트의 기본 정보(이름, 내용)를 개별적으로 수정하고 안전하게 반영합니다.</p>
                 </div>
 
@@ -81,6 +79,68 @@
                     </form>
                 </div>
 
+                <section class="danger-zone">
+                    <div class="danger-zone__content">
+                        <div>
+                            <h3 class="danger-zone__title">프로젝트 삭제</h3>
+                            <p class="danger-zone__description">
+                                프로젝트와 연결된 데이터가 모두 삭제되며,
+                                삭제 후에는 복구할 수 없습니다.
+                            </p>
+                        </div>
+
+                        <button type="button"
+                                id="openDeleteProjectModalBtn"
+                                class="btn-delete-project">
+                            프로젝트 삭제
+                        </button>
+                    </div>
+                </section>
+                <!-- 프로젝트 삭제 확인 모달 -->
+                <div id="deleteProjectModal"
+                     class="manage-modal"
+                     hidden>
+
+                    <div class="manage-modal__panel">
+                        <h3 class="manage-modal__title">프로젝트 영구 삭제</h3>
+
+                        <p class="manage-modal__description">
+                            계속하려면
+                            <strong th:text="${project.name}">프로젝트 이름</strong>
+                            을 입력하세요.
+                        </p>
+
+                        <input type="hidden"
+                               id="currentProjectName"
+                               th:value="${project.name}">
+
+                        <input type="text"
+                               id="deleteProjectNameInput"
+                               class="form-input"
+                               placeholder="프로젝트 이름을 입력하세요"
+                               autocomplete="off">
+
+                        <p id="deleteProjectError"
+                           class="manage-modal__error"
+                           hidden>
+                        </p>
+
+                        <div class="manage-modal__actions">
+                            <button type="button"
+                                    id="closeDeleteProjectModalBtn"
+                                    class="btn-cancel">
+                                취소
+                            </button>
+
+                            <button type="button"
+                                    id="confirmDeleteProjectBtn"
+                                    class="btn-delete-project"
+                                    disabled>
+                                영구 삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>

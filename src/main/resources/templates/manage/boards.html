@@ -26,9 +26,7 @@
 
         <!-- 실제 관리 폼 메인 페이지 -->
         <main class="manage-container" style="padding: 40px; width: 100%;">
-            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
-                프로젝트 관리 (팀장 전용)
-            </h1>
+            <h1 class="manage-title">프로젝트 관리</h1>
 
             <!-- 상단 탭 메뉴 바 -->
             <div class="manage-tabs">
@@ -36,6 +34,7 @@
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/posts'|">게시글 관리</button>
             </div>
 
             <!-- [탭 4] 프로젝트 게시판 관리 구역 -->

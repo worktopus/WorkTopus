@@ -222,3 +222,121 @@ input:checked + .slider:before {
 .board-item-row:hover {
     background-color: #fafafa;
 }
+
+/* 일반 관리 버튼 */
+#general-tab .manage-form{
+    width:100%;
+    max-width:none;
+}
+
+#general-tab .form-input{
+    width:100%;
+}
+
+.form-actions{
+    display:flex;
+    justify-content:flex-end;
+}
+
+#projectDescription{
+    min-height:160px;
+}
+
+/* 삭제 css */
+.danger-zone {
+    margin-top: 32px;
+    padding: 24px;
+    border: 1px solid color-mix(in srgb, var(--danger) 35%, var(--border));
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--danger) 4%, var(--card));
+}
+
+.danger-zone__content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+}
+
+.danger-zone__title {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: var(--danger);
+}
+
+.danger-zone__description {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-sub);
+    line-height: 1.6;
+}
+
+.btn-delete-project {
+    padding: 10px 18px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: var(--danger);
+    color: #fff;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-delete-project:hover {
+    filter: brightness(0.95);
+}
+
+.btn-delete-project:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.manage-modal[hidden] {
+    display: none;
+}
+
+.manage-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(15, 23, 42, 0.45);
+}
+
+.manage-modal__panel {
+    width: min(460px, 100%);
+    padding: 24px;
+    border-radius: var(--radius-md);
+    background: var(--card);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.manage-modal__title {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+    color: var(--danger);
+}
+
+.manage-modal__description {
+    margin: 0 0 18px;
+    color: var(--text-sub);
+    line-height: 1.6;
+}
+
+.manage-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    padding: 10px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--text-main);
+    cursor: pointer;
+}
