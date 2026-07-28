@@ -4,7 +4,9 @@ package com.example.WorkTopus.Notification.service;
 import com.example.WorkTopus.Notification.entity.Notification;
 import com.example.WorkTopus.Notification.entity.NotificationType;
 import com.example.WorkTopus.Notification.repository.NotificationRepository;
+import com.example.WorkTopus.entity.ProjectMember;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,7 @@ import java.util.List;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     // 1. 알림 생성 (댓글/공지/초대 등록 시 호출할 공통 메서드)
     @Override
@@ -28,6 +31,30 @@ public class NotificationServiceImpl implements NotificationService {
                 .type(type)
                 .build();
         notificationRepository.save(notification);
+    }
+
+    // 칸반 검토 요청 알림 구현
+    @Override
+    public void createKanbanReviewNotification(Long projectId, Long currentSenderNum, String cardTitle) {
+        // 1. 해당 프로젝트의 멤버 목록 조회
+        List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
+
+        String message = "[" + cardTitle + "] 카드가 검토 상태로 전환되었습니다.";
+        String url = "/projects/" + projectId + "/boards/kanban";
+
+        // 2. 본인을 제외한 모든 멤버에게 알림 생성
+        for (ProjectMember member : members) {
+            Users user = member.getUser(); // 멤버 엔티티에서 Users 객체 추출
+
+            // 본인에게는 알림을 보내지 않음
+            if (user.getUserNum().equals(currentSenderNum)) {
+                continue;
+            }
+
+            // 기존 createNotification 재활용
+            // NotificationType.KANBAN_REVIEW 또는 적절한 NotificationType 지정
+            createNotification(user, message, url, NotificationType.KANBAN_REVIEW);
+        }
     }
 
     // 2. 마이페이지/헤더용 알림 목록 조회

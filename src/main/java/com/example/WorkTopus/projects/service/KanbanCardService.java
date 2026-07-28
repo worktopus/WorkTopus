@@ -20,7 +20,7 @@ public interface KanbanCardService {
 
     KanbanCardResponse update(Long projectId, Long cardId, KanbanCardUpdateRequest request);
 
-    KanbanCardResponse updateStatus(Long projectId, Long cardId, KanbanCardStatusUpdateRequest request);
+    KanbanCardResponse updateStatus(Long projectId, Long cardId, KanbanCardStatusUpdateRequest request, Long senderUserNum);
 
     void delete(Long projectId, Long cardId);
 }
