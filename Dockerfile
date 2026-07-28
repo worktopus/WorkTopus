@@ -2,6 +2,9 @@
 FROM gradle:8.5-jdk21 AS builder
 WORKDIR /app
 COPY . .
+
+# gradlew 실행 권한 부여 (Permission denied 해결)
+RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
 
 # 2단계: 실행 환경 구성 (JDK 25 사용)
