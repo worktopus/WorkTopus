@@ -8,9 +8,6 @@ RUN ./gradlew bootJar --no-daemon
 FROM eclipse-temurin:25-jdk
 WORKDIR /app
 
-# 오라클 지갑 파일 복사
-COPY src/main/resources/wallet /app/src/main/resources/wallet
-
 # 1단계에서 빌드된 JAR 파일만 가져와서 복사
 COPY --from=builder /app/build/libs/*-SNAPSHOT.jar app.jar || COPY --from=builder /app/build/libs/*.jar app.jar
 
