@@ -1,9 +1,9 @@
-# 1단계: Gradle을 사용하여 JAR 파일 빌드
-FROM gradle:8.5-jdk21 AS builder
+# 1단계: JDK 25 환경에서 Gradle 빌드 진행
+FROM eclipse-temurin:25-jdk AS builder
 WORKDIR /app
 COPY . .
 
-# gradlew 실행 권한 부여 (Permission denied 해결)
+# gradlew 실행 권한 부여 및 빌드
 RUN chmod +x ./gradlew
 RUN ./gradlew bootJar --no-daemon
 
