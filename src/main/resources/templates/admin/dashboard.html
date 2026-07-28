@@ -184,7 +184,7 @@
                         프로젝트명
                     </td>
 
-                    <td th:text="${project.owner.name}">
+                    <td th:text="${project.owner?.name ?: '미지정'}">
                         팀장명
                     </td>
 
