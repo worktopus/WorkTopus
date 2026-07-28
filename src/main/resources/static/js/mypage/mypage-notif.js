@@ -38,11 +38,17 @@ function renderNotifications() {
     const isIdeaOn = document.getElementById("notif-idea")?.checked ?? true;
     const isEtcOn = document.getElementById("notif-etc")?.checked ?? true;
     const isCommentOn = document.getElementById("notif-comment")?.checked ?? true;
+    const isKanbanOn = document.getElementById("notif-kanban")?.checked ?? true;
 
     // 2. 체크박스 설정에 맞게 알림 데이터 필터링
     const filteredNotifications = globalNotifications.filter(notif => {
         const type = notif.type;
         const msg = notif.message || "";
+
+        // 칸반 검토 알림 필터
+        if (type === 'KANBAN_REVIEW' || msg.includes('검토(Review)')) {
+            return isKanbanOn;
+        }
 
         // 댓글 알림 (타입이 COMMENT이거나 댓글 문구 포함 시)
         if (type === 'COMMENT' || msg.includes('댓글')) {
@@ -78,26 +84,32 @@ function renderNotifications() {
             ? 'background-color: #f0fdf4; border: 1px solid #bbf7d0;'
             : 'background-color: #ffffff; border: 1px solid #e2e8f0;';
 
-        html += `
-            <li style="padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; ${bgStyle}">
-                <!-- 알림 내용 영역 -->
-                <div style="cursor: pointer; flex: 1;" onclick="onClickNotification(${notif.id}, '${notif.url}')">
-                    <span style="font-weight: bold; color: #1e293b; font-size: 14px;">[${notif.type}]</span>
-                    <span style="color: #334155; font-size: 14px; margin-left: 5px;">${notif.message}</span>
-                    <div style="font-size: 11px; color: #94a3b8; margin-top: 5px;">${formatDate(notif.createdAt)}</div>
-                </div>
+        // 알림 타입별 표시 문구 매핑
+        let displayType = notif.type;
+        if (notif.type === 'KANBAN_REVIEW') {
+            displayType = 'KANBAN';
+        }
 
-                <!-- ✕ 알림 삭제 버튼 -->
-                <button type="button" 
-                        onclick="deleteNotification(event, ${notif.id})"
-                        style="border: none; background: transparent; color: #94a3b8; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 8px; margin-left: 12px; border-radius: 4px;"
-                        onmouseover="this.style.color='#ef4444'" 
-                        onmouseout="this.style.color='#94a3b8'"
-                        title="알림 삭제">
-                    ✕
-                </button>
-            </li>
-        `;
+        html += `
+        <li style="padding: 15px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; ${bgStyle}">
+            <!-- 알림 내용 영역 -->
+            <div style="cursor: pointer; flex: 1;" onclick="onClickNotification(${notif.id}, '${notif.url}')">
+                <span style="font-weight: bold; color: #1e293b; font-size: 14px;">[${displayType}]</span>
+                <span style="color: #334155; font-size: 14px; margin-left: 5px;">${notif.message}</span>
+                <div style="font-size: 11px; color: #94a3b8; margin-top: 5px;">${formatDate(notif.createdAt)}</div>
+            </div>
+
+            <!-- ✕ 알림 삭제 버튼 -->
+            <button type="button" 
+                    onclick="deleteNotification(event, ${notif.id})"
+                    style="border: none; background: transparent; color: #94a3b8; font-size: 16px; font-weight: bold; cursor: pointer; padding: 4px 8px; margin-left: 12px; border-radius: 4px;"
+                    onmouseover="this.style.color='#ef4444'" 
+                    onmouseout="this.style.color='#94a3b8'"
+                    title="알림 삭제">
+                ✕
+            </button>
+        </li>
+    `;
     });
 
     notifList.innerHTML = html;
@@ -143,6 +155,7 @@ function updateNotifSetting() {
         resource: document.getElementById("notif-resource")?.checked,
         idea: document.getElementById("notif-idea")?.checked,
         etc: document.getElementById("notif-etc")?.checked,
+        kanban: document.getElementById("notif-kanban")?.checked,
         comment: document.getElementById("notif-comment")?.checked
     };
     localStorage.setItem("notifSettings", JSON.stringify(settings));
@@ -194,4 +207,5 @@ function restoreNotifSettings() {
     if (savedSettings.idea !== undefined && document.getElementById("notif-idea")) document.getElementById("notif-idea").checked = savedSettings.idea;
     if (savedSettings.etc !== undefined && document.getElementById("notif-etc")) document.getElementById("notif-etc").checked = savedSettings.etc;
     if (savedSettings.comment !== undefined && document.getElementById("notif-comment")) document.getElementById("notif-comment").checked = savedSettings.comment;
+    if (savedSettings.kanban !== undefined && document.getElementById("notif-kanban")) {document.getElementById("notif-kanban").checked = savedSettings.kanban;}
 }

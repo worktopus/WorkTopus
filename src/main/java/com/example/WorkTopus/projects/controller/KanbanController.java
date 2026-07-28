@@ -1,5 +1,6 @@
 package com.example.WorkTopus.projects.controller;
 
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.request.KanbanCardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.KanbanCardStatusUpdateRequest;
 import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
@@ -7,6 +8,7 @@ import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
 import com.example.WorkTopus.projects.entity.KanbanStatus;
 import com.example.WorkTopus.projects.service.KanbanCardService;
 import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
+import com.example.WorkTopus.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -34,6 +36,7 @@ public class KanbanController {
 
     private final KanbanCardService kanbanCardService;
     private final ProjectBoardAccessService projectBoardAccessService;
+    private final UserRepository userRepository;
 
     @GetMapping
     public ModelAndView kanban(@PathVariable Long projectId,
@@ -145,10 +148,14 @@ public class KanbanController {
                 authentication.getName()
         );
 
+        Users user = userRepository.findByUserId(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
         return kanbanCardService.updateStatus(
                 projectId,
                 cardId,
-                request
+                request,
+                user.getUserNum()
         );
     }
 
