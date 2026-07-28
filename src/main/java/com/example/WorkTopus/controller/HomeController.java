@@ -9,6 +9,7 @@ import com.example.WorkTopus.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -22,6 +23,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
@@ -176,6 +178,7 @@ public class HomeController {
             );
 
         } catch (Exception e) {
+            log.error("이메일 발송 중 예외 발생: ", e);
             return ResponseEntity.internalServerError().body(
                     Map.of(
                             "success", false,
