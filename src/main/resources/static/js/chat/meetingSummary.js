@@ -442,6 +442,13 @@
                 "div"
             );
 
+        const sectionIcon = `
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="ai-summary-section-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12,17c-2.76,0-5-2.24-5-5s2.24-5,5-5,5,2.24,5,5-2.24,5-5,5Z"/>
+        </svg>
+        `;
+
 
         overlay.id =
             "aiSummaryOverlay";
@@ -469,13 +476,6 @@
                 >
 
                     <div>
-
-                        <p
-                            class="ai-summary-modal__eyebrow"
-                        >
-                            WorkTopus AI
-                        </p>
-
                         <h2
                             id="aiSummaryTitle"
                             class="ai-summary-modal__title"
@@ -550,7 +550,8 @@
                     >
 
                         <h3>
-                            📝 회의 요약
+                            ${sectionIcon}
+                             회의 요약
                         </h3>
 
                         <p
@@ -567,7 +568,8 @@
                     >
 
                         <h3>
-                            ✅ 주요 결정 사항
+                            ${sectionIcon}
+                             주요 결정 사항
                         </h3>
 
                         <ul
@@ -584,7 +586,8 @@
                     >
 
                         <h3>
-                            📌 해야 할 일
+                            ${sectionIcon}
+                             해야 할 일
                         </h3>
 
                         <ul
@@ -601,7 +604,8 @@
                     >
 
                         <h3>
-                            🔑 중요 키워드
+                            ${sectionIcon}
+                             중요 키워드
                         </h3>
 
                         <div
@@ -613,16 +617,15 @@
 
 
                     <!-- 요약 정보 -->
+                    <div
+                        class="ai-summary-actions"
+                    >
+                    
                     <footer
                         id="aiSummaryMeta"
                         class="ai-summary-meta"
                     ></footer>
-
-
-                    <div
-                        class="ai-summary-actions"
-                    >
-
+                    
                         <button
                             type="button"
                             id="aiSummarySaveButton"

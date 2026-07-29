@@ -580,3 +580,29 @@
     border-bottom: 5px solid transparent;
     border-left: 7px solid #bdd8ff;
 }
+
+.chat-empty {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+    color: #64748b;
+
+    padding: 32px;
+}
+
+.chat-empty strong {
+    font-size: 18px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 10px;
+}
+
+.chat-empty span {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.6;
+}

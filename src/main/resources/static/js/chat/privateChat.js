@@ -653,12 +653,6 @@
                 "div"
             );
 
-        iconElement.className =
-            "chat-empty__icon";
-
-        iconElement.textContent =
-            "👤";
-
         const titleElement =
             document.createElement(
                 "strong"

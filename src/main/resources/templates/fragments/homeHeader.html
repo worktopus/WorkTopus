@@ -78,6 +78,7 @@
 
     <!-----------------------------------------팝업-------------------------------------------->
     <!-- 실시간 채팅 팝업 -->
+    <link rel="stylesheet" th:href="@{/css/chat-ai.css}">
     <link rel="stylesheet" th:href="@{/css/chat.css}">
 
     <div id="chatModal">
@@ -149,9 +150,9 @@
 
             <!-- 프로젝트 단체 채팅에서만 표시 -->
             <div class="chat-footer">
-                <button id="aiMeetingSummaryButton" type="button">🤖 AI 회의요약</button>
-                <button id="aiMeetingHistoryButton" type="button">📋 회의록 기록</button>
-                <button id="boardBtn" type="button">📌 게시판 등록</button>
+                <button id="aiMeetingSummaryButton" type="button">AI 회의요약</button>
+                <button id="aiMeetingHistoryButton" type="button">회의록 기록</button>
+                <button id="boardBtn" type="button">게시판 등록</button>
             </div>
 
         </div>
