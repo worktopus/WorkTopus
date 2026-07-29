@@ -1,10 +1,13 @@
 package com.example.WorkTopus.service;
 
 import com.example.WorkTopus.dto.ProjectCreateForm;
+import com.example.WorkTopus.dto.ProjectListResponse;
 import com.example.WorkTopus.entity.ProjectMember;
 import com.example.WorkTopus.entity.ProjectRole;
 import com.example.WorkTopus.entity.Projects;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.projects.entity.KanbanStatus;
+import com.example.WorkTopus.projects.repository.KanbanCardRepository;
 import com.example.WorkTopus.repository.ProjectMemberRepository;
 import com.example.WorkTopus.repository.ProjectRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final KanbanCardRepository kanbanCardRepository;
 
     // 프로젝트 생성
     public Projects createProject(ProjectCreateForm form, Users loginUser) {
@@ -71,11 +75,39 @@ public class ProjectService {
 
     // 현재 사용자가 참여한 모든 프로젝트 조회
     @Transactional(readOnly = true)
-    public List<Projects> findProjectsByUser(Users loginUser) {
+    public List<ProjectListResponse> findProjectsByUser(Users loginUser) {
         return projectMemberRepository
                 .findByUserOrderByJoinedAtDesc(loginUser)
                 .stream()
                 .map(ProjectMember::getProject)
+                .map(project -> {
+
+                    long total =
+                            kanbanCardRepository.countByProjectIdAndDeletedYn(
+                                    project.getId(),
+                                    "N"
+                            );
+
+                    long done =
+                            kanbanCardRepository.countByProjectIdAndStatusAndDeletedYn(
+                                    project.getId(),
+                                    KanbanStatus.DONE,
+                                    "N"
+                            );
+
+                    int completionRate =
+                            total == 0
+                                    ? 0
+                                    : (int) Math.round(done * 100.0 / total);
+
+                    return new ProjectListResponse(
+                            project.getId(),
+                            project.getName(),
+                            project.getDescription(),
+                            project.getInviteCode(),
+                            completionRate
+                    );
+                })
                 .toList();
     }
 

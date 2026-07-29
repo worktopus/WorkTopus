@@ -1,5 +1,6 @@
 package com.example.WorkTopus.controller;
 
+import com.example.WorkTopus.dto.ProjectListResponse;
 import com.example.WorkTopus.dto.UserCreateForm;
 import com.example.WorkTopus.entity.Projects;
 import com.example.WorkTopus.entity.Users;
@@ -234,7 +235,7 @@ public class HomeController {
         Users loginUser =
                 userService.findByUserId(authentication.getName());
 
-        List<Projects> projects =
+        List<ProjectListResponse> projects =
                 projectService.findProjectsByUser(loginUser);
 
         model.addAttribute("projects", projects);
