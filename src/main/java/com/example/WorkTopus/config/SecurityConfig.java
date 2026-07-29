@@ -24,8 +24,7 @@ public class SecurityConfig {
                         .ignoringRequestMatchers(
                                 "/api/ai/**",
                                 "/api/chat/**",
-                                "/chat/**",
-                                "/api/todo/**"
+                                "/chat/**"
                         )
                 )
                 .authorizeHttpRequests(auth -> auth
