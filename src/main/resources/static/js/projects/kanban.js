@@ -298,7 +298,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="kanban__card-footer">
                 <span class="kanban__avatar">
-                    ${escapeHtml(getAssigneeInitial(task.assignee))}
+                    ${escapeHtml(getAssigneeInitial(task.assigneeName))}
                 </span>
 
                 <span class="kanban__date">
@@ -351,7 +351,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (title) title.textContent = task.title;
         if (desc) desc.textContent = getDescriptionLabel(task.description);
-        if (avatar) avatar.textContent = getAssigneeInitial(task.assignee);
+        if (avatar) {
+            avatar.textContent = getAssigneeInitial(task.assigneeName);
+        }
         if (date) date.textContent = formatDate(task.dueDate);
 
         if (badge) {

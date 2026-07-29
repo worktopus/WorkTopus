@@ -83,7 +83,7 @@
                                      th:each="card : ${todoCards}"
                                      th:data-card-id="${card.id}"
                                      th:data-title="${card.title}"
-                                     th:data-assignee="${card.assigneeLabel()}"
+                                     th:data-assignee="${card.assignee}"
                                      th:data-due-date="${card.dueDate}"
                                      th:data-priority="${card.priority}"
                                      th:data-description="${card.descriptionLabel()}">
@@ -136,7 +136,7 @@
                                      th:each="card : ${inProgressCards}"
                                      th:data-card-id="${card.id}"
                                      th:data-title="${card.title}"
-                                     th:data-assignee="${card.assigneeLabel()}"
+                                     th:data-assignee="${card.assignee}"
                                      th:data-due-date="${card.dueDate}"
                                      th:data-priority="${card.priority}"
                                      th:data-description="${card.descriptionLabel()}">
@@ -188,7 +188,7 @@
                                      th:each="card : ${reviewCards}"
                                      th:data-card-id="${card.id}"
                                      th:data-title="${card.title}"
-                                     th:data-assignee="${card.assigneeLabel()}"
+                                     th:data-assignee="${card.assignee}"
                                      th:data-due-date="${card.dueDate}"
                                      th:data-priority="${card.priority}"
                                      th:data-description="${card.descriptionLabel()}">
@@ -240,7 +240,7 @@
                                      th:each="card : ${doneCards}"
                                      th:data-card-id="${card.id}"
                                      th:data-title="${card.title}"
-                                     th:data-assignee="${card.assigneeLabel()}"
+                                     th:data-assignee="${card.assignee}"
                                      th:data-due-date="${card.dueDate}"
                                      th:data-priority="${card.priority}"
                                      th:data-description="${card.descriptionLabel()}">
@@ -306,8 +306,16 @@
                         </div>
 
                         <div class="kanban-modal__group">
-                            <label>담당자</label>
-                            <input type="text" id="taskUser">
+                            <label for="taskUser">담당자</label>
+                            <select id="taskUser">
+                                <option value="">담당자 없음</option>
+                                <option th:each="member : ${members}"
+                                        th:if="${member.user != null}"
+                                        th:value="${member.user.userNum}"
+                                        th:text="${member.user.name}">
+                                    프로젝트 멤버
+                                </option>
+                            </select>
                         </div>
 
                         <div class="kanban-modal__group">

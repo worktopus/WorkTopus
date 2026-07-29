@@ -9,6 +9,7 @@ import com.example.WorkTopus.projects.repository.BoardFileRepository;
 import com.example.WorkTopus.projects.repository.BoardRepository;
 import com.example.WorkTopus.projects.repository.CalendarScheduleRepository;
 import com.example.WorkTopus.projects.repository.KanbanCardRepository;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
 import com.example.WorkTopus.service.UserService;
 import com.example.WorkTopus.entity.Users;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final CalendarScheduleRepository calendarScheduleRepository;
     private final UserService userService;
     private final ManageMemberRepository manageMemberRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     @Override
     public DashboardResponse getDashboard(Long projectId, String loginUserId) {
@@ -104,18 +106,19 @@ public class DashboardServiceImpl implements DashboardService {
         // 로그인 사용자 개인 통계 조회
         Users user = userService.findByUserId(loginUserId);
         String userName = user.getName();
+        String assignee = String.valueOf(user.getUserNum());
 
         long myKanbanCardCount =
                 kanbanCardRepository.countByProjectIdAndAssigneeAndDeletedYn(
                         projectId,
-                        userName,
+                        assignee,
                         "N"
                 );
 
         long myDoneCount =
                 kanbanCardRepository.countByProjectIdAndAssigneeAndStatusAndDeletedYn(
                         projectId,
-                        userName,
+                        assignee,
                         KanbanStatus.DONE,
                         "N"
                 );
@@ -144,9 +147,9 @@ public class DashboardServiceImpl implements DashboardService {
                 myKanbanCardCount,
                 myCompletionRate,
 
-                filterKanbanCards(kanbanCards, KanbanStatus.TODO),
-                filterKanbanCards(kanbanCards, KanbanStatus.IN_PROGRESS),
-                filterKanbanCards(kanbanCards, KanbanStatus.REVIEW),
+                filterKanbanCards(projectId, kanbanCards, KanbanStatus.TODO),
+                filterKanbanCards(projectId, kanbanCards, KanbanStatus.IN_PROGRESS),
+                filterKanbanCards(projectId, kanbanCards, KanbanStatus.REVIEW),
                 findRecentBoards(projectId),
                 findLatestNotice(projectId),
                 findRecentFiles(projectId),
@@ -183,14 +186,41 @@ public class DashboardServiceImpl implements DashboardService {
 
     // 상태별 칸반 카드 최대 3건 조회
     private List<KanbanCardResponse> filterKanbanCards(
+            Long projectId,
             List<KanbanCard> cards,
             KanbanStatus status
     ) {
         return cards.stream()
                 .filter(card -> card.getStatus() == status)
                 .limit(3)
-                .map(KanbanCardResponse::from)
+                .map(card -> KanbanCardResponse.from(
+                        card,
+                        findAssigneeName(projectId, card.getAssignee())
+                ))
                 .toList();
+    }
+
+    private String findAssigneeName(
+            Long projectId,
+            String assignee
+    ) {
+        if (assignee == null || assignee.isBlank()) {
+            return null;
+        }
+
+        try {
+            Long userNum = Long.valueOf(assignee);
+
+            return projectMemberRepository
+                    .findByProject_IdAndUser_UserNum(projectId, userNum)
+                    .filter(member -> member.getUser() != null)
+                    .map(member -> member.getUser().getName())
+                    .orElse("알 수 없는 사용자");
+
+        } catch (NumberFormatException e) {
+            // 기존 데이터에 이름이 저장된 경우
+            return assignee;
+        }
     }
 
     // 캘린더 일정과 칸반 마감일을 통합하여 조회

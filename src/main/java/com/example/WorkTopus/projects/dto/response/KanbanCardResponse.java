@@ -12,6 +12,7 @@ public record KanbanCardResponse(
         Long projectId,
         String title,
         String assignee,
+        String assigneeName,
         LocalDate dueDate,
         KanbanPriority priority,
         KanbanStatus status,
@@ -21,12 +22,13 @@ public record KanbanCardResponse(
     private static final DateTimeFormatter DUE_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("M월 d일");
 
-    public static KanbanCardResponse from(KanbanCard card) {
+    public static KanbanCardResponse from(KanbanCard card, String assigneeName) {
         return new KanbanCardResponse(
                 card.getId(),
                 card.getProjectId(),
                 card.getTitle(),
                 card.getAssignee(),
+                assigneeName,
                 card.getDueDate(),
                 card.getPriority(),
                 card.getStatus(),
@@ -51,16 +53,18 @@ public record KanbanCardResponse(
     }
 
     public String assigneeLabel() {
-        if (assignee == null || assignee.isBlank()) {
+        if (assigneeName == null || assigneeName.isBlank()) {
             return "미정";
         }
 
-        return assignee;
+        return assigneeName;
     }
 
     public String assigneeInitial() {
         String label = assigneeLabel();
-        return label.length() <= 2 ? label : label.substring(0, 2);
+        return label.length() <= 2
+                ? label
+                : label.substring(0, 2);
     }
 
     public String dueDateLabel() {

@@ -16,6 +16,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +32,50 @@ public class KanbanCardServiceImpl implements KanbanCardService {
     @Override
     @Transactional(readOnly = true)
     public List<KanbanCardResponse> findProjectCards(Long projectId) {
+
+        Map<Long, ProjectMember> memberMap =
+                projectMemberRepository
+                        .findByProject_IdOrderByJoinedAtAsc(projectId)
+                        .stream()
+                        .filter(member -> member.getUser() != null)
+                        .collect(Collectors.toMap(
+                                member -> member.getUser().getUserNum(),
+                                Function.identity()
+                        ));
+
         return kanbanCardRepository
                 .findByProjectIdAndDeletedYnOrderByCreatedAtAsc(projectId, "N")
                 .stream()
-                .map(KanbanCardResponse::from)
+                .map(card -> KanbanCardResponse.from(
+                        card,
+                        resolveAssigneeName(card.getAssignee(), memberMap)
+                ))
                 .toList();
+    }
+
+    private String resolveAssigneeName(
+            String assignee,
+            Map<Long, ProjectMember> memberMap
+    ) {
+        if (assignee == null || assignee.isBlank()) {
+            return null;
+        }
+
+        try {
+            Long userNum = Long.valueOf(assignee);
+
+            ProjectMember member = memberMap.get(userNum);
+
+            if (member == null || member.getUser() == null) {
+                return "알 수 없는 사용자";
+            }
+
+            return member.getUser().getName();
+
+        } catch (NumberFormatException e) {
+            // 기존 카드에 이름이 저장되어 있는 경우 그대로 표시
+            return assignee;
+        }
     }
 
     @Override
@@ -49,7 +91,12 @@ public class KanbanCardServiceImpl implements KanbanCardService {
     }
 
     @Override
-    public KanbanCardResponse create(Long projectId, KanbanCardCreateRequest request) {
+    public KanbanCardResponse create(
+            Long projectId,
+            KanbanCardCreateRequest request
+    ) {
+        validateAssignee(projectId, request.assignee());
+
         KanbanCard card = new KanbanCard(
                 projectId,
                 request.title(),
@@ -59,12 +106,24 @@ public class KanbanCardServiceImpl implements KanbanCardService {
                 request.description()
         );
 
-        return KanbanCardResponse.from(kanbanCardRepository.save(card));
+        KanbanCard savedCard = kanbanCardRepository.save(card);
+
+        return KanbanCardResponse.from(
+                savedCard,
+                findAssigneeName(projectId, savedCard.getAssignee())
+        );
     }
 
     @Override
-    public KanbanCardResponse update(Long projectId, Long cardId, KanbanCardUpdateRequest request) {
+    public KanbanCardResponse update(
+            Long projectId,
+            Long cardId,
+            KanbanCardUpdateRequest request
+    ) {
+        validateAssignee(projectId, request.assignee());
+
         KanbanCard card = getCard(projectId, cardId);
+
         card.update(
                 request.title(),
                 request.assignee(),
@@ -73,7 +132,10 @@ public class KanbanCardServiceImpl implements KanbanCardService {
                 request.description()
         );
 
-        return KanbanCardResponse.from(card);
+        return KanbanCardResponse.from(
+                card,
+                findAssigneeName(projectId, card.getAssignee())
+        );
     }
 
     @Override
@@ -91,7 +153,8 @@ public class KanbanCardServiceImpl implements KanbanCardService {
             sendKanbanReviewNotification(projectId, card.getTitle(), senderUserNum);
         }
 
-        return KanbanCardResponse.from(card);
+        return KanbanCardResponse.from(card, findAssigneeName(projectId, card.getAssignee())
+        );
     }
 
     @Override
@@ -106,6 +169,59 @@ public class KanbanCardServiceImpl implements KanbanCardService {
                 .orElseThrow(() -> new IllegalArgumentException("칸반 카드를 찾을 수 없습니다."));
     }
 
+
+
+    private void validateAssignee(
+            Long projectId,
+            String assignee
+    ) {
+        if (assignee == null || assignee.isBlank()) {
+            return;
+        }
+
+        Long userNum;
+
+        try {
+            userNum = Long.valueOf(assignee);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("담당자 정보가 올바르지 않습니다.");
+        }
+
+        boolean projectMember =
+                projectMemberRepository
+                        .existsByProject_IdAndUser_UserNum(
+                                projectId,
+                                userNum
+                        );
+
+        if (!projectMember) {
+            throw new IllegalArgumentException(
+                    "프로젝트에 참여하지 않은 사용자는 담당자로 지정할 수 없습니다."
+            );
+        }
+    }
+
+    private String findAssigneeName(
+            Long projectId,
+            String assignee
+    ) {
+        if (assignee == null || assignee.isBlank()) {
+            return null;
+        }
+
+        try {
+            Long userNum = Long.valueOf(assignee);
+
+            return projectMemberRepository
+                    .findByProject_IdAndUser_UserNum(projectId, userNum)
+                    .filter(member -> member.getUser() != null)
+                    .map(member -> member.getUser().getName())
+                    .orElse("알 수 없는 사용자");
+
+        } catch (NumberFormatException e) {
+            return assignee;
+        }
+    }
     // 프로젝트 멤버들에게 검토 요청 알림을 발송
     private void sendKanbanReviewNotification(Long projectId, String cardTitle, Long senderUserNum) {
         List<ProjectMember> members = projectMemberRepository.findByProject_Id(projectId);
