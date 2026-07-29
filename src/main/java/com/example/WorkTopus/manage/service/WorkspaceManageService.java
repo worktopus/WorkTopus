@@ -111,15 +111,114 @@ public class WorkspaceManageService {
      */
     @Transactional
     public void deleteWorkspace(Long workspaceId, Long currentUserId) {
+
+        // TODO 로그인 사용자 기반 실제 팀장 권한 검증으로 교체
         Long mockLeaderId = 1L;
+
         if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException("워크스페이스 완전 삭제 권한은 팀장에게만 있습니다.");
+            throw new SecurityException(
+                    "프로젝트 완전 삭제 권한은 팀장에게만 있습니다."
+            );
         }
 
         Manage manage = manageRepository.findById(workspaceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 워크스페이스 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "해당 프로젝트가 존재하지 않습니다. ID: "
+                                        + workspaceId
+                        )
+                );
+
+        /*
+         * PROJECT_BOARD의 자식 테이블부터 삭제
+         */
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_BOARD_FILE
+            WHERE BOARD_ID IN (
+                SELECT BOARD_ID
+                FROM PROJECT_BOARD
+                WHERE PROJECT_ID = :projectId
+            )
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_BOARD_COMMENT
+            WHERE BOARD_ID IN (
+                SELECT BOARD_ID
+                FROM PROJECT_BOARD
+                WHERE PROJECT_ID = :projectId
+            )
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        /*
+         * CHAT_READ는 PROJECTS와 CHAT_MESSAGE를 모두 참조하므로
+         * CHAT_MESSAGE보다 먼저 삭제
+         */
+
+        em.createNativeQuery("""
+        DELETE FROM CHAT_READ
+        WHERE PROJECT_ID = :projectId
+        """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM CHAT_MESSAGE
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        /*
+         * 프로젝트 직접 참조 데이터 삭제
+         */
+
+        em.createNativeQuery("""
+            DELETE FROM AI_MEETING_SUMMARY
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_KANBAN_CARD
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_CALENDAR_SCHEDULE
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_BOARD
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        em.createNativeQuery("""
+            DELETE FROM PROJECT_MEMBER
+            WHERE PROJECT_ID = :projectId
+            """)
+                .setParameter("projectId", workspaceId)
+                .executeUpdate();
+
+        /*
+         * 모든 자식 데이터 삭제 후 프로젝트 삭제
+         */
 
         manageRepository.delete(manage);
+        manageRepository.flush();
     }
 
     /**

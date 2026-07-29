@@ -1,0 +1,167 @@
+[33mfaf3d48[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/user-auth[m[33m, [m[1;31morigin/develop[m[33m, [m[1;32mdevelop[m[33m)[m 머지 및 게시판 관리
+[33m2316efd[m 머지 및 게시판관리수정1
+[33m34e243b[m 머지 및 게시판관리
+[33me29b592[m[33m ([m[1;31morigin/feature/user-auth[m[33m)[m ffiixx
+[33md5938e4[m fix
+[33m1ce26ad[m Controller 및 Service 주석 정리
+[33m9811dc9[m[33m ([m[1;31morigin/feature/project-board[m[33m)[m Controller 및 Service 주석 정리
+[33m3964821[m Merge pull request #22 from worktopus/feature/frontend
+[33m86b9837[m[33m ([m[1;31morigin/feature/frontend[m[33m)[m Merge develop into feature/frontend and resolve conflicts
+[33m5d78b90[m Merge pull request #21 from worktopus/feature/project-board
+[33m3ee03ea[m Merge remote-tracking branch 'origin/develop' into feature/project-board
+[33mcb77f0d[m 대시보드 진행도 및 게시판 상세 카테고리 기능 조정
+[33m44e2a97[m 사이드바 헤더 수정
+[33m6bd33d3[m reset
+[33m687a82b[m Merge branch 'develop' into feature/user-auth
+[33m6af6e2d[m header fix
+[33mf80939e[m[33m ([m[1;31morigin/feature/chat[m[33m)[m board-wirte.js 에 if (categoryInput) 안에 value=MEETING 으로 변경 게시판 구분 디폴트 회의로
+[33mb31f0fe[m[33m ([m[1;31morigin/feature/develop-manage[m[33m)[m 헤더, 팀원관리
+[33m2f5bea5[m Merge branch 'feature/user-auth' into develop
+[33mba6b450[m fix/header
+[33m73f3245[m Merge branch 'feature/user-auth' into develop
+[33mc7cca39[m alarm
+[33mc34dc40[m Merge branch 'feature/user-auth' into develop
+[33mea6e35e[m fix
+[33ma3047a3[m Merge pull request #20 from worktopus/feature/user-auth
+[33mdee35d6[m merge
+[33mcfec20e[m alarm
+[33m7053d2c[m feat: 관리자 회원 및 프로젝트 관리 기능 구현
+[33me943295[m[33m ([m[1;31morigin/feature/admin[m[33m)[m 헤더 드롭다운 조정
+[33ma1f77bc[m 회원 관리 레이아웃 변경
+[33mc4a3215[m Merge remote-tracking branch 'origin/develop' into feature/admin
+[33m2a932ba[m feat(admin): 관리자 대시보드 및 로그인 권한 기능 구현
+[33mf7105b6[m 관리자 페이지|대시보드 db 연동
+[33m562625d[m Merge branch 'feature/chat' into develop
+[33m4d18786[m 채팅인원 추가 시 채팅을 열어두어도 추가되게
+[33m23cbd48[m ing
+[33mb138020[m 관리자 페이지 | 프로젝트 관리 db 연동
+[33md8e9a15[m merge origin/feature/admin into feature/admin
+[33m4deecfe[m 관리자 페이지/ 회원 관리 DB 연동
+[33m550f441[m feat: 프로젝트 게시판 및 댓글 접근 제어 적용
+[33maf1f7b3[m Merge remote-tracking branch 'origin/develop' into feature/project-board
+[33m9d3c1de[m feat: 프로젝트 게시판, 캘린더, 칸반, 파일 및 댓글 접근 권한 검증 추가
+[33m63a4e54[m 사이드바 메모 링크 삭제
+[33m261c314[m feat(board): 게시판 검색 / 공지 기능 구현
+[33m2bd670a[m 채팅에 메시지 알림 표시 추가
+[33m330dbbc[m header.html 밑 socket 부분src수정
+[33mee3d0ad[m feat: 프로젝트 대시보드 기능 완료
+[33m3ced2da[m fix..
+[33mc6ae5cb[m 대시보드/게시글 담당 역할 기능
+[33md177543[m Merge branch 'feature/chat' into develop
+[33m76d171c[m Merge remote-tracking branch 'origin/develop' into feature/project-board
+[33mfaff80e[m 중복된 html 제거
+[33m09d3dd5[m 게시글 목록, 게시글 조회 작성자 기능, 태그 기능
+[33me6dceb7[m 프로젝트 코드 복사버튼 생성
+[33me5ee88d[m 팀원역할 헤더 연동
+[33m54391c1[m 병합 및 팀원관리
+[33m35c6258[m 팀원관리
+[33m9fce286[m chat.css 고치기 실시간채팅 수정
+[33mf621f89[m chat 병합
+[33mb4c5e1b[m Merge feature/chat into develop 2026.07.21한거까지
+[33m04ffe11[m 회의글 등록 눌럿을시 작성페이지에 붙여넣기 되게끔
+[33m6194a41[m 팀원 초대 및 병합
+[33mf8e28da[m Merge pull request #16 from worktopus/feature/user-auth
+[33mdcdbe10[m Merge branch 'develop' into feature/user-auth
+[33mf31b421[m 채팅을 프로젝트에 연결 및 다른 주소로 들어갔을시 안보이게 진행
+[33m0281b01[m docker, 내글조회
+[33m2b04915[m feat: 프로젝트 게시판 최신 공지사항 연동
+[33mfa6b2e4[m chore: restore ddl-auto to validate
+[33meee1a00[m fix: 대시보드 최신 공지 표시 조건 수정
+[33md98083c[m Merge remote-tracking branch 'origin/develop' into feature/project-board
+[33mb8423ed[m feat: 대시보드 및 게시판 최신 공지사항 연동
+[33m0104a78[m todo
+[33md35a493[m feat: 댓글 CRUD 및 UI 개선
+[33m80d1cfa[m sidebar 수정
+[33m2f399ba[m Merge branch 'develop' into feature/user-auth
+[33mf15fd7f[m merge: develop into feature/project-board
+[33mb587ccf[m feat: 팀원 초대 이메일 발송 기능 및 헤더 프로젝트명 실시간 동기화 구현
+[33meb4f791[m fix10
+[33m8721980[m Merge pull request #14 from worktopus/feature/chat
+[33me9f91b6[m Merge remote-tracking branch 'origin/feature/chat' into feature/chat
+[33m59429c9[m SecurityConfig 수정
+[33m5dde067[m 칸반보드, 캘린더 csrf 토큰 수정
+[33m8a14552[m develop 와 chat 합쳣습니다
+[33mb8a3707[m merge: develop into feature/project-board
+[33m1535ddf[m 수정
+[33m6e0ac21[m 임시 저장
+[33m16280e3[m Merge pull request #12 from worktopus/feature/develop-manage
+[33mb1dc825[m Merge pull request #11 from worktopus/feature/frontend
+[33md1bb686[m index 구성
+[33mf9ddf98[m Merge latest develop into feature/project-board
+[33m50f4ba3[m Merge develop into feature/project-board
+[33m82b5952[m 마지
+[33mf7842c5[m feat: project-board 작업 내용 저장
+[33mcb71ed2[m 수정
+[33mb05dd29[m fix
+[33mbdb99fe[m Merge pull request #10 from worktopus/feature/frontend
+[33m6a8a3a5[m 머지 전
+[33m922bf43[m refactor: rename package and initialize admin page
+[33mf69d9fd[m refactor: unify package name and rename application class
+[33md9614de[m 디벨롭 병합 및 일반 관리 기능 구현
+[33m7a6189a[m fix2
+[33m95aeff6[m 1차병합
+[33mc77b52e[m fix
+[33mdb22358[m Merge 패키지/임포트명 변경
+[33mc1ecced[m fix: remove invalid project global model advice
+[33m5d955a3[m refactor: rename package to WorkTopus
+[33m003edcf[m 최신상태확인
+[33m7a5d696[m Merge pull request #3 from worktopus/feature/project-board
+[33m8dedeb1[m Merge develop into feature/project-board
+[33mae74cbf[m fix
+[33md33e8a2[m chore: 로컬 설정 파일 Git 제외
+[33md1a5320[m feat: 프로젝트 대시보드 데이터 연동 및 진행도 차트 구현
+[33m26a081b[m Update README.md
+[33ma0b78cf[m Update README.md
+[33m92246d2[m Update README.md
+[33m5049ba1[m AI 회의요약 생성 → 저장 → 목록 조회 → 상세 조회
+[33m7597e7a[m fix
+[33m325e419[m 목록 조회 API
+[33me2805b3[m feat: 프로젝트 캘린더 CRUD 및 칸반 일정 연동 구현
+[33m39683b4[m fix: 프로젝트 파일 자동 검색 기능 복구
+[33mc6a0871[m feat: 프로젝트 칸반보드 CRUD 및 상태 변경 구현
+[33m4222075[m feat: 게시판 태그 및 첨부파일 선택 기능 개선
+[33mc538563[m AI가 만든 회의요약을 DB에 저장할 구조
+[33mb80fd31[m gemini api key를 이용하여 대화내용 및 회의요약
+[33m890d6c6[m yaml 에 제미나이키 설정 추가 (수정)
+[33m2c1f663[m yaml 에 gemini api키 설정 추가
+[33m3ad08da[m AI 회의요약 DTO 생성
+[33med4f44f[m ChatReadService를 Oracle DB 방식으로 교체
+[33m267a84b[m ChatReadJpaRepository 생성
+[33m948615d[m 기존 메모리 저장을 Oracle DB 저장으로 교체
+[33m1ba1ff2[m 기능추가 프로젝트 접기/펼치기 푸로젝트 총인원 표시 /현재 접속자 표시 마지막 메시지 표시 / 마지막 메시지 업로드 시간 표시 안 읽은 메시지 표시 프로젝트 이름대로 검색이되게 검색창 추가 entity 만듦 chat_message 오라클 db생성
+[33m92f6d1b[m feat: 프로젝트 게시판 파일 관리 및 모달 기능 구현
+[33m45f465a[m feat: 관리자 페이지 UI 구현
+[33m82826f9[m fix
+[33ma6f06cc[m Merge pull request #2 from worktopus/feature/user-auth
+[33me755759[m 합치기
+[33mad31a42[m aa
+[33md4e270e[m projects 수정
+[33me5a3f38[m fix
+[33md6bc13f[m fix
+[33m4a0af67[m 아이디 중복, 이메일 인증 구현
+[33m506e9cc[m restart
+[33m4dee689[m 연결 및 chat.css 수정
+[33m6a66fb8[m service 수정
+[33m72b0a14[m controller
+[33m5a56074[m entity
+[33m195dd89[m 기능추가 프로젝트 접기/펼치기 푸로젝트 총인원 표시 /현재 접속자 표시 마지막 메시지 표시 / 마지막 메시지 업로드 시간 표시 안 읽은 메시지 표시 프로젝트 이름대로 검색이되게 검색창 추가
+[33m486d43b[m 기능추가 프로젝트 접기/펼치기 푸로젝트 총인원 표시 /현재 접속자 표시 마지막 메시지 표시 / 마지막 메시지 업로드 시간 표시 안 읽은 메시지 표시 프로젝트 이름대로 검색이되게 검색창 추가
+[33ma78288d[m 게시판 템플릿명 변경 및 기능 구현
+[33md5dbec4[m 워크스페이스 화면 구현, 프로젝트 생성 기능
+[33mf04b705[m Merge branch 'develop' into feature/frontend
+[33maea225e[m 프로젝트 화면 작업
+[33me6c3c96[m user-auth, backend mergin
+[33m8ab152b[m fix
+[33m16ac939[m feat: 채팅기능 구현중
+[33mecba004[m google kakao login
+[33m40cdf17[m 리팩터링: 게시글 작성 페이지와 에디터 기능 분리
+[33ma4a23c9[m first
+[33m32bc0df[m feat: 프로젝트 게시판 작성 화면 구현
+[33m9881aba[m login/register
+[33m672d547[m 로그인 기능
+[33m22de43d[m fix2
+[33m8060997[m feat: 프로젝트 게시판 UI 구현
+[33mf532dd3[m fix
+[33maaa1138[m readme
+[33med6e2c8[m 프로젝트 초기생성
+[33m778f5db[m[33m ([m[1;32mmain[m[33m)[m Initial commit

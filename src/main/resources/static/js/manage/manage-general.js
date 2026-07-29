@@ -22,6 +22,29 @@ document.addEventListener("DOMContentLoaded", function () {
     const nameForm = document.getElementById("updateNameForm");
     const descForm = document.getElementById("updateDescForm");
 
+
+    // 삭제 관련 요소
+    const openDeleteModalBtn =
+        document.getElementById("openDeleteProjectModalBtn");
+
+    const deleteProjectModal =
+        document.getElementById("deleteProjectModal");
+
+    const closeDeleteModalBtn =
+        document.getElementById("closeDeleteProjectModalBtn");
+
+    const deleteProjectNameInput =
+        document.getElementById("deleteProjectNameInput");
+
+    const currentProjectNameInput =
+        document.getElementById("currentProjectName");
+
+    const confirmDeleteProjectBtn =
+        document.getElementById("confirmDeleteProjectBtn");
+
+    const deleteProjectError =
+        document.getElementById("deleteProjectError");
+
     // 2. 📌 프로젝트 이름 비동기 수정 처리 구역
     if (nameForm) {
         nameForm.addEventListener("submit", function (e) {
@@ -46,9 +69,18 @@ document.addEventListener("DOMContentLoaded", function () {
                         alert("프로젝트 이름이 성공적으로 변경되었습니다. 🎉");
 
                         // 우측 상단 헤더 텍스트 실시간 반영 변경
-                        const headerProjName = document.querySelector(".header__project-name");
+                        const changedProjectName =
+                            document.getElementById("projectName").value.trim();
+
+                        const headerProjName =
+                            document.querySelector(".header__project-name");
+
                         if (headerProjName) {
-                            headerProjName.textContent = document.getElementById("projectName").value;
+                            headerProjName.textContent = changedProjectName;
+                        }
+
+                        if (currentProjectNameInput) {
+                            currentProjectNameInput.value = changedProjectName;
                         }
                     } else if (data.error) {
                         alert("수정 실패: " + data.error);
@@ -93,4 +125,151 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
         });
     }
+
+    // 프로젝트 삭제 모달 열기
+    if (
+        openDeleteModalBtn &&
+        deleteProjectModal &&
+        deleteProjectNameInput &&
+        confirmDeleteProjectBtn
+    ) {
+        openDeleteModalBtn.addEventListener("click", function () {
+            deleteProjectModal.hidden = false;
+            deleteProjectNameInput.value = "";
+            confirmDeleteProjectBtn.disabled = true;
+            confirmDeleteProjectBtn.textContent = "영구 삭제";
+
+            if (deleteProjectError) {
+                deleteProjectError.textContent = "";
+                deleteProjectError.hidden = true;
+            }
+
+            deleteProjectNameInput.focus();
+        });
+    }
+
+
+// 프로젝트 삭제 모달 닫기
+    if (closeDeleteModalBtn && deleteProjectModal) {
+        closeDeleteModalBtn.addEventListener("click", function () {
+            closeDeleteProjectModal();
+        });
+    }
+
+
+// 모달 배경 클릭 시 닫기
+    if (deleteProjectModal) {
+        deleteProjectModal.addEventListener("click", function (event) {
+            if (event.target === deleteProjectModal) {
+                closeDeleteProjectModal();
+            }
+        });
+    }
+
+
+// 입력한 프로젝트명 검증
+    if (
+        deleteProjectNameInput &&
+        currentProjectNameInput &&
+        confirmDeleteProjectBtn
+    ) {
+        deleteProjectNameInput.addEventListener("input", function () {
+            const enteredName = deleteProjectNameInput.value.trim();
+            const currentName = currentProjectNameInput.value.trim();
+
+            confirmDeleteProjectBtn.disabled =
+                enteredName !== currentName;
+
+            if (deleteProjectError) {
+                deleteProjectError.textContent = "";
+                deleteProjectError.hidden = true;
+            }
+        });
+    }
+
+
+// 프로젝트 영구 삭제
+    if (
+        confirmDeleteProjectBtn &&
+        deleteProjectNameInput &&
+        currentProjectNameInput
+    ) {
+        confirmDeleteProjectBtn.addEventListener("click", async function () {
+            const enteredName = deleteProjectNameInput.value.trim();
+            const currentName = currentProjectNameInput.value.trim();
+
+            if (enteredName !== currentName) {
+                showDeleteError("프로젝트 이름이 일치하지 않습니다.");
+                return;
+            }
+
+            confirmDeleteProjectBtn.disabled = true;
+            confirmDeleteProjectBtn.textContent = "삭제 중...";
+
+            try {
+                const response = await fetch(
+                    `/api/manage/${workspaceId}`,
+                    {
+                        method: "DELETE",
+                        headers: {
+                            [csrfHeader]: csrfToken
+                        }
+                    }
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "프로젝트 삭제에 실패했습니다."
+                    );
+                }
+
+                window.location.href =
+                    data.redirectUrl || "/projects";
+
+            } catch (error) {
+                console.error("프로젝트 삭제 오류:", error);
+
+                showDeleteError(error.message);
+
+                confirmDeleteProjectBtn.disabled = false;
+                confirmDeleteProjectBtn.textContent = "영구 삭제";
+            }
+        });
+    }
+
+
+    function showDeleteError(message) {
+        if (!deleteProjectError) {
+            return;
+        }
+
+        deleteProjectError.textContent = message;
+        deleteProjectError.hidden = false;
+    }
+
+
+    function closeDeleteProjectModal() {
+        if (!deleteProjectModal) {
+            return;
+        }
+
+        deleteProjectModal.hidden = true;
+
+        if (deleteProjectNameInput) {
+            deleteProjectNameInput.value = "";
+        }
+
+        if (confirmDeleteProjectBtn) {
+            confirmDeleteProjectBtn.disabled = true;
+            confirmDeleteProjectBtn.textContent = "영구 삭제";
+        }
+
+        if (deleteProjectError) {
+            deleteProjectError.textContent = "";
+            deleteProjectError.hidden = true;
+        }
+    }
+
 });

@@ -1,5 +1,7 @@
 package com.example.WorkTopus.projects.controller;
 
+import com.example.WorkTopus.entity.ProjectMember;
+import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.projects.dto.request.KanbanCardCreateRequest;
 import com.example.WorkTopus.projects.dto.request.KanbanCardStatusUpdateRequest;
 import com.example.WorkTopus.projects.dto.request.KanbanCardUpdateRequest;
@@ -7,6 +9,8 @@ import com.example.WorkTopus.projects.dto.response.KanbanCardResponse;
 import com.example.WorkTopus.projects.entity.KanbanStatus;
 import com.example.WorkTopus.projects.service.KanbanCardService;
 import com.example.WorkTopus.projects.service.ProjectBoardAccessService;
+import com.example.WorkTopus.repository.ProjectMemberRepository;
+import com.example.WorkTopus.repository.UserRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -34,6 +38,8 @@ public class KanbanController {
 
     private final KanbanCardService kanbanCardService;
     private final ProjectBoardAccessService projectBoardAccessService;
+    private final UserRepository userRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     @GetMapping
     public ModelAndView kanban(@PathVariable Long projectId,
@@ -47,10 +53,13 @@ public class KanbanController {
 
         // 프로젝트의 전체 칸반 카드 조회
         List<KanbanCardResponse> cards = kanbanCardService.findProjectCards(projectId);
+        List<ProjectMember> members =
+                projectMemberRepository.findByProject_IdOrderByJoinedAtAsc(projectId);
 
         // 칸반 화면에 상태별 카드 및 통계 데이터 전달
         ModelAndView mav = new ModelAndView("projects/kanban");
         mav.addObject("projectId", projectId);
+        mav.addObject("members", members);
         mav.addObject("todoCards", filterByStatus(cards, KanbanStatus.TODO));
         mav.addObject("inProgressCards", filterByStatus(cards, KanbanStatus.IN_PROGRESS));
         mav.addObject("reviewCards", filterByStatus(cards, KanbanStatus.REVIEW));
@@ -145,10 +154,14 @@ public class KanbanController {
                 authentication.getName()
         );
 
+        Users user = userRepository.findByUserId(authentication.getName())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
         return kanbanCardService.updateStatus(
                 projectId,
                 cardId,
-                request
+                request,
+                user.getUserNum()
         );
     }
 

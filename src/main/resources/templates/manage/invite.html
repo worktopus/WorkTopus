@@ -24,23 +24,21 @@
         <div th:replace="~{fragments/header :: header}"></div>
 
         <main class="manage-container" style="padding: 40px; width: 100%;">
-            <h1 class="manage-title" style="font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; color: var(--text-main);">
-                프로젝트 관리 (팀장 전용)
-            </h1>
+            <h1 class="manage-title">프로젝트 관리</h1>
 
             <!-- [일반관리 HTML - 상단 탭 바 동적 ID 파이프라인 전면 적용] -->
             <div class="manage-tabs">
                 <button class="tab-btn active" th:onclick="|location.href='/projects/manage/' + ${projectId}|">일반 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/members'|">팀원 관리</button>
                 <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/invite'|">팀원 초대</button>
-                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/boards'|">게시판 관리</button>
+                <button class="tab-btn" th:onclick="|location.href='/projects/manage/' + ${projectId} + '/posts'|">게시글 관리</button>
             </div>
 
 
             <!-- [팀원초대 - 입력 폼 마크업 구역] -->
             <div id="invite-tab" class="tab-content active" style="display: block;">
-                <div class="email-invite-container">
-                    <h3>✉️ 프로젝트 팀원 초대</h3>
+                <div class="content-header" style="margin-bottom: 24px;">
+                    <h3>프로젝트 팀원 초대</h3>
                     <p>함께 협업할 팀원들의 구글 이메일 계정을 입력하여 초대장을 발송합니다.</p>
                 </div>
                 <form style="margin-top: 24px; max-width: 600px;" onsubmit="return false;">
@@ -59,7 +57,7 @@
                         <!-- [최종 교정] 진짜 엔티티 필드명인 project.inviteCode 대소문자 규격으로 완전 일치 완료 -->
                         <input type="text" id="codeInput" th:value="${project != null ? project.inviteCode : 'CWEXN8'}" style="width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 4px;" readonly>
 
-                        <button type="button" id="sendEmailBtn" onclick="sendInviteEmail()" style="background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%;">
+                        <button type="button" id="sendEmailBtn" onclick="sendInviteEmail()" style="background-color: var(--primary); color: #fff; border: none; padding: 10px 20px; border-radius: var(--radius-sm); cursor: pointer; width: 100%;">
                             초대장 발송 트리거
                         </button>
                     </div>

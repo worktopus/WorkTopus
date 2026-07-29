@@ -35,14 +35,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     initCards();
     updateColumnCounts();
-    loadTasks();
+    //loadTasks();
 
     openBtn?.addEventListener("click", openModal);
     closeBtn?.addEventListener("click", closeModal);
     overlay?.addEventListener("click", closeModal);
 
+    let saving = false;
+
     form?.addEventListener("submit", async (event) => {
         event.preventDefault();
+
+        // 이미 저장 요청 중이면 두 번째 제출 무시
+        if (saving) {
+            return;
+        }
+
 
         const task = {
             title: titleInput.value.trim(),
@@ -57,31 +65,56 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        const submitButton = form.querySelector(".kanban-modal__submit");
+        const isEditing = editingCard !== null;
+
+        // 요청 시작과 동시에 잠금
+        saving = true;
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.textContent = editingCard ? "수정 중..." : "저장 중...";
+        }
+
         try {
-            if (editingCard) {
-                const updatedCard = await updateTask(editingCard.dataset.cardId, task);
+            if (isEditing) {
+                const updatedCard = await updateTask(
+                    editingCard.dataset.cardId,
+                    task
+                );
+
                 updateTaskCard(editingCard, updatedCard);
                 editingCard = null;
+
             } else {
                 const createdCard = await createTask(task);
                 const todoList = document.getElementById("todoList");
 
                 if (!todoList) {
-                    console.error("todoList를 찾지 못했습니다.");
-                    return;
+                    throw new Error("todoList를 찾지 못했습니다.");
                 }
 
                 const card = createTaskCard(createdCard);
                 todoList.appendChild(card);
+
                 bindDragEvent(card);
                 bindCardMenu(card);
             }
 
             updateColumnCounts();
             closeModal();
+
         } catch (error) {
             console.error("칸반 카드 저장 오류:", error);
             alert("업무를 저장하지 못했습니다.");
+
+        } finally {
+            saving = false;
+
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = isEditing ? "수정" : "저장";
+            }
         }
     });
 
@@ -298,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <div class="kanban__card-footer">
                 <span class="kanban__avatar">
-                    ${escapeHtml(getAssigneeInitial(task.assignee))}
+                    ${escapeHtml(getAssigneeInitial(task.assigneeName))}
                 </span>
 
                 <span class="kanban__date">
@@ -351,7 +384,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (title) title.textContent = task.title;
         if (desc) desc.textContent = getDescriptionLabel(task.description);
-        if (avatar) avatar.textContent = getAssigneeInitial(task.assignee);
+        if (avatar) {
+            avatar.textContent = getAssigneeInitial(task.assigneeName);
+        }
         if (date) date.textContent = formatDate(task.dueDate);
 
         if (badge) {

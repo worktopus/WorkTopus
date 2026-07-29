@@ -25,7 +25,7 @@
         <!--사이드,메인이 들어있는 컨테이너-->
         <div class="mypage-container">
             <div class="sidebar">
-                <div class="sidebar-title">마이 페이지</div>
+                <div class="sidebar-title">내 정보 관리</div>
                 <ul class="menu-list">
                     <li class="menu-item active" id="menu-info"><button onclick="switchTab('info')">내 정보</button></li>
                     <li class="menu-item" id="menu-posts"><button onclick="switchTab('posts')">내가 쓴 글</button></li>
@@ -194,7 +194,9 @@
                             <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-etc" value="ETC" checked onchange="updateNotifSetting()"> 기타</label>
 
                             <span style="color: #cbd5e1; margin: 0 4px;">|</span>
+                            <label style="cursor: pointer; display: flex; align-items: center; gap: 4px;"><input type="checkbox" id="notif-kanban" value="KANBAN_REVIEW" checked onchange="updateNotifSetting()"> 칸반/검토</label>
 
+                            <span style="color: #cbd5e1; margin: 0 4px;">|</span>
                             <label style="cursor: pointer; display: flex; align-items: center; gap: 4px; font-weight: 500;"><input type="checkbox" id="notif-comment" value="COMMENT" checked onchange="updateNotifSetting()"> 댓글 알림</label>
                         </div>
                     </div>

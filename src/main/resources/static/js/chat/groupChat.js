@@ -565,19 +565,13 @@
                 "div"
             );
 
-        iconElement.className =
-            "chat-empty__icon";
-
-        iconElement.textContent =
-            "💬";
-
         const titleElement =
             document.createElement(
                 "strong"
             );
 
         titleElement.textContent =
-            "아직 대화가 없습니다.";
+            "대화를 시작해 보세요.";
 
         const descriptionElement =
             document.createElement(
@@ -585,7 +579,7 @@
             );
 
         descriptionElement.textContent =
-            "프로젝트 팀원들과 첫 메시지를 나눠보세요.";
+            "선택한 팀원과 메시지를 주고받을 수 있습니다.";
 
         emptyElement.appendChild(
             iconElement

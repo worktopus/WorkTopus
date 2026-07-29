@@ -35,4 +35,5 @@ out/
 
 src/main/resources/application-secret.yml
 
-
+# Oracle DB Wallet (보안 파일 제외)
+src/main/resources/wallet/

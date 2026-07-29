@@ -11,6 +11,9 @@ public interface NotificationService {
     // 1. 알림 생성
     void createNotification(Users user, String message, String url, NotificationType type);
 
+    // 칸반 카드가 REVIEW 상태로 변경 시 프로젝트 멤버(본인 제외)들에게 알림 발송
+    void createKanbanReviewNotification(Long projectId, Long currentSenderNum, String cardTitle);
+
     // 2. 알림 목록 조회
     List<Notification> getNotifications(Long userNum);
 
