@@ -1372,12 +1372,6 @@
         }
 
         privateMessageArea.innerHTML = `
-            <h3>
-                ${escapeHtml(memberName)}
-            </h3>
-
-            <hr>
-
             <div id="dmArea"></div>
         `;
     }

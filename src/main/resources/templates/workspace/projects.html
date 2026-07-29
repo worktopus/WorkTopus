@@ -102,7 +102,8 @@
                                 프로젝트명
                             </h2>
 
-                            <span class="project-card-badge">
+                            <span class="project-card-badge"
+                                  th:text="${project.completionRate == 100 ? '완료' : '진행중'}">
                                 진행중
                             </span>
 

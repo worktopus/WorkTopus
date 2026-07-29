@@ -1,0 +1,462 @@
+/* ==========================================================
+   WorkTopus AI 회의요약/회의록 기능 연결용 CSS
+
+   - 팝업 표시, 배치, 스크롤, 로딩 상태 등 기능에 필요한 구조만 담당합니다.
+   - 색상, 그림자, 세부 간격 등 최종 디자인은 chat.css에서 덮어쓸 수 있습니다.
+   - 이 파일을 chat.css보다 먼저 불러오면 디자인 담당 CSS가 우선 적용됩니다.
+========================================================== */
+
+.ai-summary-overlay,
+.ai-summary-overlay *,
+.ai-history-overlay,
+.ai-history-overlay * {
+    box-sizing: border-box;
+}
+
+/* JavaScript가 body 아래에 생성하는 전체 화면 팝업 영역 */
+.ai-summary-overlay,
+.ai-history-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 24px;
+    overflow: auto;
+
+    /* 디자인 CSS가 아직 없을 때 내용을 읽을 수 있도록 하는 기본값 */
+    background: rgba(15, 23, 42, 0.45);
+}
+
+/* 팝업 본체와 내부 스크롤 */
+.ai-summary-modal,
+.ai-history-modal {
+    width: min(620px, 100%);
+    max-height: 82vh;
+    overflow-y: auto;
+
+    background: var(--card, #ffffff);
+    color: var(--text-main, #111827);
+}
+
+.ai-history-modal {
+    width: min(560px, 100%);
+}
+
+/* 제목과 닫기 버튼을 한 줄에 배치 */
+.ai-summary-modal__header,
+.ai-history-modal__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    background: inherit;
+}
+
+.ai-summary-modal__close,
+.ai-history-modal__close,
+.ai-summary-save-button,
+.ai-history-item {
+    cursor: pointer;
+}
+
+/* 로딩 상태 */
+.ai-summary-loading,
+.ai-history-loading {
+    min-height: 240px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+
+    text-align: center;
+}
+
+.ai-summary-loading__spinner,
+.ai-history-loading__spinner {
+    width: 40px;
+    height: 40px;
+
+    border: 4px solid rgba(148, 163, 184, 0.35);
+    border-top-color: currentColor;
+    border-radius: 50%;
+
+    animation: worktopus-ai-spin 0.8s linear infinite;
+}
+
+@keyframes worktopus-ai-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* AI 요약 결과 구조 */
+.ai-summary-content {
+    padding: 30px 24px 30px;
+    overflow-wrap: anywhere;
+    color: #475569;
+}
+
+.ai-summary-text,
+.ai-summary-error p,
+.ai-history-error p {
+    white-space: pre-wrap;
+}
+
+.ai-summary-content h3:first-child,
+.ai-summary-content h4:first-child {
+    margin-top: 0;
+}
+
+.ai-summary-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.ai-summary-section-icon {
+    width: 24px;
+    height: 24px;
+
+    flex-shrink: 0;
+
+    fill: var(--primary);
+}
+
+/* 회의 요약 본문 */
+.ai-summary-text {
+    margin: 10px 0 18px 16px;
+
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+/* 주요 결정 사항 및 할 일 목록 */
+.ai-summary-list {
+    margin: 10px 0 18px 16px;
+}
+
+.ai-summary-list li {
+    margin: 0 0 7px;
+
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.75;
+}
+
+.ai-summary-list__empty {
+    list-style: none;
+}
+
+/* 키워드 영역 */
+.ai-summary-keywords {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+
+    margin: 10px 0 14px 16px;
+}
+
+.ai-summary-keyword {
+    min-height: 30px;
+    padding: 0 11px;
+
+    display: inline-flex;
+    align-items: center;
+
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: 999px;
+
+    background: var(--primary-light, #eef1ff);
+    color: var(--primary, #4f46e5);
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 분석 메시지 및 날짜 */
+.ai-summary-meta {
+    margin: 0;
+    flex: 1;
+
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 1.5;
+    text-align: left;
+}
+
+/* 하단 버튼 영역 */
+.ai-summary-actions {
+    margin-top: 24px;
+    padding-top: 16px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    border-top: 1px solid var(--border, #e5e7eb);
+}
+
+.ai-summary-save-button:disabled {
+    cursor: default;
+}
+
+/* 저장된 회의록 목록 구조 */
+.ai-history-list {
+    width: 100%;
+}
+
+.ai-history-item {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 7px;
+
+    text-align: left;
+}
+
+.ai-history-item__summary {
+    width: 100%;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.ai-history-empty,
+.ai-history-error,
+.ai-summary-error {
+    text-align: center;
+}
+
+@media (max-width: 640px) {
+    .ai-summary-overlay,
+    .ai-history-overlay {
+        padding: 12px;
+        align-items: flex-start;
+    }
+
+    .ai-summary-modal,
+    .ai-history-modal {
+        width: 100%;
+        max-height: calc(100dvh - 24px);
+    }
+}
+
+/* ==========================================================
+   AI 회의 요약 모달
+========================================================== */
+
+/* 배경 */
+.ai-summary-overlay,
+.ai-history-overlay {
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(2px);
+}
+
+/* 모달 본체 */
+.ai-summary-modal,
+.ai-history-modal {
+    width: min(700px, calc(100vw - 48px));
+    max-height: 82vh;
+    overflow-y: auto;
+
+    background: var(--card, #ffffff);
+    border: 1px solid var(--border, #e5e7eb);
+    border-radius: var(--radius-md, 18px);
+    box-shadow: 0 20px 50px rgba(34, 34, 34, 0.15);
+}
+
+/* 헤더 */
+.ai-summary-modal__header,
+.ai-history-modal__header {
+    min-height: 64px;
+    padding: 0 20px;
+
+    background: var(--card, #ffffff);
+    border-bottom: 1px solid var(--border, #e5e7eb);
+}
+
+.ai-summary-modal__header strong,
+.ai-history-modal__header strong {
+    color: var(--text-main, #111827);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+/* 닫기 버튼 */
+.ai-summary-modal__close,
+.ai-history-modal__close {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 50%;
+
+    background: #f2f2f2;
+    color: #6b7280;
+
+    font-size: 18px;
+}
+
+.ai-summary-modal__close:hover,
+.ai-history-modal__close:hover {
+    background: #e8e8e8;
+    color: #111827;
+}
+
+/* 하단 버튼 영역 */
+.ai-summary-actions {
+    margin-top: 24px;
+    padding-top: 16px;
+
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+
+    border-top: 1px solid var(--border, #e5e7eb);
+}
+
+/* 하단의 모든 버튼을 동일한 형태로 통일 */
+.ai-summary-actions button {
+    min-width: 110px;
+    height: 40px;
+    padding: 0 16px;
+
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+
+    border: 1px solid transparent;
+    border-radius: 10px;
+
+    background: var(--primary, #7287f4);
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1;
+
+    text-align: center;
+    white-space: nowrap;
+
+    cursor: pointer;
+    transition: background 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.ai-summary-actions button:hover:not(:disabled) {
+    background: var(--primary-hover, #5d73ea);
+}
+
+/* 저장 완료 등 비활성화 버튼 */
+.ai-summary-actions button:disabled {
+    background: var(--primary-light, #eef1ff);
+    color: var(--primary, #7287f4);
+
+    opacity: 1;
+    cursor: default;
+}
+
+/* 로딩 화면 */
+.ai-summary-loading,
+.ai-history-loading {
+    padding: 32px;
+    color: var(--text-sub, #64748b);
+    font-size: 13px;
+}
+
+.ai-summary-loading__spinner,
+.ai-history-loading__spinner {
+    color: var(--primary, #7287f4);
+}
+
+/* 오류 화면 */
+.ai-summary-error,
+.ai-history-error,
+.ai-history-empty {
+    padding: 40px 24px;
+
+    color: var(--text-sub, #64748b);
+    font-size: 13px;
+}
+
+/* 저장된 회의록 목록 */
+.ai-history-list {
+    padding: 12px;
+}
+
+.ai-history-item {
+    padding: 14px 16px;
+
+    border: 0;
+    border-bottom: 1px solid var(--border, #edf0f3);
+
+    background: #ffffff;
+    color: var(--text-main, #111827);
+}
+
+.ai-history-item:hover {
+    background: #f5f5f5;
+}
+
+.ai-history-item__summary {
+    color: var(--text-sub, #64748b);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+/* 스크롤바 */
+.ai-summary-modal,
+.ai-history-modal {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+}
+
+.ai-summary-modal::-webkit-scrollbar,
+.ai-history-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ai-summary-modal::-webkit-scrollbar-thumb,
+.ai-history-modal::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+/* 모바일 */
+@media (max-width: 640px) {
+    .ai-summary-modal,
+    .ai-history-modal {
+        width: 100%;
+        max-height: calc(100dvh - 24px);
+        border-radius: 14px;
+    }
+
+    .ai-summary-content {
+        padding: 18px 16px 20px;
+    }
+}

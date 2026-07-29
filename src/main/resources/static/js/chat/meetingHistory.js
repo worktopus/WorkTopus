@@ -257,13 +257,6 @@
                 >
 
                     <div>
-
-                        <p
-                            class="ai-history-modal__eyebrow"
-                        >
-                            WorkTopus AI
-                        </p>
-
                         <h2
                             id="aiMeetingHistoryTitle"
                             class="ai-history-modal__title"
