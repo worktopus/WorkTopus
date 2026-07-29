@@ -6,6 +6,8 @@ import com.example.WorkTopus.manage.dto.WorkspaceInviteRequestDto;
 import com.example.WorkTopus.manage.service.WorkspaceManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,21 +25,27 @@ public class WorkspaceManageApiController {
      */
     @PostMapping("/api/manage/{workspaceId}/update-name")
     public ResponseEntity<?> updateProjectName(
-            @PathVariable("workspaceId") Long workspaceId,
-            @ModelAttribute WorkspaceGeneralUpdateDto dto) {
+            @PathVariable Long workspaceId,
+            @ModelAttribute WorkspaceGeneralUpdateDto dto,
+            Authentication authentication
+    ) {
         try {
-            System.out.println("=========================================");
-            System.out.println("▶ [이름 수정 API 요청] Workspace ID : " + workspaceId);
-            System.out.println("▶ [수신 데이터] 변경할 이름 : " + (dto != null ? dto.getWorkspaceName() : "null"));
-            System.out.println("=========================================");
+            workspaceManageService.updateGeneralSettings(
+                    workspaceId,
+                    dto,
+                    authentication.getName()
+            );
 
-            Long currentUserId = 1L;
-            workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
-            return ResponseEntity.ok().body(Map.of("message", "프로젝트 이름이 성공적으로 저장되었습니다."));
+            return ResponseEntity.ok(
+                    Map.of("message", "프로젝트 이름이 성공적으로 저장되었습니다.")
+            );
+
+        }catch (AccessDeniedException e) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("❌ [이름 저장 실패 서버 에러 로그]");
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -48,34 +56,34 @@ public class WorkspaceManageApiController {
     @PostMapping("/api/manage/{workspaceId}/update-description")
     public ResponseEntity<?> updateProjectDescription(
             @PathVariable("workspaceId") Long workspaceId,
-            @ModelAttribute WorkspaceGeneralUpdateDto dto) {
+            @ModelAttribute WorkspaceGeneralUpdateDto dto,
+            Authentication authentication) {
         try {
-            System.out.println("=========================================");
-            System.out.println("▶ [내용 수정 API 요청] Workspace ID : " + workspaceId);
-            System.out.println("▶ [수신 데이터] 변경할 내용 : " + (dto != null ? dto.getProjectDescription() : "null"));
-            System.out.println("=========================================");
-
-            Long currentUserId = 1L;
-            workspaceManageService.updateGeneralSettings(workspaceId, dto, currentUserId);
+            workspaceManageService.updateGeneralSettings(
+                    workspaceId,
+                    dto,
+                    authentication.getName()
+            );
             return ResponseEntity.ok().body(Map.of("message", "프로젝트 내용이 성공적으로 저장되었습니다."));
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            System.err.println("❌ [내용 저장 실패 서버 에러 로그]");
-            e.printStackTrace();
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
         }
     }
 
     // 프로젝트 삭제
     @DeleteMapping("/api/manage/{workspaceId}")
     public ResponseEntity<?> deleteWorkspace(
-            @PathVariable("workspaceId") Long workspaceId
+            @PathVariable("workspaceId") Long workspaceId,
+            Authentication authentication
     ) {
         try {
-            Long currentUserId = 1L;
-
             workspaceManageService.deleteWorkspace(
                     workspaceId,
-                    currentUserId
+                    authentication.getName()
             );
 
             return ResponseEntity.ok(Map.of(
@@ -83,7 +91,7 @@ public class WorkspaceManageApiController {
                     "redirectUrl", "/projects"
             ));
 
-        } catch (SecurityException e) {
+        } catch (AccessDeniedException e) {
             return ResponseEntity.status(403)
                     .body(Map.of("error", e.getMessage()));
 
@@ -104,10 +112,10 @@ public class WorkspaceManageApiController {
 
     /**  기존 비동기 JSON 수신용 초대 API 주소 (기존 유지) */
     @PostMapping("/api/manage/invite")
-    public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto) {
+    public ResponseEntity<?> inviteTeamMembers(@RequestBody WorkspaceInviteRequestDto dto,
+                                               Authentication authentication) {
         try {
-            Long currentUserId = 1L;
-            workspaceManageService.inviteTeamMembers(dto, currentUserId);
+            workspaceManageService.inviteTeamMembers(dto, authentication.getName());
             return ResponseEntity.ok().body(Map.of("message", "팀원 초자가 정상적으로 완료되었습니다."));
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
@@ -115,33 +123,31 @@ public class WorkspaceManageApiController {
     }
 
     /** 일반 HTML 폼 전송 방식 초대 기능 (기존 유지) */
-    @PostMapping("/project/manage/invite/send")
-    public ResponseEntity<?> handleFormSubmitInvite(
-            @RequestParam(value = "emails", required = false) List<String> emails) {
+    @PostMapping("/project/manage/{workspaceId}/invite/send")
+    public ResponseEntity<?> handleFormSubmitInvite( @PathVariable Long workspaceId,
+            @RequestParam(value = "emails", required = false) List<String> emails, Authentication authentication) {
         try {
-            Long currentUserId = 1L;
             if (emails == null || emails.isEmpty()) {
                 throw new IllegalArgumentException("입력된 이메일 데이터가 전송되지 않았습니다.");
             }
             WorkspaceInviteRequestDto dto = new WorkspaceInviteRequestDto();
-            dto.setWorkspaceId(45L);
+            dto.setWorkspaceId(workspaceId);
             dto.setEmails(emails);
-            workspaceManageService.inviteTeamMembers(dto, currentUserId);
+            workspaceManageService.inviteTeamMembers(dto, authentication.getName());
             return ResponseEntity.ok().body(
                     "<div style='padding: 40px; text-align: center; font-family: sans-serif; line-height: 1.6;'>" +
                             "   <h2 style='color: #28a745; margin-bottom: 10px;'>🎉 구글 이메일 초대장 발송 완료!</h2>" +
                             "   <p style='color: #555; margin-bottom: 25px;'>선택하신 팀원들의 이메일 계정으로 초대 메세지가 성공적으로 전송되었습니다.</p>" +
-                            "   <a href='/manage/45/members' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;'>[팀원 관리 페이지로 이동]</a>" +
+                            "   <a href='/manage/"+  workspaceId + "/members' style='display: inline-block; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 4px; font-weight: bold;'>[팀원 관리 페이지로 이동]</a>" +
                             "</div>"
             );
+        } catch (AccessDeniedException e) {
+            return ResponseEntity.status(403)
+                    .body(Map.of("error", e.getMessage()));
+
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(
-                    "<div style='padding: 40px; text-align: center; font-family: sans-serif; color: #dc3545;'>" +
-                            "   <h3>❌ 초대장 발송 실패</h3>" +
-                            "   <p>" + e.getMessage() + "</p>" +
-                            "   <br><a href='javascript:history.back()' style='color: #007bff;'>[뒤로 가기]</a>" +
-                            "</div>"
-            );
+            return ResponseEntity.badRequest()
+                    .body(Map.of("error", e.getMessage()));
         }
     }
     /** 팀원 직급(역할) 비동기 수정 API (기존 유지) */

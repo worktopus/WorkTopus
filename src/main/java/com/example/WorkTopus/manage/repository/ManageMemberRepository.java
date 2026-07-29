@@ -24,5 +24,7 @@ public interface ManageMemberRepository extends JpaRepository<ManageMember, Long
     );
 
 
+
+
     boolean existsByWorkspaceIdAndUser_UserId(Long workspaceId, String userId);
 }

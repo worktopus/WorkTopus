@@ -12,10 +12,10 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +33,37 @@ public class WorkspaceManageService {
     private final EntityManager em;
 
     /**
+     * 현재 로그인 사용자가 해당 프로젝트의 OWNER인지 검증한다.
+     */
+    public ManageMember validateProjectOwner(
+            Long workspaceId,
+            String loginUserId
+    ) {
+        if (loginUserId == null || loginUserId.isBlank()) {
+            throw new AccessDeniedException("로그인이 필요합니다.");
+        }
+
+        ManageMember member = manageMemberRepository
+                .findByWorkspaceIdAndUser_UserId(
+                        workspaceId,
+                        loginUserId
+                )
+                .orElseThrow(() ->
+                        new AccessDeniedException(
+                                "해당 프로젝트의 멤버가 아닙니다."
+                        )
+                );
+
+        if (!"OWNER".equals(member.getProjectRole())) {
+            throw new AccessDeniedException(
+                    "프로젝트 관리 기능은 팀장만 사용할 수 있습니다."
+            );
+        }
+
+        return member;
+    }
+
+    /**
      * 특정 워크스페이스에 참여 중인 전체 팀원 목록 조회 (기존 원본 복구)
      */
     public List<ManageMember> getWorkspaceMembers(Long workspaceId) {
@@ -47,7 +78,7 @@ public class WorkspaceManageService {
         ManageMember member = manageMemberRepository.findById(dto.getMemberId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + dto.getMemberId()));
 
-        if ("LEADER".equals(member.getProjectRole())) {
+        if ("OWNER".equals(member.getProjectRole())) {
             throw new IllegalStateException("팀장의 직급은 강제로 변경할 수 없습니다.");
         }
 
@@ -62,7 +93,7 @@ public class WorkspaceManageService {
         ManageMember member = manageMemberRepository.findById(memberId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 팀원 정보가 존재하지 않습니다. ID: " + memberId));
 
-        if ("LEADER".equals(member.getProjectRole())) {
+        if ("OWNER".equals(member.getProjectRole())) {
             throw new IllegalStateException("팀장은 워크스페이스에서 제외할 수 없습니다.");
         }
 
@@ -74,14 +105,16 @@ public class WorkspaceManageService {
      * 이름 변경 폼과 내용 변경 폼이 개별적으로 독립 요청될 때 각각 유연하게 필터링 업데이트합니다.
      */
     @Transactional
-    public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, Long currentUserId) {
-        Long mockLeaderId = 1L;
-        if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException("팀장 권한이 없습니다.");
-        }
+    public void updateGeneralSettings(Long workspaceId, WorkspaceGeneralUpdateDto dto, String loginUserId) {
+        validateProjectOwner(workspaceId, loginUserId);
+
 
         Manage manage = manageRepository.findById(workspaceId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트 관리 데이터가 존재하지 않습니다. ID: " + workspaceId));
+                .orElseThrow(() ->
+                        new IllegalArgumentException(
+                                "해당 프로젝트 관리 데이터가 존재하지 않습니다."
+                        )
+                );
 
         if (dto.getWorkspaceName() != null && !dto.getWorkspaceName().trim().isEmpty()) {
             manage.setName(dto.getWorkspaceName());
@@ -106,20 +139,18 @@ public class WorkspaceManageService {
             manage.updateLogoPath(originalFileName);
         }
     }
+
     /**
      * 4-1 워크스페이스 전체 데이터 영구 소멸 및 삭제 (기존 원본 복구)
      */
     @Transactional
-    public void deleteWorkspace(Long workspaceId, Long currentUserId) {
+    public void deleteWorkspace(Long workspaceId, String loginUserId) {
 
-        // TODO 로그인 사용자 기반 실제 팀장 권한 검증으로 교체
-        Long mockLeaderId = 1L;
+        validateProjectOwner(
+                workspaceId,
+                loginUserId
+        );
 
-        if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException(
-                    "프로젝트 완전 삭제 권한은 팀장에게만 있습니다."
-            );
-        }
 
         Manage manage = manageRepository.findById(workspaceId)
                 .orElseThrow(() ->
@@ -225,11 +256,12 @@ public class WorkspaceManageService {
      * 4-2-1 워크스페이스 팀원 초대 프로세스 (기존 원본 복구)
      */
     @Transactional
-    public void inviteTeamMembers(WorkspaceInviteRequestDto dto, Long currentUserId) {
-        Long mockLeaderId = 1L;
-        if (!mockLeaderId.equals(currentUserId)) {
-            throw new SecurityException("팀장만 팀원을 초대할 수 있는 권한이 있습니다.");
-        }
+    public void inviteTeamMembers(WorkspaceInviteRequestDto dto, String loginUserId) {
+        validateProjectOwner(
+                dto.getWorkspaceId(),
+                loginUserId
+        );
+
 
         if ((dto.getEmails() == null || dto.getEmails().isEmpty()) && (dto.getEmail() == null || dto.getEmail().trim().isEmpty())) {
             throw new IllegalArgumentException("초대할 이메일 주소가 존재하지 않습니다.");

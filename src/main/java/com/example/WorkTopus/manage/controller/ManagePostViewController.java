@@ -2,8 +2,10 @@ package com.example.WorkTopus.manage.controller;
 
 import com.example.WorkTopus.manage.dto.ManagePostPageDto;
 import com.example.WorkTopus.manage.entity.Manage;
+import com.example.WorkTopus.manage.entity.ManageMember;
 import com.example.WorkTopus.manage.repository.ManageRepository;
 import com.example.WorkTopus.manage.service.ManagePostService;
+import com.example.WorkTopus.manage.service.WorkspaceManageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,6 +23,7 @@ public class ManagePostViewController {
 
     private final ManageRepository manageRepository;
     private final ManagePostService managePostService;
+    private final WorkspaceManageService workspaceManageService;
 
     @GetMapping("/projects/manage/{projectId}/posts")
     public String showPostManagementPage(
@@ -32,6 +35,23 @@ public class ManagePostViewController {
             Authentication authentication,
             Model model
     ) {
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                "anonymousUser".equals(authentication.getName())) {
+
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "로그인이 필요합니다."
+            );
+        }
+
+        ManageMember currentMember =
+                workspaceManageService.validateProjectOwner(
+                        projectId,
+                        authentication.getName()
+                );
+
+        model.addAttribute("projectMember", currentMember);
+
         Manage project = manageRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 프로젝트가 존재하지 않습니다."));
 
