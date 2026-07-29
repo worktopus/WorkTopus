@@ -60,8 +60,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${mail.username}
-    password: ${mail.password}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
     default-encoding: UTF-8
 
     properties:
@@ -71,8 +71,9 @@ spring:
           starttls:
             enable: true
             required: true
-          ssl:
-            trust: smtp.gmail.com  # <--- 팀원 추가
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
 
 
 
