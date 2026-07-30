@@ -211,4 +211,12 @@ public class GlobalModelAttributeAdvice {
             model.addAttribute("projects", List.of());
         }
     }
+
+    // 삭제되거나 없는 게시글 접근 시 /access-denied 페이지로 직접 리다이렉트
+    @org.springframework.web.bind.annotation.ExceptionHandler(com.example.WorkTopus.projects.exception.BoardNotFoundException.class)
+    public String handleBoardNotFoundException(com.example.WorkTopus.projects.exception.BoardNotFoundException e) {
+        log.warn("존재하지 않거나 삭제된 게시글 접근: {}", e.getMessage());
+        return "redirect:/access-denied";
+    }
+
 }
