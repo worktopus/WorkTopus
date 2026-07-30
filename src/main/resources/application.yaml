@@ -20,11 +20,11 @@ spring:
     password: 'WorkTopus1234!'
 
     # oracle 설정 (docker)
-    #  datasource:
-    #    driver-class-name: oracle.jdbc.OracleDriver
-    #    url: jdbc:oracle:thin:@localhost:11521/FREEPDB1
-    #    username: ADMIN
-    #    password: 'WorkTopus1234!'
+#  datasource:
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    url: jdbc:oracle:thin:@localhost:11521/FREEPDB1
+#    username: ADMIN
+#    password: 'WorkTopus1234!'
 
     # postgresql 설정 (docker)
     #  datasource:
