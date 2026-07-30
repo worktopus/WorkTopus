@@ -35,6 +35,8 @@
     let presenceSubscription =
         null;
 
+    let notificationSubscription = null;
+
     let subscribedRoomId =
         null;
 
@@ -171,6 +173,8 @@
         );
 
         subscribePresence();
+
+        subscribeNotification();
 
         const roomId =
             pendingRoomId ||
@@ -1207,3 +1211,46 @@
     window.WorkTopusChat =
         window.WorkTopusChat || {}
 );
+
+/* =====================================================
+   실시간 알림 구독 및 수신 [신규 추가]
+===================================================== */
+function subscribeNotification() {
+    const loginUser = getLoginUser();
+
+    // 로그인한 유저 PK가 없거나 이미 구독했거나, 연결 상태가 아니면 리턴
+    if (!loginUser || !loginUser.userNum || !isConnected() || notificationSubscription) {
+        return;
+    }
+
+    // 백엔드(ServiceImpl)에서 보낸 /topic/notification/{userNum}
+    const destination = "/topic/notification/" + loginUser.userNum;
+
+    try {
+        notificationSubscription = stompClient.subscribe(destination, function (stompMessage) {
+            const notification = parseStompBody(stompMessage);
+            if (!notification) return;
+
+            console.log("🔔 새 알림 수신:", notification);
+
+            // 헤더 UI 업데이트 함수 호출 (해당 함수가 페이지에 정의되어 있다면)
+            if (typeof window.onReceiveNotification === "function") {
+                window.onReceiveNotification(notification);
+            }
+        });
+        console.log("알림 구독 완료:", destination);
+    } catch (error) {
+        console.warn("알림 구독 실패", error);
+        notificationSubscription = null;
+    }
+}
+
+// 연결 해제시 알림 구독도 초기화하도록 cleanupConnection에 추가
+function cleanupConnection() {
+    roomSubscription = null;
+    presenceSubscription = null;
+    notificationSubscription = null; // 👇 [추가]
+    subscribedRoomId = null;
+    stompClient = null;
+    syncLegacyClient();
+}

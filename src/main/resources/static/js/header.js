@@ -165,6 +165,7 @@ function initHeaderOutsideClick() {
         closeProfileDropdownOnOutsideClick(event);
         closeProjectDropdownOnOutsideClick(event);
         closeTodoModalOnOutsideClick(event);
+        closeNotificationOnOutsideClick(event);
     });
 }
 
@@ -240,6 +241,28 @@ function closeTodoModalOnOutsideClick(event) {
     todoModal.classList.remove("active");
 }
 
+/**
+* 알림 영역 외부 클릭 시 알림 팝업을 닫는다.
+*/
+function closeNotificationOnOutsideClick(event) {
+    const notifContainer = document.querySelector(".header__notification-container"); // 실제 HTML 구조에 맞는 부모 클래스명으로 확인 필요
+    const notificationModal = document.getElementById("notif-popup-modal");
+
+    if (!notificationModal || !notificationModal.classList.contains("active")) {
+        return;
+    }
+
+    // 알림 버튼이나 모달 내부를 클릭한 경우는 닫지 않음
+    if (notifContainer && notifContainer.contains(event.target)) {
+        return;
+    }
+    if (notificationModal.contains(event.target)) {
+        return;
+    }
+
+    notificationModal.classList.remove("active");
+}
+
 
 /* =========================================================
    공통 팝업 제어
@@ -306,4 +329,38 @@ function escapeHtml(value) {
     element.textContent = value ?? "";
 
     return element.innerHTML;
+}
+
+/* =========================================================
+   알림 팝업 제어 [신규 추가]
+========================================================= */
+
+/**
+ * 알림 드롭다운/모달을 열거나 닫는다.
+ * HTML의 onclick 속성에서 호출하므로 전역 함수로 선언한다.
+ */
+function toggleNotificationDropdown(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+
+    const notificationModal = document.getElementById("notif-popup-modal");
+
+    if (!notificationModal) {
+        return;
+    }
+
+    const isOpen = notificationModal.classList.contains("active");
+
+    // 다른 모든 팝업(프로필, 프로젝트, 메모 등)은 닫기
+    closeAllModalsExcept("notif");
+
+    if (isOpen) {
+        notificationModal.classList.remove("active");
+    } else {
+        notificationModal.classList.add("active");
+
+        // (선택) 알림창을 열 때 안 읽은 알림 목록을 서버에서 불러오는 함수가 있다면 여기서 호출
+        // if (typeof loadNotifications === "function") { loadNotifications(); }
+    }
 }

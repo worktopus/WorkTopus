@@ -205,3 +205,20 @@ function deleteHeaderNotification(event, id) {
             loadHeaderNotifications();
         });
 }
+
+/* =========================================================
+   실시간 웹소켓 알림 수신 처리 [신규 추가]
+========================================================= */
+window.onReceiveNotification = function (notification) {
+    console.log("🔔 실시간 알림 수신:", notification);
+
+    // 1. 전체 알림 목록 API를 다시 호출하여 뱃지 카운트와 목록을 최신화
+    // (기존 updateUnreadNotifBadge 및 loadHeaderNotifications 내의 조건 로직을 그대로 활용)
+    updateUnreadNotifBadge();
+
+    // 2. 만약 현재 알림 팝업 창이 열려있는 상태라면 목록도 실시간 갱신
+    const notifModal = document.getElementById('notif-popup-modal');
+    if (notifModal && notifModal.classList.contains('active')) {
+        loadHeaderNotifications();
+    }
+};
