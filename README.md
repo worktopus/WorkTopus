@@ -557,7 +557,7 @@ cd WorkTopus
 
 | 프로젝트 목록 | 프로젝트 메인 |
 |:---:|:---:|
-| <img src="./src/main/resources/static/images/메인화면.png"> | <img src="./src/main/resources/static/images/프로젝트화면.png"> |
+| <img src="./src/main/resources/static/images/메인 화면.png"> | <img src="./src/main/resources/static/images/프로젝트화면.png"> |
 
 | 게시판 | 칸반 |
 |:---:|:---:|
