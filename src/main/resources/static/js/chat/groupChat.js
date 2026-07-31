@@ -293,12 +293,6 @@
 
         const senderName = getSenderName(message);
 
-        console.log("message:", message);
-        console.log("loginUser:", loginUser);
-        console.log("senderNum:", senderNum);
-        console.log("senderUserId:", senderUserId);
-        console.log("senderName:", senderName);
-
         if (
             senderNum !== null &&
             loginUser.userNum !== null &&
