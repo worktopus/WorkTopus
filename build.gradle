@@ -38,7 +38,6 @@ dependencies {
     // 실제 이메일 발송을 담당하는 스프링 메일 스타터 라이브러리
     implementation 'org.springframework.boot:spring-boot-starter-mail'
 
-
     // oracle
     runtimeOnly 'com.oracle.database.jdbc:ojdbc17'
 
@@ -61,6 +60,9 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
+
+    // 외부 파일저장
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 /* 웹 소켓 추가 WebSocket */

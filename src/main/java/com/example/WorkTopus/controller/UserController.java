@@ -4,6 +4,8 @@ import com.example.WorkTopus.dto.Comment;
 import com.example.WorkTopus.dto.Post;
 import com.example.WorkTopus.dto.UserUpdateForm;
 import com.example.WorkTopus.entity.Users;
+import com.example.WorkTopus.projects.dto.response.StoredFileResponse;
+import com.example.WorkTopus.projects.service.FileStorageService;
 import com.example.WorkTopus.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 public class UserController {
 
     private final UserService userService;
+    private final FileStorageService fileStorageService;
 
     // 1. 내 정보 조회/수정폼 이동
     @GetMapping("/mypage")
@@ -85,36 +88,16 @@ public class UserController {
 
             // 프사 변경
             if (isDefaultProfile) {
-                // 기본 프로필로 초기화 요청이 온 경우
+                // 기본 프로필로 초기화
                 userService.updatePicture(userId, "/images/logo.png");
             } else if (profilePicture != null && !profilePicture.isEmpty()) {
-                String originalFilename = profilePicture.getOriginalFilename();
-                String saveFileName = System.currentTimeMillis() + "_" + originalFilename;
 
-                // DB에 웹 접근
-                String savedPath = "/images/" + saveFileName;
+                // 👈 2. S3FileStorageService를 통해 오라클 버킷으로 바로 업로드
+                StoredFileResponse storedFile = fileStorageService.store(profilePicture);
 
-                String rootPath = System.getProperty("user.dir");
-
-                // 경로를 각각 정의
-                String srcPath = rootPath + "/src/main/resources/static/images/";
-                String buildPath = rootPath + "/build/resources/main/static/images/";
-
-                // 폴더 자동 생성
-                java.io.File srcFolder = new java.io.File(srcPath);
-                if (!srcFolder.exists()) srcFolder.mkdirs();
-
-                java.io.File buildFolder = new java.io.File(buildPath);
-                if (!buildFolder.exists()) buildFolder.mkdirs();
-
-                // 3. 파일 저장
-                profilePicture.transferTo(new java.io.File(srcPath + saveFileName));
-
-                java.io.File srcFile = new java.io.File(srcPath + saveFileName);
-                java.io.File buildFile = new java.io.File(buildPath + saveFileName);
-                java.nio.file.Files.copy(srcFile.toPath(), buildFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-                userService.updatePicture(userId, savedPath);
+                // 👈 3. S3 URL 주소(fileUrl)를 DB에 저장
+                // 예: https://{namespace}.compat.objectstorage.ap-osaka-1.oraclecloud.com/...
+                userService.updatePicture(userId, storedFile.fileUrl());
             }
         } catch (Exception e) {
             bindingResult.reject("updateFail", e.getMessage());

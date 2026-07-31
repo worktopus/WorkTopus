@@ -33,14 +33,14 @@
                     <li class="menu-item" id="menu-notif"><button onclick="switchTab('notif')">알림</button></li>
                     <li class="menu-item">
                         <form th:action="@{/logout}" method="post">
-                            <button type="submit" class="logout">로그아웃</button>
+                            <button type="submit" class="delete">로그아웃</button> <!-- 추후 class="logout"으로 변경 -->
                         </form>
                     </li>
-                    <li class="menu-item">
-                        <form th:action="@{#}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 작성하신 정보가 모두 삭제되며 되돌릴 수 없습니다.');">
-                            <button type="submit" class="delete">회원탈퇴</button>
-                        </form>
-                    </li>
+<!--                    <li class="menu-item">-->
+<!--                        <form th:action="@{#}" method="post" onsubmit="return confirm('정말로 탈퇴하시겠습니까? 작성하신 정보가 모두 삭제되며 되돌릴 수 없습니다.');">-->
+<!--                            <button type="submit" class="delete">회원탈퇴</button>-->
+<!--                        </form>-->
+<!--                    </li>-->
                 </ul>
             </div>
 
