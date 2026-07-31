@@ -24,9 +24,12 @@ function toggleNotifModal(event) {
         // 🎯 1. 종을 연 '시각'을 브라우저에 저장 (새로고침해도 배지 안 떠오름)
         localStorage.setItem('lastNotifCheckedTime', new Date().toISOString());
 
-        // 🎯 2. 화면의 빨간 배지 즉시 숨김
+        // 🎯 2. 화면의 빨간 배지 즉시 숨기고 텍스트도 "0"으로 리셋! (핵심 수정 1)
         const badge = document.getElementById("header-notif-badge");
-        if (badge) badge.style.display = "none";
+        if (badge) {
+            badge.innerText = "0";
+            badge.style.display = "none";
+        }
 
         // 3. 알림 목록 로드 (초록색 배경은 유지됨)
         loadHeaderNotifications();
@@ -123,10 +126,18 @@ function onClickHeaderNotification(id, targetUrl) {
         .catch(err => console.error(err));
 }
 
-// 🎯 안 읽은 알림 뱃지 카운트 단일화 (중복 제거)
+// 🎯 안 읽은 알림 뱃지 카운트 계산
 function updateBadgeCount(notifications) {
     const badge = document.getElementById("header-notif-badge");
     if (!badge) return;
+
+    // 만약 현재 알림창 모달이 열려있는 상태라면 뱃지는 무조건 보이지 않게 유지
+    const notifModal = document.getElementById('notif-popup-modal');
+    if (notifModal && notifModal.classList.contains('active')) {
+        badge.innerText = "0";
+        badge.style.display = "none";
+        return;
+    }
 
     const lastChecked = localStorage.getItem('lastNotifCheckedTime');
 
@@ -135,14 +146,18 @@ function updateBadgeCount(notifications) {
         if (n.readYn !== 'N') return false;
         if (!lastChecked) return true;
 
-        // 알림 생성 시간이 종을 마지막으로 누른 시간보다 뒤인 경우에만 뱃지 카운트
-        return new Date(n.createdAt) > new Date(lastChecked);
+        // 생성 일시 문자열을 Date로 정상 파싱하여 비교
+        const createdDate = new Date(n.createdAt).getTime();
+        const checkedDate = new Date(lastChecked).getTime();
+
+        return createdDate > checkedDate;
     }).length;
 
     if (newUnreadCount > 0) {
         badge.innerText = newUnreadCount > 99 ? '99+' : newUnreadCount;
         badge.style.display = "inline-block";
     } else {
+        badge.innerText = "0";
         badge.style.display = "none";
     }
 }
@@ -205,3 +220,26 @@ function deleteHeaderNotification(event, id) {
             loadHeaderNotifications();
         });
 }
+
+/* =========================================================
+   실시간 웹소켓 알림 수신 처리 [완벽 수정 완료]
+========================================================= */
+window.onReceiveNotification = function (notification) {
+    console.log("🔔 실시간 알림 수신:", notification);
+
+    const notifModal = document.getElementById('notif-popup-modal');
+    const isModalOpen = notifModal && notifModal.classList.contains('active');
+
+    // 1. 모달이 열려있는 동안에 들어온 소켓 알림은 '확인함'으로 간주해서 lastNotifCheckedTime을 최신화
+    if (isModalOpen) {
+        localStorage.setItem('lastNotifCheckedTime', new Date().toISOString());
+        setTimeout(() => {
+            loadHeaderNotifications();
+        }, 200);
+        return;
+    }
+
+    // 2. 모달이 닫혀있는 상태일 때만 서버 재조회를 통해 정확한 개수 계산! (핵심 수정 2)
+    // 수동으로 +1을 증가시키는 대신, updateUnreadNotifBadge를 호출하여 백엔드 기준 정확한 뱃지수를 표시합니다.
+    updateUnreadNotifBadge();
+};

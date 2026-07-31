@@ -8,6 +8,7 @@ import com.example.WorkTopus.entity.ProjectMember;
 import com.example.WorkTopus.entity.Users;
 import com.example.WorkTopus.repository.ProjectMemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final ProjectMemberRepository projectMemberRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     // 1. 알림 생성 (댓글/공지/초대 등록 시 호출할 공통 메서드)
     @Override
@@ -30,7 +32,16 @@ public class NotificationServiceImpl implements NotificationService {
                 .url(url)
                 .type(type)
                 .build();
-        notificationRepository.save(notification);
+
+        // DB 저장
+        Notification savedNotification = notificationRepository.save(notification);
+
+        // 3. [웹소켓 추가] DB 저장 성공 후 대상 유저에게 실시간 알림 전송
+        // 구독 주소: /topic/notification/{userNum}
+        messagingTemplate.convertAndSend(
+                "/topic/notification/" + user.getUserNum(),
+                savedNotification
+        );
     }
 
     // 칸반 검토 요청 알림 구현

@@ -35,6 +35,8 @@
     let presenceSubscription =
         null;
 
+    let notificationSubscription = null;
+
     let subscribedRoomId =
         null;
 
@@ -97,16 +99,6 @@
 
         clearReconnectTimer();
 
-        /*
-         * 이전 연결이 끊어진 뒤 구독 객체만 남아 있으면
-         * 새 연결에서도 이미 구독 중인 것으로 잘못 판단할 수 있습니다.
-         *
-         * 새 연결을 만들기 전에 이전 연결과 구독 상태를
-         * 모두 초기화합니다.
-         *
-         * pendingRoomId는 지우지 않으므로 연결 성공 후
-         * 마지막으로 선택한 채팅방을 다시 구독합니다.
-         */
         cleanupConnection();
 
         const socket =
@@ -117,32 +109,17 @@
         stompClient =
             Stomp.over(socket);
 
-        /*
-         * 연결이 끊어진 상태를 빠르게 감지하기 위한
-         * STOMP heartbeat 설정입니다.
-         */
         stompClient.heartbeat.outgoing =
             10000;
 
         stompClient.heartbeat.incoming =
             10000;
 
-        /*
-        STOMP 디버그 로그를 끕니다.
-        필요할 때는 아래 줄을 주석 처리합니다.
-        */
         stompClient.debug =
             null;
 
         syncLegacyClient();
 
-        /*
-        로그인 정보는 기존 세션 또는
-        Spring Security 인증에서 서버가 확인합니다.
-
-        userNum을 연결 헤더로 보내서
-        인증값으로 사용하지 않습니다.
-        */
         stompClient.connect(
             {},
             handleConnectSuccess,
@@ -171,6 +148,8 @@
         );
 
         subscribePresence();
+
+        subscribeNotification(); // 👈 이제 IIFE 내부의 subscribeNotification 함수가 정상 작동합니다!
 
         const roomId =
             pendingRoomId ||
@@ -270,10 +249,6 @@
             return false;
         }
 
-        /*
-        연결 전이라도 선택한 방을 저장합니다.
-        연결 성공 후 해당 방을 자동 구독합니다.
-        */
         pendingRoomId =
             normalizedRoomId;
 
@@ -283,10 +258,6 @@
             return false;
         }
 
-        /*
-        이미 같은 방을 구독 중이면
-        다시 구독하지 않습니다.
-        */
         if (
             roomSubscription &&
             subscribedRoomId ===
@@ -391,6 +362,41 @@
 
             presenceSubscription =
                 null;
+        }
+    }
+
+
+    /* =====================================================
+       실시간 알림 구독 [안쪽으로 이동 완료]
+    ===================================================== */
+
+    function subscribeNotification() {
+        // window.loginUser 또는 getLoginUser()에서 유저 정보를 가져옴
+        const loginUser = getLoginUser();
+        const userNum = loginUser?.userNum || window.loginUser?.userNum;
+
+        if (!userNum || !isConnected() || notificationSubscription) {
+            return;
+        }
+
+        const destination = "/topic/notification/" + userNum;
+
+        try {
+            notificationSubscription = stompClient.subscribe(destination, function (stompMessage) {
+                const notification = parseStompBody(stompMessage);
+                if (!notification) return;
+
+                console.log("🔔 새 실시간 알림 수신:", notification);
+
+                // notification.js에 등록된 수신 처리 함수 호출
+                if (typeof window.onReceiveNotification === "function") {
+                    window.onReceiveNotification(notification);
+                }
+            });
+            console.log("✅ 알림 구독 완료:", destination);
+        } catch (error) {
+            console.warn("알림 구독 실패", error);
+            notificationSubscription = null;
         }
     }
 
@@ -561,9 +567,6 @@
 
     /* =====================================================
        수신 메시지 데이터 정리
-
-       senderNum은 사용자 숫자 PK
-       senderName은 화면 표시 이름
     ===================================================== */
 
     function normalizeReceivedMessage(
@@ -686,13 +689,6 @@
         const loginUser =
             getLoginUser();
 
-        /*
-        senderNum과 senderName은 현재 개발 단계의
-        화면 출력 및 기존 서버 호환을 위해 포함합니다.
-
-        최종 백엔드에서는 프런트가 보낸 값을 믿지 않고
-        로그인 세션의 사용자 정보로 다시 설정해야 합니다.
-        */
         const payload = {
             projectId:
             projectId,
@@ -773,6 +769,8 @@
         unsubscribeCurrentRoom();
 
         unsubscribePresence();
+
+        unsubscribeNotification();
 
         pendingRoomId =
             null;
@@ -855,6 +853,25 @@
 
 
     /* =====================================================
+       알림 구독 해제 [신규 추가]
+    ===================================================== */
+
+    function unsubscribeNotification() {
+        if (!notificationSubscription) {
+            return;
+        }
+
+        try {
+            notificationSubscription.unsubscribe();
+        } catch (error) {
+            console.warn("알림 구독 해제 오류", error);
+        }
+
+        notificationSubscription = null;
+    }
+
+
+    /* =====================================================
        연결 오류 상태 초기화
     ===================================================== */
 
@@ -863,6 +880,9 @@
             null;
 
         presenceSubscription =
+            null;
+
+        notificationSubscription =
             null;
 
         subscribedRoomId =
@@ -989,6 +1009,14 @@
                             .name ??
                         ""
                     )
+            };
+        }
+
+        if (window.loginUser) {
+            return {
+                userNum: normalizeNumber(window.loginUser.userNum),
+                userId: String(window.loginUser.userId ?? ""),
+                name: String(window.loginUser.name ?? "")
             };
         }
 
